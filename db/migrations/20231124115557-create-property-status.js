@@ -9,6 +9,7 @@ module.exports = {
         type: Sequelize.UUID
       },
       statusName: {
+        unique: true,
         allowNull: false,
         type: Sequelize.STRING
       }

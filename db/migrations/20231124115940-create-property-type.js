@@ -9,6 +9,7 @@ module.exports = {
         type: Sequelize.UUID
       },
       typeName: {
+        unique: true,
         allowNull: false,
         type: Sequelize.STRING
       }

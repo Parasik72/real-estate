@@ -12,6 +12,10 @@ module.exports = {
         allowNull: true,
         type: Sequelize.BIGINT
       },
+      totalPrice: {
+        allowNull: true,
+        type: Sequelize.DECIMAL
+      },
       dealStatusId: {
         type: Sequelize.UUID,
 			  allowNull: false,
