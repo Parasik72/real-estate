@@ -1,21 +1,28 @@
 import Link from "next/link"
 import { LogoIcon } from "../icons/logo.icon"
 import { HamburgerIcon } from "../icons/hamburder.icon"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import clsx from "clsx"
 import { CrossIcon } from "../icons/cross.icon"
+import { useRouter } from "next/router"
 
 export const Navbar = () => {
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const toggleMenu = () => setIsMenuOpen(prev => !prev);
+
+    useEffect(() => {
+        setIsMenuOpen(false);
+    }, [router.pathname]);
+
     return (
         <header className="bg-gray-100 shadow-lg lg:shadow-transparent lg:bg-transparent">
             <div className="px-4 py-8 md:max-w-3xl md:mx-auto lg:max-w-none xl:px-0 xl:max-w-6xl flex justify-between items-center">
                 <div className="lg:flex w-full">
                     <div className="w-full lg:w-auto flex justify-between items-center">
-                        <div>
+                        <Link href="/">
                             <LogoIcon className="fill-current text-dark-blue" />
-                        </div>
+                        </Link>
                         <button onClick={toggleMenu} className="lg:hidden">
                             {isMenuOpen ? <CrossIcon /> : <HamburgerIcon />}
                         </button>
@@ -26,7 +33,7 @@ export const Navbar = () => {
                     })}>
                         <div className="flex flex-col md:flex-row md:items-center gap-5 lg:ml-12">
                             <Link href="#topoffers" className="text-gray-800">Last offers</Link>
-                            <Link href="#topoffers" className="text-gray-800">Search in offers</Link>
+                            <Link href="offers" className="text-gray-800">Search in offers</Link>
                             <Link href="#topoffers" className="text-gray-800">About us</Link>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center gap-5">

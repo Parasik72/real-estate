@@ -20,7 +20,9 @@ export default function Home() {
             We provide a complete service for the sale or purchase of real estate. We have been operating in Madrid and Barcelona more than 15 years.
           </p>
         </div>
-        <FormSearch />
+        <div className="mt-8 w-full lg:max-w-3xl">
+         <FormSearch />
+        </div>
       </div>
       <div className="bg-indigo-50 w-full py-14 lg:mt-36 lg:py-28">
         <div className="relative px-4 md:max-w-3xl md:mx-auto xl:px-0 lg:max-w-full xl:max-w-6xl">
