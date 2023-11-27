@@ -3,6 +3,7 @@ import { LogoIcon } from "../icons/logo.icon"
 import { HamburgerIcon } from "../icons/hamburder.icon"
 import { useState } from "react"
 import clsx from "clsx"
+import { CrossIcon } from "../icons/cross.icon"
 
 export const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +17,7 @@ export const Navbar = () => {
                             <LogoIcon />
                         </div>
                         <button onClick={toggleMenu} className="lg:hidden">
-                            <HamburgerIcon />
+                            {isMenuOpen ? <CrossIcon /> : <HamburgerIcon />}
                         </button>
                     </div>
                     <div className={clsx("mt-4 pt-4 w-full border-t border-gray-500 lg:mt-0 lg:pt-0 lg:border-none lg:flex justify-between", {

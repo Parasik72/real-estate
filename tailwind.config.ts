@@ -17,10 +17,18 @@ const config: Config = {
         'dark-blue': '#091638'
       },
       fontSize: {
+        '1.5xl': ['1.35rem', '1.85rem'],
         '6.5xl': ['4.05rem', '1.25']
       },
       padding: {
         '13': '3.25rem'
+      },
+      height: {
+        '2px': '2px'
+      },
+      maxWidth: {
+        '250px': '250px',
+        '350px': '350px'
       }
     },
     customForms: (theme: any) => ({
