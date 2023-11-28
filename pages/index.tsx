@@ -4,6 +4,7 @@ import CardImg1 from '../common/images/card-img-1.png';
 import AboutUsImg from '../common/images/about-us.png';
 import { FormSearch } from "@/common/components/home/form-search.component";
 import { ArrowIcon } from "@/common/icons/arrow.icon";
+import { PropertyCard } from "@/common/components/property-card.component";
 
 export default function Home() {
   return (
@@ -21,7 +22,7 @@ export default function Home() {
           </p>
         </div>
         <div className="mt-8 w-full lg:max-w-3xl">
-         <FormSearch />
+         <FormSearch  className="p-4" />
         </div>
       </div>
       <div className="bg-indigo-50 w-full py-14 lg:mt-36 lg:py-28">
@@ -54,18 +55,14 @@ export default function Home() {
           </div>
           <div className="inline-flex gap-5 mt-6 overflow-x-hidden">
             {[...new Array(6)].map((_, i) => (
-              <div key={i} className="bg-white shadow-sm rounded-md max-w-250px md:max-w-350px w-full flex-shrink-0">
-                <Image className="object-cover object-center rounded-md" src={CardImg1} alt="cardImg1" height={249} width={444} />
-                <div className="p-4 flex flex-col gap-4">
-                  <h3 className="text-dark-blue text-1.5xl leading-8 font-bold">
-                    Large 4-room apartment with a beautiful terrace
-                  </h3>
-                  <div className="flex flex-col gap-1">
-                    <span className="font-bold text-blue-900">320 000$</span>
-                    <span className="text-dark-blue">Barcelona IX. </span>
-                  </div>
-                </div>
-              </div>
+              <PropertyCard 
+                key={i}
+                title="Large 4-room apartment with a beautiful terrace"
+                price={320000}
+                address="Barcelona IX."
+                imgPath={CardImg1}
+                className="max-w-250px md:max-w-350px"
+              />
             ))}
           </div>
         </div>
