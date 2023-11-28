@@ -1,64 +1,54 @@
 'use strict';
+
+const tableName = 'Deals';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Deals', {
-      dealId: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.UUID
-      },
-      signDate: {
-        allowNull: true,
-        type: Sequelize.BIGINT
-      },
-      totalPrice: {
-        allowNull: true,
-        type: Sequelize.DECIMAL
-      },
-      dealStatusId: {
-        type: Sequelize.UUID,
-			  allowNull: false,
-			  references: {
-			  	model: 'DealStatuses',
-			  	key: 'dealStatusId'
-			  }
-      },
-      propertyId: {
-        type: Sequelize.UUID,
-			  allowNull: false,
-			  references: {
-			  	model: 'Properties',
-			  	key: 'propertyId'
-			  }
-      },
-      sellerUserId: {
-        type: Sequelize.UUID,
-			  allowNull: false,
-			  references: {
-			  	model: 'Users',
-			  	key: 'userId'
-			  }
-      },
-      buyerUserId: {
-        type: Sequelize.UUID,
-			  allowNull: false,
-			  references: {
-			  	model: 'Users',
-			  	key: 'userId'
-			  }
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.BIGINT
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.BIGINT
-      }
-    });
+    const query = `
+      CREATE TABLE ${tableName} (
+        dealId CHAR(36) PRIMARY KEY NOT NULL,
+        signDate BIGINT,
+        totalPrice DECIMAL,
+        dealStatusId CHAR(36) NOT NULL,
+        propertyId CHAR(36) NOT NULL,
+        sellerUserId CHAR(36) NOT NULL,
+        buyerUserId CHAR(36) NOT NULL,
+        createdAt BIGINT NOT NULL,
+        updatedAt BIGINT NOT NULL,
+
+        CONSTRAINT ${tableName}_dealStatusId_foreign_idx
+        FOREIGN KEY (dealStatusId)
+        REFERENCES DealStatuses (dealStatusId)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+        CONSTRAINT ${tableName}_propertyId_foreign_idx
+        FOREIGN KEY (propertyId)
+        REFERENCES Properties (propertyId)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+        CONSTRAINT ${tableName}_sellerUserId_foreign_idx
+        FOREIGN KEY (sellerUserId)
+        REFERENCES Users (userId)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+        
+        CONSTRAINT ${tableName}_buyerUserId_foreign_idx
+        FOREIGN KEY (buyerUserId)
+        REFERENCES Users (userId)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+      );
+    `;
+    await queryInterface.sequelize.query(query);
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Deals');
+    const query = `
+      DROP TABLE IF EXISTS ${tableName};
+    `;
+    await queryInterface.sequelize.query(query);
   }
 };

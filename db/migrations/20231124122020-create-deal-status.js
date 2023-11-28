@@ -1,21 +1,23 @@
 'use strict';
+
+const tableName = 'DealStatuses';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('DealStatuses', {
-      dealStatusId: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.UUID
-      },
-      statusName: {
-        unique: true,
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-    });
+    const query = `
+      CREATE TABLE ${tableName} (
+        dealStatusId CHAR(36) PRIMARY KEY NOT NULL,
+        statusName VARCHAR(255) UNIQUE NOT NULL
+      );
+    `;
+    await queryInterface.sequelize.query(query);
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('DealStatuses');
+    const query = `
+      DROP TABLE IF EXISTS ${tableName};
+    `;
+    await queryInterface.sequelize.query(query);
   }
 };

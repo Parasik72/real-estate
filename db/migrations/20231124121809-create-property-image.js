@@ -1,28 +1,29 @@
 'use strict';
+
+const tableName = 'PropertyImages';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('PropertyImages', {
-      propertyImageId: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.UUID
-      },
-      imgName: {
-			  allowNull: false,
-        type: Sequelize.STRING
-      },
-      propertyId: {
-        type: Sequelize.UUID,
-			  allowNull: false,
-			  references: {
-			  	model: 'Properties',
-			  	key: 'propertyId'
-			  }
-      },
-    });
+    const query = `
+      CREATE TABLE ${tableName} (
+        propertyImageId CHAR(36) PRIMARY KEY NOT NULL,
+        imgName VARCHAR(255) NOT NULL,
+        propertyId CHAR(36) NOT NULL,
+        CONSTRAINT ${tableName}_propertyId_foreign_idx
+        FOREIGN KEY (propertyId)
+        REFERENCES Properties (propertyId)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+      );
+    `;
+    await queryInterface.sequelize.query(query);
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('PropertyImages');
+    const query = `
+      DROP TABLE IF EXISTS ${tableName};
+    `;
+    await queryInterface.sequelize.query(query);
   }
 };

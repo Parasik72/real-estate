@@ -1,32 +1,26 @@
 'use strict';
+
+const tableName = 'PropertyAddresses';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('PropertyAddresses', {
-      propertyAddressId: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.UUID
-      },
-      countryName: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      cityName: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      addressLine1: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      addressLine2: {
-        allowNull: true,
-        type: Sequelize.STRING
-      }
-    });
+    const query = `
+      CREATE TABLE ${tableName} (
+        propertyAddressId CHAR(36) PRIMARY KEY NOT NULL,
+        countryName VARCHAR(255) NOT NULL,
+        cityName VARCHAR(255) NOT NULL,
+        addressLine1 VARCHAR(255) NOT NULL,
+        addressLine2 VARCHAR(255)
+      );
+    `;
+    await queryInterface.sequelize.query(query);
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('PropertyAddresses');
+    const query = `
+      DROP TABLE IF EXISTS ${tableName};
+    `;
+    await queryInterface.sequelize.query(query);
   }
 };

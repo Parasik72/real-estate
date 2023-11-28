@@ -1,48 +1,30 @@
 'use strict';
+
+const tableName = 'Properties';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Properties', {
-      propertyId: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.UUID
-      },
-      bedRooms: {
-        allowNull: false,
-        type: Sequelize.INTEGER
-      },
-      bathRooms: {
-        allowNull: false,
-        type: Sequelize.INTEGER
-      },
-      area: {
-        allowNull: false,
-        type: Sequelize.INTEGER
-      },
-      title: {
-        allowNull: false,
-        type: Sequelize.STRING(100)
-      },
-      description: {
-        allowNull: false,
-        type: Sequelize.STRING(1000)
-      },
-      priceAmount: {
-        allowNull: false,
-        type: Sequelize.DECIMAL
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.BIGINT
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.BIGINT
-      },
-    });
+    const query = `
+      CREATE TABLE ${tableName} (
+        propertyId CHAR(36) PRIMARY KEY NOT NULL,
+        bedRooms INTEGER NOT NULL,
+        bathRooms INTEGER NOT NULL,
+        area INTEGER NOT NULL,
+        title VARCHAR(100) NOT NULL,
+        description VARCHAR(1000) NOT NULL,
+        priceAmount DECIMAL NOT NULL,
+        createdAt BIGINT NOT NULL,
+        updatedAt BIGINT NOT NULL
+      );
+    `;
+    await queryInterface.sequelize.query(query);
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Properties');
+    const query = `
+      DROP TABLE IF EXISTS ${tableName};
+    `;
+    await queryInterface.sequelize.query(query);
   }
 };

@@ -1,21 +1,23 @@
 'use strict';
+
+const tableName = 'PropertyTypes';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('PropertyTypes', {
-      propertyTypeId: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.UUID
-      },
-      typeName: {
-        unique: true,
-        allowNull: false,
-        type: Sequelize.STRING
-      }
-    });
+    const query = `
+      CREATE TABLE ${tableName} (
+        propertyTypeId CHAR(36) PRIMARY KEY NOT NULL,
+        typeName VARCHAR(255) UNIQUE NOT NULL
+      );
+    `;
+    await queryInterface.sequelize.query(query);
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('PropertyTypes');
+    const query = `
+      DROP TABLE IF EXISTS ${tableName};
+    `;
+    await queryInterface.sequelize.query(query);
   }
 };
