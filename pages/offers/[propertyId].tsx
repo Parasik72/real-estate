@@ -25,9 +25,15 @@ export default function Property() {
                                     <ArrowIcon reverse />
                                 </button>
                                 <div className="hidden w-full md:flex justify-between gap-4">
-                                    <Image className="w-full h-64 md:h-full object-cover object-center shadow-sm" src={PropertyPrimaryImg} width={191} height={84} alt='second1' />
-                                    <Image className="w-full object-cover object-center shadow-sm" src={PropertySecondImg} width={191} height={84} alt='second2' />
-                                    <Image className="w-full object-cover object-center shadow-sm" src={PropertySecondImg} width={191} height={84} alt='second3' />
+                                    <div className="w-full xl:max-h-24">
+                                        <Image className="h-full object-cover object-center shadow-sm" src={PropertyPrimaryImg} width={191} height={84} alt='second1' />
+                                    </div>
+                                    <div  className="w-full xl:max-h-24">
+                                        <Image className="h-full object-cover object-center shadow-sm" src={PropertySecondImg} width={191} height={84} alt='second2' />
+                                    </div>
+                                    <div  className="w-full xl:max-h-24">
+                                        <Image className="h-full object-cover object-center shadow-sm" src={PropertySecondImg} width={191} height={84} alt='second3' />
+                                    </div>
                                 </div>
                                 <button className="hidden md:block bg-blue-900 rounded-full px-6 py-5">
                                     <ArrowIcon />
