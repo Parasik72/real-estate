@@ -33,12 +33,12 @@ export const Navbar = () => {
                     })}>
                         <div className="flex flex-col md:flex-row md:items-center gap-5 lg:ml-12">
                             <Link href="#topoffers" className="text-gray-800">Last offers</Link>
-                            <Link href="offers" className="text-gray-800">Search in offers</Link>
+                            <Link href="/offers" className="text-gray-800">Search in offers</Link>
                             <Link href="#topoffers" className="text-gray-800">About us</Link>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center gap-5">
-                            <Link href="#topoffers" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold ">Sign In</Link>
-                            <Link href="#topoffers" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold ">Sign Up</Link>
+                            <Link href="#topoffers" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign In</Link>
+                            <Link href="#topoffers" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign Up</Link>
                         </div>
                     </nav>
                 </div>
