@@ -5,12 +5,14 @@ import { FC } from "react";
 interface IProps {
     type: string;
     name: string;
+    id?: string;
     placeholder?: string;
     className?: string;
+    disableQuery?: boolean;
 }
 
 export const Input: FC<IProps> = ({ 
-    placeholder, className, type, name
+    placeholder, className, type, name, disableQuery, id
 }) => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -22,11 +24,12 @@ export const Input: FC<IProps> = ({
         replace(`${pathname}?${params.toString()}`);
     };
     return (
-        <input 
+        <input
+            id={id}
             placeholder={placeholder} 
             className={clsx("py-4 w-full h-full border-gray-300 rounded-md", className)} 
             type={type}
-            onChange={event => handleSearch(event.target.value)}
+            onChange={event => !disableQuery && handleSearch(event.target.value)}
         />
     );
 }

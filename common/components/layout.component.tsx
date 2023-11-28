@@ -8,12 +8,12 @@ interface IProps {
 
 export default function Layout({ children }: IProps) {
     return (
-        <>
+        <div className="flex flex-col h-screen">
             <Navbar />
-            <main>
+            <main className="flex-1">
                 {children}
             </main>
             <Footer />
-        </>
+        </div>
     )
 }

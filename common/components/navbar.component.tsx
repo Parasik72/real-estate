@@ -37,8 +37,8 @@ export const Navbar = () => {
                             <Link href="#topoffers" className="text-gray-800">About us</Link>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center gap-5">
-                            <Link href="#topoffers" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign In</Link>
-                            <Link href="#topoffers" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign Up</Link>
+                            <Link href="/sign-in" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign In</Link>
+                            <Link href="/sign-up" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign Up</Link>
                         </div>
                     </nav>
                 </div>

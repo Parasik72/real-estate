@@ -20,7 +20,7 @@ export const FormSearch: FC<IProps> = ({ className }) => {
             <div className="absolute inset-y-0 left-0 flex items-center pl-3">
               <LocationMarkIcon />
             </div>
-            <Input placeholder="Search of location" className="pl-10" type="text" />
+            <Input name="location" placeholder="Search of location" className="pl-10" type="text" />
           </div>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-5">
