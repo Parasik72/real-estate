@@ -1,9 +1,10 @@
-import { AuthType } from "@/common/types/auth.types";
+import { AuthTypeForm } from "@/common/types/auth.types";
 import { Input } from "./input.component"
 import { FC } from "react";
+import { Divider } from "../divider.component";
 
 interface IProps {
-    type: AuthType;
+    type: AuthTypeForm;
 }
 
 export const AuthForm: FC<IProps> = ({ type }) => {
@@ -18,19 +19,13 @@ export const AuthForm: FC<IProps> = ({ type }) => {
                     <label htmlFor="password" className="pl-1 text-lg">Password</label>
                     <Input id="password" disableQuery name="password" placeholder="Password" type="text" />
                 </div>
-                {type === AuthType.SIGN_UP && (
+                {type === AuthTypeForm.SIGN_UP && (
                     <>
                         <div className="h-full">
                             <label htmlFor="confirmPassword" className="pl-1 text-lg">Confirm password</label>
                             <Input id="confirmPassword" disableQuery name="confirmPassword" placeholder="Confirm password" type="text" />
                         </div>
-                        <div className="w-full flex items-center justify-between gap-8">
-                            <div className="border w-full border-indigo-100"></div>
-                            <span className="text-gray-400 flex-shrink-0">
-                                Personal info
-                            </span>
-                            <div className="border w-full border-indigo-100"></div>
-                        </div>
+                        <Divider text="Personal info" />
                         <div className="flex flex-col md:flex-row justify-between gap-4">
                             <div className="h-full">
                                 <label htmlFor="firstName" className="pl-1 text-lg">First name</label>
@@ -47,6 +42,7 @@ export const AuthForm: FC<IProps> = ({ type }) => {
                         </div>
                     </>
                 )}
+                <Divider />
                 <button className="py-4 w-full bg-blue-900 text-white rounded-md font-bold">Submit</button>
             </div>
         </form>

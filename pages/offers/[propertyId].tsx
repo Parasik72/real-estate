@@ -5,12 +5,15 @@ import { ArrowIcon } from '@/common/icons/arrow.icon';
 import { CompanyIcon } from '@/common/icons/company.icon';
 import { DimensionIcon } from '@/common/icons/dimension.icon';
 import { LocationMarkSpotIcon } from '@/common/icons/location-mark-spot.icon';
+import { UserInfo } from '@/common/components/profile/user-info.component';
+import { PageWrapper } from '@/common/components/page-wrapper.component';
+import { PageContainer } from '@/common/components/page-container.component';
 import Link from 'next/link';
 
 export default function Property() {
     return (
-        <div className="antialiased pt-8 w-full">
-            <div className="px-4 py-8 md:max-w-3xl md:mx-auto xl:px-0 lg:max-w-full xl:max-w-6xl">
+        <PageWrapper>
+            <PageContainer className="py-8">
                 <h1 className="text-dark-blue text-4xl lg:text-6xl font-bold">
                     Premium penthouse in central Barcelona with panoramic views
                 </h1>
@@ -92,51 +95,47 @@ export default function Property() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-col md:flex-row justify-center lg:justify-normal lg:flex-col lg:max-w-350px w-full gap-10">
-                        <div className="p-4 bg-indigo-50 rounded-sm flex flex-col justify-center items-center gap-5">
-                            <div className="flex flex-col justify-center items-center">
-                                <h3 className="text-dark-blue text-xl font-bold">Haylie Donin</h3>
-                                <span className="block text-dark-blue">+34 555 781 731</span>
-                                <span className="block text-dark-blue">haylie.donin@realestate.es</span>
+                    <div className="flex flex-col gap-10 lg:max-w-350px w-full">
+                        <div className="flex flex-col md:flex-row justify-center lg:justify-normal lg:flex-col w-full gap-10">
+                            <UserInfo displayBrokerLink className="bg-indigo-50" />
+                            <div className="p-4 bg-indigo-50 rounded-sm flex flex-col gap-5">
+                                <h3 className="text-dark-blue text-xl font-bold">
+                                    Brief characteristics
+                                </h3>
+                                <ul className="flex flex-col gap-3">
+                                    <li className="text-dark-blue">
+                                        <span className="font-bold">Country:</span>
+                                        &nbsp;Spain
+                                    </li>
+                                    <li className="text-dark-blue">
+                                        <span className="font-bold">City:</span>
+                                        &nbsp;Barcelona I.
+                                    </li>
+                                    <li className="text-dark-blue">
+                                        <span className="font-bold">Type:</span>
+                                        &nbsp;Apartment
+                                    </li>
+                                    <li className="text-dark-blue">
+                                        <span className="font-bold">Total area:</span>
+                                        &nbsp;307 m2
+                                    </li>
+                                    <li className="text-dark-blue">
+                                        <span className="font-bold">Number of rooms:</span>
+                                        &nbsp;5
+                                    </li>
+                                    <li className="text-dark-blue">
+                                        <span className="font-bold">Number of bathrooms:</span>
+                                        &nbsp;1
+                                    </li>
+                                </ul>
                             </div>
-                            <Link className="text-blue-900 underline" href="#brokerProfile">
-                                View broker profile
-                            </Link>
                         </div>
-                        <div className="p-4 bg-indigo-50 rounded-sm flex flex-col gap-5">
-                            <h3 className="text-dark-blue text-xl font-bold">
-                                Brief characteristics
-                            </h3>
-                            <ul className="flex flex-col gap-3">
-                                <li className="text-dark-blue">
-                                    <span className="font-bold">Country:</span>
-                                    &nbsp;Spain
-                                </li>
-                                <li className="text-dark-blue">
-                                    <span className="font-bold">City:</span>
-                                    &nbsp;Barcelona I.
-                                </li>
-                                <li className="text-dark-blue">
-                                    <span className="font-bold">Type:</span>
-                                    &nbsp;Apartment
-                                </li>
-                                <li className="text-dark-blue">
-                                    <span className="font-bold">Total area:</span>
-                                    &nbsp;307 m2
-                                </li>
-                                <li className="text-dark-blue">
-                                    <span className="font-bold">Number of rooms:</span>
-                                    &nbsp;5
-                                </li>
-                                <li className="text-dark-blue">
-                                    <span className="font-bold">Number of bathrooms:</span>
-                                    &nbsp;1
-                                </li>
-                            </ul>
+                        <div className="md:px-20 lg:px-0">
+                            <Link href="/offers/edit/1" className="text-center block py-4 w-full bg-blue-900 text-white rounded-md font-bold">Edit the property</Link>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </PageContainer>
+        </PageWrapper>
     )
 }

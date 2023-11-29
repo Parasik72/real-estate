@@ -10,10 +10,12 @@ export default function Layout({ children }: IProps) {
     return (
         <div className="flex flex-col h-screen">
             <Navbar />
-            <main className="flex-1">
-                {children}
-            </main>
-            <Footer />
+            <div className="flex flex-col flex-1 overflow-y-auto">
+                <main className="flex-1">
+                    {children}
+                </main>
+                <Footer />
+            </div>
         </div>
     )
 }

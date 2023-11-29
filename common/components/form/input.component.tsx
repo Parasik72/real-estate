@@ -29,6 +29,7 @@ export const Input: FC<IProps> = ({
             placeholder={placeholder} 
             className={clsx("py-4 w-full h-full border-gray-300 rounded-md", className)} 
             type={type}
+            name={name}
             onChange={event => !disableQuery && handleSearch(event.target.value)}
         />
     );

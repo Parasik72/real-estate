@@ -1,3 +1,4 @@
+import { Divider } from "../divider.component"
 import { Input } from "../form/input.component"
 import { Select } from "../form/select.component"
 import { SearchIcon } from "@/common/icons/search.icon"
@@ -20,13 +21,7 @@ export const FormSearch = () => {
                         <button className="py-4 w-full lg:w-auto px-11 pl-13 bg-blue-900 text-white rounded-md font-bold">Search</button>
                     </div>
                 </div>
-                <div className="py-4 w-full flex items-center justify-between gap-8">
-                    <div className="border w-full border-indigo-100"></div>
-                    <span className="text-gray-400 flex-shrink-0">
-                        Advanced filters
-                    </span>
-                    <div className="border w-full border-indigo-100"></div>
-                </div>
+                <Divider className="py-7" text="Advanced filters" />
                 <div className="w-full flex flex-col">
                     <div className="flex flex-wrap -mx-3">
                         <div className="w-1/2 p-3 lg:w-1/4">

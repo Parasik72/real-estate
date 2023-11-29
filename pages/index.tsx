@@ -5,11 +5,13 @@ import AboutUsImg from '../common/images/about-us.png';
 import { FormSearch } from "@/common/components/home/form-search.component";
 import { ArrowIcon } from "@/common/icons/arrow.icon";
 import { PropertyCard } from "@/common/components/property-card.component";
+import { PageWrapper } from "@/common/components/page-wrapper.component";
+import { PageContainer } from "@/common/components/page-container.component";
 
 export default function Home() {
   return (
-    <div className="antialiased py-8 w-full overflow-x-hidden">
-      <div className="relative px-4 py-12 md:max-w-3xl md:mx-auto xl:px-0 lg:max-w-full xl:max-w-6xl">
+    <PageWrapper className="overflow-x-hidden">
+      <PageContainer className="relative py-12">
         <div className="lg:max-w-lg">
           <h1 className="text-dark-blue font-bold text-4xl lg:text-6.5xl lg:mt-4">
             Modern living for everyone
@@ -24,9 +26,9 @@ export default function Home() {
         <div className="mt-8 w-full lg:max-w-3xl">
          <FormSearch  className="p-4" />
         </div>
-      </div>
+      </PageContainer>
       <div className="bg-indigo-50 w-full py-14 lg:mt-36 lg:py-28">
-        <div className="relative px-4 md:max-w-3xl md:mx-auto xl:px-0 lg:max-w-full xl:max-w-6xl">
+        <PageContainer>
           <h2 className="text-dark-blue text-4xl lg:text-6xl font-bold">
             Last offers
           </h2>
@@ -65,10 +67,10 @@ export default function Home() {
               />
             ))}
           </div>
-        </div>
+        </PageContainer>
       </div>
       <div className="py-14 lg:py-28">
-        <div className="relative px-4 md:max-w-3xl md:mx-auto xl:px-0 lg:max-w-full xl:max-w-6xl">
+        <PageContainer>
           <div className="flex flex-col-reverse gap-10 md:flex-row md:gap-20 justify-between">
               <div>
                 <Image src={AboutUsImg} width={688} height={464} alt="aboutUs" />
@@ -87,8 +89,8 @@ export default function Home() {
                 </div>
               </div>
           </div>
-        </div>
+        </PageContainer>
       </div>
-    </div>
+    </PageWrapper>
   )
 }
