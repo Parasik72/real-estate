@@ -1,7 +1,7 @@
 import { AuthForm } from "@/common/components/form/auth-form.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
-import { AuthTypeForm } from "@/common/types/auth.types";
+import { signUpInitialDataForm } from "@/common/functions/auth.functions";
 
 export default function SignUp() {
     return (
@@ -12,7 +12,7 @@ export default function SignUp() {
                         <h2 className="p-8 w-full text-center border-b-2 border-indigo-100 text-dark-blue font-bold text-3xl">
                             Sign up
                         </h2>
-                        <AuthForm type={AuthTypeForm.SIGN_UP} />
+                        <AuthForm data={signUpInitialDataForm()} />
                     </div>
                 </div>
             </PageContainer>

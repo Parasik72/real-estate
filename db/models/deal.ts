@@ -11,7 +11,7 @@ export class Deal extends Model<
 > {
   declare dealId: UUID;
   declare signDate: BigInt | null;
-  declare totalPrice: number | null;
+  declare totalPrice: number;
   declare dealStatusId: UUID;
   declare propertyId: UUID;
   declare sellerUserId: UUID;
@@ -32,7 +32,7 @@ Deal.init(
       type: DataTypes.BIGINT
     },
     totalPrice: {
-      allowNull: true,
+      allowNull: false,
       type: DataTypes.DECIMAL
     },
     dealStatusId: {

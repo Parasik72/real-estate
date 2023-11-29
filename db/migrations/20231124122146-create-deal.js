@@ -9,7 +9,7 @@ module.exports = {
       CREATE TABLE ${tableName} (
         dealId CHAR(36) PRIMARY KEY NOT NULL,
         signDate BIGINT,
-        totalPrice DECIMAL,
+        totalPrice DECIMAL NOT NULL,
         dealStatusId CHAR(36) NOT NULL,
         propertyId CHAR(36) NOT NULL,
         sellerUserId CHAR(36) NOT NULL,

@@ -161,7 +161,7 @@ const demoDeals = [
     propertyId: demoProperties[2].propertyId,
     sellerUserId: demoUsers[2].userId,
     buyerUserId: demoUsers[0].userId,
-    totalPrice: null,
+    totalPrice: demoProperties[2].priceAmount,
     signDate: null,
     createdAt: new Date().getTime(),
     updatedAt: new Date().getTime()

@@ -1,25 +1,26 @@
-import { AuthTypeForm } from "@/common/types/auth.types";
+import { AuthActionsForm, AuthTypeForm, AuthVariableTypes } from "@/common/types/auth.types";
 import { Input } from "./input.component"
-import { FC } from "react";
 import { Divider } from "../divider.component";
+import { Form, Formik } from "formik";
+import { FormikInput } from "./formik-input.component";
 
-interface IProps {
-    type: AuthTypeForm;
+interface IProps<T extends AuthVariableTypes> {
+    data: AuthActionsForm<T>;
 }
 
-export const AuthForm: FC<IProps> = ({ type }) => {
+export function AuthForm<T extends AuthVariableTypes>({ data }: IProps<T>) {
     return (
-        <form action="">
-            <div className="p-4 flex flex-col gap-4">
+        <Formik initialValues={data.variables} onSubmit={() => {}} validate={data.validate}>
+            <Form className="p-4 flex flex-col gap-4">
                 <div className="h-full">
                     <label htmlFor="email" className="pl-1 text-lg">Email</label>
-                    <Input id="email" disableQuery name="email" placeholder="Email" type="text" />
+                    <FormikInput id="email" name="email" placeholder="Email" type="text" />
                 </div>
                 <div className="h-full">
                     <label htmlFor="password" className="pl-1 text-lg">Password</label>
-                    <Input id="password" disableQuery name="password" placeholder="Password" type="text" />
+                    <FormikInput id="password" name="password" placeholder="Password" type="text" />
                 </div>
-                {type === AuthTypeForm.SIGN_UP && (
+                {data.type === AuthTypeForm.SIGN_UP && (
                     <>
                         <div className="h-full">
                             <label htmlFor="confirmPassword" className="pl-1 text-lg">Confirm password</label>
@@ -44,7 +45,7 @@ export const AuthForm: FC<IProps> = ({ type }) => {
                 )}
                 <Divider />
                 <button className="py-4 w-full bg-blue-900 text-white rounded-md font-bold">Submit</button>
-            </div>
-        </form>
+            </Form>
+        </Formik>
     )
 }

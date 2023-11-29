@@ -6,3 +6,8 @@ namespace NodeJS {
     DB_HOSTNAME: string;
   }
 }
+namespace Express {
+  interface User {
+    userId: any;
+  }
+}
