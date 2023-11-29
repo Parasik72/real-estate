@@ -18,9 +18,9 @@ export const UserInfo: FC<IProps> = ({
             <span className="block text-dark-blue">haylie.donin@realestate.es</span>
         </div>
         {displayEditLink && (
-            <button className="py-4 w-full bg-blue-900 text-white rounded-md font-bold">
+            <Link href="/profile/edit" className="py-4 w-full bg-blue-900 text-white rounded-md font-bold">
                 Edit profile
-            </button>
+            </Link>
         )}
         {displayBrokerLink && (
             <Link className="text-blue-900 underline" href="/profile/1">
