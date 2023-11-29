@@ -23,9 +23,14 @@ export default function Profile() {
                         <h2 className="text-dark-blue text-3xl lg:text-4xl font-bold">
                             User's properties
                         </h2>
-                        <Link href="/offers/add" className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
-                            Add a property
-                        </Link>
+                        <div className="flex gap-4">
+                            <Link href="/offers/add" className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
+                                Add a property
+                            </Link>
+                            <Link href="/deals" className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
+                                My deals
+                            </Link>
+                        </div>
                     </div>
                     <div className="mt-4">
                         <ListOfProperties />
