@@ -2,9 +2,20 @@ import { ListOfProperties } from "@/common/components/list-of-properties.compone
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { UserInfo } from "@/common/components/profile/user-info.component";
+import { PropertyModel } from "@/common/services/property/property.model";
+import { propertyService } from "@/common/services/property/property.service";
 import Link from "next/link";
 
-export default function Profile() {
+interface IProps {
+    offers: PropertyModel[];
+}
+
+export async function getServerSideProps() {
+    const offers = await propertyService.getAllOffers();
+    return { props: { offers: JSON.parse(JSON.stringify(offers)) } };
+}
+
+export default function Profile({ offers }: IProps) {
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -33,7 +44,7 @@ export default function Profile() {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <ListOfProperties />
+                        <ListOfProperties properties={offers} />
                     </div>
                 </PageContainer>
             </div>

@@ -1,3 +1,5 @@
+import { DataForm } from "./form.type";
+
 export enum AuthTypeForm {
     SIGN_IN,
     SIGN_UP
@@ -12,17 +14,16 @@ export interface SignUpVariablesForm {
     email: string;
     password: string;
     confirmPassword: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
 }
 
-export interface SignInActionForm<T> {
-    variables: T;
-    validate: (values: T) => void | object;
+export interface SignInActionForm<T extends Object> extends DataForm<T> {
     type: AuthTypeForm.SIGN_IN;
 }
 
-export interface SignUpActionForm<T> {
-    variables: T;
-    validate: (values: T) => void | object;
+export interface SignUpActionForm<T extends Object> extends DataForm<T>  {
     type: AuthTypeForm.SIGN_UP;
 }
 

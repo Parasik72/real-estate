@@ -2,8 +2,19 @@ import { ListOfProperties } from "@/common/components/list-of-properties.compone
 import { FormSearch } from "@/common/components/offers/form-search.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
+import { PropertyModel } from "@/common/services/property/property.model";
+import { propertyService } from "@/common/services/property/property.service";
 
-export default function Offers() {
+interface IProps {
+    offers: PropertyModel[];
+}
+
+export async function getServerSideProps() {
+    const offers = await propertyService.getAllOffers();
+    return { props: { offers: JSON.parse(JSON.stringify(offers)) } };
+}
+
+export default function Offers({ offers }: IProps) {
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -22,7 +33,7 @@ export default function Offers() {
                 </PageContainer>
             </div>
             <PageContainer className="py-8">
-                <ListOfProperties />
+                <ListOfProperties properties={offers} />
             </PageContainer>
         </PageWrapper>
     )

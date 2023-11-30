@@ -9,13 +9,39 @@ import { UserInfo } from '@/common/components/profile/user-info.component';
 import { PageWrapper } from '@/common/components/page-wrapper.component';
 import { PageContainer } from '@/common/components/page-container.component';
 import Link from 'next/link';
+import { PropertyModel } from '@/common/services/property/property.model';
+import { propertyService } from '@/common/services/property/property.service';
+import { NextPageContext } from 'next';
 
-export default function Property() {
+interface IProps {
+    property: PropertyModel;
+}
+
+interface IContext extends NextPageContext {
+    query: {
+        propertyId: string;
+    }
+}
+
+export async function getServerSideProps(context: IContext) {
+    const { propertyId } = context.query;
+    const property = await propertyService.getPropertyById(propertyId);
+    if (!property) {
+      return {
+        notFound: true,
+      }
+    }
+    return { 
+        props: { property: JSON.parse(JSON.stringify(property)) } 
+    };
+}
+
+export default function Property({ property }: IProps) {
     return (
         <PageWrapper>
             <PageContainer className="py-8">
                 <h1 className="text-dark-blue text-4xl lg:text-6xl font-bold">
-                    Premium penthouse in central Barcelona with panoramic views
+                    { property.title }
                 </h1>
                 <div className="flex flex-col lg:flex-row gap-10 mt-10">
                     <div className="w-full">
@@ -61,7 +87,7 @@ export default function Property() {
                                     <div className="flex items-center gap-5">
                                         <DimensionIcon />
                                         <span className="text-dark-blue font-bold text-xl flex">
-                                            224m
+                                            { property.area }m
                                             <div className="h-full flex">
                                                 <span className="text-sm">2</span>
                                             </div>
@@ -79,7 +105,9 @@ export default function Property() {
                                 <div className="p-4 bg-indigo-50 flex justify-between items-center rounded-md">
                                     <div>
                                         <span className="text-dark-blue">Price:</span>
-                                        <h3 className="text-dark-blue font-bold text-xl">807.57 $</h3>
+                                        <h3 className="text-dark-blue font-bold text-xl">
+                                            { property.priceAmount } $
+                                        </h3>
                                     </div>
                                     <button className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
                                         Send the deal
@@ -88,9 +116,7 @@ export default function Property() {
                             </div>
                             <div className="mt-8 md:px-20">
                                 <p className="text-dark-blue">
-                                    FEDORS GROUP offers an exclusive FOR SALE elegant large 5-room apartment on Vincent Hložník Street in the Condominium Renaissance residential complex.
-                                    Thanks to its unique location, the property has access to a large Japanese garden with an area of 35 m2, which can be accessed directly from the bedroom. The front of the apartment is at the height of the third floor, so the terrace is located just above the treetops, which gives the apartment a unique atmosphere. Overall, the apartment has a direct view of the Danube River and the surrounding forests.
-                                    The apartment offers extraordinary comfort, has a first-class interior from the leading architectural office Cakov Makara and equipment from renowned world furniture manufacturers. The overall atmosphere of the apartment is completed
+                                    { property.description }
                                 </p>
                             </div>
                         </div>
@@ -117,15 +143,15 @@ export default function Property() {
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Total area:</span>
-                                        &nbsp;307 m2
+                                        &nbsp;{ property.area } m2
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Number of rooms:</span>
-                                        &nbsp;5
+                                        &nbsp;{ property.bedRooms }
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Number of bathrooms:</span>
-                                        &nbsp;1
+                                        &nbsp;{ property.bathRooms }
                                     </li>
                                 </ul>
                             </div>

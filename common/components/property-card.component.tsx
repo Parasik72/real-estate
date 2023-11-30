@@ -1,32 +1,28 @@
 import clsx from "clsx";
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
+import { PropertyModel } from "../services/property/property.model";
+import CardImg from '../../common/images/card-img-1.png';
 
 interface IProps {
-    title: string;
-    price: number;
-    address: string;
-    imgPath: StaticImageData;
-    className?: string;
+  property: PropertyModel;
+  className?: string;
 }
 
 export const PropertyCard: FC<IProps> = ({
-    address,
-    imgPath,
-    price,
-    title,
-    className
+  property,
+  className
 }) => (
-    <Link href="/offers/1" className={clsx("block bg-white shadow-lg rounded-md w-full flex-shrink-0", className)}>
-      <Image className="bg-indigo-50 w-full object-cover object-center rounded-md" src={imgPath} alt={title} height={249} width={444} />
+    <Link href={`/offers/${property.propertyId}`} className={clsx("block bg-white shadow-lg rounded-md w-full flex-shrink-0", className)}>
+      <Image className="bg-indigo-50 w-full object-cover object-center rounded-md" src={CardImg} alt={property.title} height={249} width={444} />
       <div className="p-4 flex flex-col gap-4">
         <h3 className="text-dark-blue text-1.5xl leading-8 font-bold">
-          {title}
+          {property.title}
         </h3>
         <div className="flex flex-col gap-1">
-          <span className="font-bold text-blue-900">{price}$</span>
-          <span className="text-dark-blue">{address}</span>
+          <span className="font-bold text-blue-900">{property.priceAmount}$</span>
+          <span className="text-dark-blue">{property.propertyAddressId}</span>
         </div>
       </div>
     </Link>

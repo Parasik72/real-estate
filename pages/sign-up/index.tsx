@@ -5,7 +5,7 @@ import { signUpInitialDataForm } from "@/common/functions/auth.functions";
 
 export default function SignUp() {
     return (
-        <PageWrapper className="pt-0 h-full">
+        <PageWrapper className="py-8 h-full">
             <PageContainer className="h-full">
                 <div className="flex flex-col justify-center items-center h-full">
                     <div className="rounded-md shadow-md bg-indigo-50 max-w-xl w-full">

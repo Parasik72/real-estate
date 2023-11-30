@@ -1,14 +1,24 @@
 import Image from "next/image";
 import ModernLivingImg from '../common/images/header picture.jpg';
-import CardImg1 from '../common/images/card-img-1.png';
 import AboutUsImg from '../common/images/about-us.png';
 import { FormSearch } from "@/common/components/home/form-search.component";
 import { ArrowIcon } from "@/common/icons/arrow.icon";
 import { PropertyCard } from "@/common/components/property-card.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { PageContainer } from "@/common/components/page-container.component";
+import { propertyService } from "@/common/services/property/property.service";
+import { PropertyModel } from "@/common/services/property/property.model";
 
-export default function Home() {
+interface IProps {
+  offers: PropertyModel[];
+}
+
+export async function getServerSideProps() {
+  const offers = await propertyService.getLastOffers();
+  return { props: { offers: JSON.parse(JSON.stringify(offers)) } };
+}
+
+export default function Home({ offers }: IProps) {
   return (
     <PageWrapper className="overflow-x-hidden">
       <PageContainer className="relative py-12">
@@ -28,7 +38,7 @@ export default function Home() {
         </div>
       </PageContainer>
       <div className="bg-indigo-50 w-full py-14 lg:mt-36 lg:py-28">
-        <PageContainer>
+        <PageContainer className="overflow-x-hidden">
           <h2 className="text-dark-blue text-4xl lg:text-6xl font-bold">
             Last offers
           </h2>
@@ -56,13 +66,10 @@ export default function Home() {
             </div>
           </div>
           <div className="inline-flex gap-5 mt-6 overflow-x-hidden">
-            {[...new Array(6)].map((_, i) => (
+            {offers.map((property, i) => (
               <PropertyCard 
-                key={i}
-                title="Large 4-room apartment with a beautiful terrace"
-                price={320000}
-                address="Barcelona IX."
-                imgPath={CardImg1}
+                property={property}
+                key={property.propertyId}
                 className="max-w-250px md:max-w-350px"
               />
             ))}

@@ -1,5 +1,6 @@
+import { userService } from "../services/user/user.service";
 import { AuthActionsForm, AuthTypeForm, SignInVariablesForm, SignUpVariablesForm } from "../types/auth.types";
-import { signInValidateForm, signUpValidateForm } from "../validators/auth.validators";
+import { signInSchemaForm, signUpSchemaForm } from "../validators/auth.validators";
 
 const signInInitialVariablesForm = (): SignInVariablesForm => ({
     email: '',
@@ -9,17 +10,22 @@ const signInInitialVariablesForm = (): SignInVariablesForm => ({
 const signUpInitialVariablesForm = (): SignUpVariablesForm => ({
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    phone: ''
 });
 
 export const signInInitialDataForm = (): AuthActionsForm<SignInVariablesForm> => ({
     type: AuthTypeForm.SIGN_IN,
     variables: signInInitialVariablesForm(),
-    validate: signInValidateForm
+    validationSchema: signInSchemaForm,
+    onSubmit: userService.signIn.bind(userService)
 });
 
 export const signUpInitialDataForm = (): AuthActionsForm<SignUpVariablesForm> => ({
     type: AuthTypeForm.SIGN_UP,
     variables: signUpInitialVariablesForm(),
-    validate: signUpValidateForm
+    validationSchema: signUpSchemaForm,
+    onSubmit: userService.signIn.bind(userService)
 });
