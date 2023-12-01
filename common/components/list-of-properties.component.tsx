@@ -1,15 +1,16 @@
 import { PropertyCard } from "./property-card.component";
 import { PropertyModel } from "../services/property/property.model";
 import { FC } from "react";
+import { PropertyAddressModel } from "../services/property/property-address.model";
 
 interface IProps {
-    properties: PropertyModel[];
+    properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
 }
 
 export const ListOfProperties: FC<IProps> = ({ properties }) => (
-    <div className="flex flex-wrap justify-center -mx-4">
+    <div className="flex flex-wrap justify-center md:justify-start -mx-4">
         {properties.map((property, i) => (
-            <div key={property.propertyId} className="md:w-1/2 lg:w-1/3 p-4">
+            <div key={property.propertyId} className="w-full md:w-1/2 lg:w-1/3 p-4">
                 <PropertyCard property={property} />
             </div>
         ))}

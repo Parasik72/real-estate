@@ -2,20 +2,31 @@ import { ListOfProperties } from "@/common/components/list-of-properties.compone
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { UserInfo } from "@/common/components/profile/user-info.component";
+import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { PropertyModel } from "@/common/services/property/property.model";
-import { propertyService } from "@/common/services/property/property.service";
+import { UserModel } from "@/common/services/user/user.model";
+import container from "@/server/container";
+import { UserController } from "@/server/controllers/user.controller";
+import { NextPageContext } from "next";
 import Link from "next/link";
 
 interface IProps {
-    offers: PropertyModel[];
+    user: UserModel;
+    userProperties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
 }
 
-export async function getServerSideProps() {
-    const offers = await propertyService.getAllOffers();
-    return { props: { offers: JSON.parse(JSON.stringify(offers)) } };
+interface IContext extends NextPageContext {
+    query: {
+        userId: string;
+    }
 }
 
-export default function Profile({ offers }: IProps) {
+export async function getServerSideProps(context: IContext) {
+    const userController = container.resolve<UserController>('userController');
+    return userController.getUserProfileByIdServerSideProps({ userId: context.query.userId });
+}
+
+export default function Profile({ user, userProperties }: IProps) {
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -24,7 +35,7 @@ export default function Profile({ offers }: IProps) {
                         User profile
                     </h2>
                     <div className="mt-4">
-                        <UserInfo displayEditLink />
+                        <UserInfo user={user} displayEditLink />
                     </div>
                 </div>
             </PageContainer>
@@ -44,7 +55,7 @@ export default function Profile({ offers }: IProps) {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <ListOfProperties properties={offers} />
+                        <ListOfProperties properties={userProperties} />
                     </div>
                 </PageContainer>
             </div>

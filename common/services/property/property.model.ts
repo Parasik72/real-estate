@@ -1,5 +1,3 @@
-import { GetPropertyResponse } from "./property-http.types";
-
 export class PropertyModel {
     constructor(
         public propertyId: string,
@@ -18,8 +16,8 @@ export class PropertyModel {
     ) {}
 }
 
-export const createPropertyModel 
-    = (item: GetPropertyResponse) => new PropertyModel(
+export const createPropertyModel = 
+    <T extends PropertyModel>(item: T) => new PropertyModel(
         item.propertyId,
         item.bedRooms,
         item.bathRooms,

@@ -6,16 +6,18 @@ import { ArrowIcon } from "@/common/icons/arrow.icon";
 import { PropertyCard } from "@/common/components/property-card.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { PageContainer } from "@/common/components/page-container.component";
-import { propertyService } from "@/common/services/property/property.service";
 import { PropertyModel } from "@/common/services/property/property.model";
+import container from "@/server/container";
+import { PropertyController } from "@/server/controllers/property.controller";
+import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 
 interface IProps {
-  offers: PropertyModel[];
+  offers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
 }
 
 export async function getServerSideProps() {
-  const offers = await propertyService.getLastOffers();
-  return { props: { offers: JSON.parse(JSON.stringify(offers)) } };
+  const propertyController = container.resolve<PropertyController>('propertyController');
+  return propertyController.getLastOffersServerSideProps();
 }
 
 export default function Home({ offers }: IProps) {

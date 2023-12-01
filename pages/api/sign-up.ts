@@ -1,6 +1,7 @@
 import container from '@/server/container';
 import { UserController } from '@/server/controllers/user.controller';
-import { passportAuthenticate, passportInitialize, passportSession } from '@/server/passport';
+import { SignUpDto } from '@/server/dto/user/sign-up.dto';
+import { passportInitialize, passportSession } from '@/server/passport';
 import { sessions } from '@/server/sessions';
 import { INextApiRequestExtended } from '@/server/types/http.types';
 import type { NextApiResponse } from 'next'
@@ -8,14 +9,13 @@ import { createRouter } from 'next-connect';
 
 const userController = container.resolve<UserController>('userController');
 
-const router = createRouter<INextApiRequestExtended, NextApiResponse>();
+const router = createRouter<INextApiRequestExtended<SignUpDto>, NextApiResponse>();
 router
   .use(sessions)
   .use(passportInitialize)
-  .use(passportSession)
-  .use(passportAuthenticate);
+  .use(passportSession);
 
-router.post("/api/user", userController.signIn);
+router.post("/api/sign-up", userController.signUp);
 
 export default router.handler({
   onError: (err, req, res) => {

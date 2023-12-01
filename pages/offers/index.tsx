@@ -2,16 +2,18 @@ import { ListOfProperties } from "@/common/components/list-of-properties.compone
 import { FormSearch } from "@/common/components/offers/form-search.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
+import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { PropertyModel } from "@/common/services/property/property.model";
-import { propertyService } from "@/common/services/property/property.service";
+import container from "@/server/container";
+import { PropertyController } from "@/server/controllers/property.controller";
 
 interface IProps {
-    offers: PropertyModel[];
+    offers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
 }
 
 export async function getServerSideProps() {
-    const offers = await propertyService.getAllOffers();
-    return { props: { offers: JSON.parse(JSON.stringify(offers)) } };
+    const propertyController = container.resolve<PropertyController>('propertyController');
+    return propertyController.getAllOffersServerSideProps({});
 }
 
 export default function Offers({ offers }: IProps) {

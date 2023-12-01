@@ -6,3 +6,7 @@ export type GetAllPropertiesParams = {
     page?: string;
     limit?: string;
 }
+
+export type UpdatePropertyParams = {
+    propertyId: string;
+}

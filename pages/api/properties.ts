@@ -18,7 +18,7 @@ router
 
 const propertyController = container.resolve<PropertyController>('propertyController');
 
-router.get("/api/properties", propertyController.getAllProperties);
+router.post("/api/properties", propertyController.createProperty);
 
 export default router.handler({
   onError: (err, req, res) => {

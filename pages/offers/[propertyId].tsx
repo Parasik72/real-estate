@@ -10,11 +10,20 @@ import { PageWrapper } from '@/common/components/page-wrapper.component';
 import { PageContainer } from '@/common/components/page-container.component';
 import Link from 'next/link';
 import { PropertyModel } from '@/common/services/property/property.model';
-import { propertyService } from '@/common/services/property/property.service';
 import { NextPageContext } from 'next';
+import container from '@/server/container';
+import { PropertyController } from '@/server/controllers/property.controller';
+import { UserModel } from '@/common/services/user/user.model';
+import { PropertyAddressModel } from '@/common/services/property/property-address.model';
+import { PropertyTypeModel } from '@/common/services/property/property-type.model';
+import { getPropertyTypeNameWithArticle } from '@/common/functions/property.functions';
 
 interface IProps {
-    property: PropertyModel;
+    property: PropertyModel & {
+        PropertyAddress: PropertyAddressModel,
+        PropertyType: PropertyTypeModel
+    };
+    user: UserModel;
 }
 
 interface IContext extends NextPageContext {
@@ -24,19 +33,11 @@ interface IContext extends NextPageContext {
 }
 
 export async function getServerSideProps(context: IContext) {
-    const { propertyId } = context.query;
-    const property = await propertyService.getPropertyById(propertyId);
-    if (!property) {
-      return {
-        notFound: true,
-      }
-    }
-    return { 
-        props: { property: JSON.parse(JSON.stringify(property)) } 
-    };
+    const propertyController = container.resolve<PropertyController>('propertyController');
+    return propertyController.getPropertyByIdServerSideProps({ propertyId: context.query.propertyId });
 }
 
-export default function Property({ property }: IProps) {
+export default function Property({ property, user }: IProps) {
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -81,7 +82,7 @@ export default function Property({ property }: IProps) {
                                     <div className="flex items-center gap-5">
                                         <CompanyIcon />
                                         <span className="text-dark-blue font-bold text-xl">
-                                            an Apartment
+                                            {getPropertyTypeNameWithArticle(property.PropertyType)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-5">
@@ -96,7 +97,7 @@ export default function Property({ property }: IProps) {
                                     <div className="flex items-center gap-5">
                                         <LocationMarkSpotIcon />
                                         <span className="text-dark-blue font-bold text-xl">
-                                            Barcelona I.
+                                            {`${property.PropertyAddress.countryName}, ${property.PropertyAddress.cityName}`}
                                         </span>
                                     </div>
                                 </div>
@@ -123,7 +124,7 @@ export default function Property({ property }: IProps) {
                     </div>
                     <div className="flex flex-col gap-10 lg:max-w-350px w-full">
                         <div className="flex flex-col md:flex-row justify-center lg:justify-normal lg:flex-col w-full gap-10">
-                            <UserInfo displayBrokerLink className="bg-indigo-50" />
+                            <UserInfo user={user} displayBrokerLink className="bg-indigo-50" />
                             <div className="p-4 bg-indigo-50 rounded-sm flex flex-col gap-5">
                                 <h3 className="text-dark-blue text-xl font-bold">
                                     Brief characteristics
@@ -131,15 +132,15 @@ export default function Property({ property }: IProps) {
                                 <ul className="flex flex-col gap-3">
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Country:</span>
-                                        &nbsp;Spain
+                                        &nbsp;{property.PropertyAddress.countryName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">City:</span>
-                                        &nbsp;Barcelona I.
+                                        &nbsp;{property.PropertyAddress.cityName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Type:</span>
-                                        &nbsp;Apartment
+                                        &nbsp;{property.PropertyType.typeName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Total area:</span>

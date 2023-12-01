@@ -1,14 +1,16 @@
 import { User } from '@/db/models/user';
 import container from '@/server/container';
 import { PropertyController } from '@/server/controllers/property.controller';
-import { GetPropertyByIdParams } from '@/server/params/property.params';
 import { passportInitialize, passportSession } from '@/server/passport';
 import { sessions } from '@/server/sessions';
-import { INextApiRequestExtended } from '@/server/types/http.types';
-import type { NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { createRouter } from 'next-connect';
 
-const router = createRouter<INextApiRequestExtended<{}, GetPropertyByIdParams>, NextApiResponse>();
+interface INextApiRequestExtended extends NextApiRequest {
+  user: User;
+}
+
+const router = createRouter<INextApiRequestExtended, NextApiResponse>();
 router
   .use(sessions)
   .use(passportInitialize)
@@ -16,8 +18,7 @@ router
 
 const propertyController = container.resolve<PropertyController>('propertyController');
 
-router.get("/api/properties/:propertyId", propertyController.getPropertyById);
-router.patch("/api/properties/:propertyId", propertyController.updatePropertyById);
+router.get("/api/properties/offers", propertyController.getAllOffers);
 
 export default router.handler({
   onError: (err, req, res) => {
