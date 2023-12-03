@@ -7,6 +7,7 @@ export const dbInstance = new Sequelize(
     {
         host: process.env.DB_HOSTNAME,
         dialect: 'mysql',
+        logging: false,
         define: {
           timestamps: false
         }

@@ -10,17 +10,19 @@ import { PropertyModel } from "@/common/services/property/property.model";
 import container from "@/server/container";
 import { PropertyController } from "@/server/controllers/property.controller";
 import { PropertyAddressModel } from "@/common/services/property/property-address.model";
+import { tryCatchControllerSSR } from "@/server/wrappers/try-catch-controller-ssr.wrapper";
+import { NextPageContext } from "next";
 
 interface IProps {
-  offers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+  data: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
 }
 
-export async function getServerSideProps() {
-  const propertyController = container.resolve<PropertyController>('propertyController');
-  return propertyController.getLastOffersServerSideProps();
+export async function getServerSideProps(context: NextPageContext) {
+  const propertyController: PropertyController = container.resolve<PropertyController>('propertyController');
+  return tryCatchControllerSSR(propertyController.getLastOffers, context);
 }
 
-export default function Home({ offers }: IProps) {
+export default function Home({ data }: IProps) {
   return (
     <PageWrapper className="overflow-x-hidden">
       <PageContainer className="relative py-12">
@@ -68,7 +70,7 @@ export default function Home({ offers }: IProps) {
             </div>
           </div>
           <div className="inline-flex gap-5 mt-6 overflow-x-hidden">
-            {offers.map((property, i) => (
+            {data.map((property, i) => (
               <PropertyCard 
                 property={property}
                 key={property.propertyId}

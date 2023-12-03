@@ -1,5 +1,3 @@
-import { NextApiResponse } from "next";
-import { INextApiRequestExtended } from "../types/http.types";
 import container from "../container";
 import { GetUserProfileParams } from "../params/user.params";
 import { UserService } from "../services/user.service";
@@ -8,44 +6,34 @@ import { HttpException } from "../exceptions/http.exception";
 import bcryptjs from 'bcryptjs';
 import { v4 } from "uuid";
 import { UUID } from "crypto";
+import { ControllerConfig } from "../types/controller.types";
 
 export class UserController {
-    async getUserProfileByIdServerSideProps(params: GetUserProfileParams) {
+    async getUserProfileById({ query }: ControllerConfig<{}, GetUserProfileParams>) {
         const userService = container.resolve<UserService>('userService');
-        const user = await userService.getUserProfileById(params.userId);
-        if (!user) return { notFound: true };
-        const data = JSON.parse(JSON.stringify({ 
-            user, 
-            userProperties: user.Properties
-        }));
-        return { props: data }; 
+        const user = await userService.getUserProfileById(query.userId);
+        if (!user) throw new HttpException('The user was not found', 404);
+        return user; 
     }
 
-    async signIn(req: INextApiRequestExtended, res: NextApiResponse) {
-        res.status(200).json({ message: 'Successful sign in!' })
+    async signIn() {
+        return { message: 'Successful sign in!' };
     }
 
-    async signUp(req: INextApiRequestExtended<SignUpDto>, res: NextApiResponse) {
-        try {
-            const userService = container.resolve<UserService>('userService');
-            const emailInUse = await userService.getUserByEmail(req.body.email);
-            if (emailInUse) throw new HttpException('This email is already in use', 400);
-            const userId = v4() as UUID;
-            const hashPassword = bcryptjs.hashSync(req.body.password, 5);
-            const time = BigInt(new Date().getTime());
-            await userService.createUser({
-                ...req.body,
-                userId,
-                password: hashPassword,
-                createdAt: time,
-                updatedAt: time
-            });
-            return res.status(201).json({ message: 'Successful sign up!' })
-        } catch (error) {
-          if (error instanceof HttpException) {
-            return res.status(error.statusCode).json({ error: error.message });
-          }
-          return res.status(500).json({ error: `Error of signing up: ${error}` });
-        }
+    async signUp({ body }: ControllerConfig<SignUpDto>) {
+        const userService = container.resolve<UserService>('userService');
+        const emailInUse = await userService.getUserByEmail(body.email);
+        if (emailInUse) throw new HttpException('This email is already in use', 400);
+        const userId = v4() as UUID;
+        const hashPassword = bcryptjs.hashSync(body.password, 5);
+        const time = BigInt(new Date().getTime());
+        await userService.createUser({
+            ...body,
+            userId,
+            password: hashPassword,
+            createdAt: time,
+            updatedAt: time
+        });
+        return { message: 'Successful sign up!' };
     }
 }

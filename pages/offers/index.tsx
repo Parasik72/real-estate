@@ -6,17 +6,21 @@ import { PropertyAddressModel } from "@/common/services/property/property-addres
 import { PropertyModel } from "@/common/services/property/property.model";
 import container from "@/server/container";
 import { PropertyController } from "@/server/controllers/property.controller";
+import { tryCatchControllerSSR } from "@/server/wrappers/try-catch-controller-ssr.wrapper";
+import { NextPageContext } from "next";
 
 interface IProps {
-    offers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+    data: {
+        properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+    }
 }
 
-export async function getServerSideProps() {
-    const propertyController = container.resolve<PropertyController>('propertyController');
-    return propertyController.getAllOffersServerSideProps({});
+export async function getServerSideProps(context: NextPageContext) {
+    const propertyController: PropertyController = container.resolve<PropertyController>('propertyController');
+    return tryCatchControllerSSR(propertyController.getAllOffers, context);
 }
 
-export default function Offers({ offers }: IProps) {
+export default function Offers({ data }: IProps) {
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -35,7 +39,7 @@ export default function Offers({ offers }: IProps) {
                 </PageContainer>
             </div>
             <PageContainer className="py-8">
-                <ListOfProperties properties={offers} />
+                <ListOfProperties properties={data.properties} />
             </PageContainer>
         </PageWrapper>
     )

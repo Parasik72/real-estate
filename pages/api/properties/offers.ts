@@ -1,30 +1,27 @@
-import { User } from '@/db/models/user';
 import container from '@/server/container';
 import { PropertyController } from '@/server/controllers/property.controller';
+import { apiErrorHandler } from '@/server/middlewares/error-handler.middleware';
+import { islogedIn } from '@/server/middlewares/is-loged-in.middleware';
 import { passportInitialize, passportSession } from '@/server/passport';
 import { sessions } from '@/server/sessions';
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { INextApiRequestExtended } from '@/server/types/http.types';
+import { tryCatchController } from '@/server/wrappers/try-catch-controller.wrapper';
+import type { NextApiResponse } from 'next'
 import { createRouter } from 'next-connect';
-
-interface INextApiRequestExtended extends NextApiRequest {
-  user: User;
-}
 
 const router = createRouter<INextApiRequestExtended, NextApiResponse>();
 router
   .use(sessions)
   .use(passportInitialize)
-  .use(passportSession);
+  .use(passportSession)
+  .use(islogedIn);
 
-const propertyController = container.resolve<PropertyController>('propertyController');
+const propertyController: PropertyController = container.resolve<PropertyController>('propertyController');
 
-router.get("/api/properties/offers", propertyController.getAllOffers);
+router.get("/api/properties/offers", tryCatchController(propertyController.getAllOffers));
 
 export default router.handler({
-  onError: (err, req, res) => {
-    console.log(err);
-    res.status(500).end('Something went wrong!');
-  },
+  onError: apiErrorHandler,
   onNoMatch: (req, res) => {
     res.status(404).end('Page is not found');
   }

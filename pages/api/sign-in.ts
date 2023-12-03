@@ -1,27 +1,24 @@
 import container from '@/server/container';
 import { UserController } from '@/server/controllers/user.controller';
-import { passportAuthenticate, passportInitialize, passportSession } from '@/server/passport';
+import { apiErrorHandler } from '@/server/middlewares/error-handler.middleware';
+import { passportAuthenticate, passportInitialize } from '@/server/passport';
 import { sessions } from '@/server/sessions';
-import { INextApiRequestExtended } from '@/server/types/http.types';
-import type { NextApiResponse } from 'next'
+import { tryCatchController } from '@/server/wrappers/try-catch-controller.wrapper';
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { createRouter } from 'next-connect';
 
-const userController = container.resolve<UserController>('userController');
+const userController: UserController = container.resolve<UserController>('userController');
 
-const router = createRouter<INextApiRequestExtended, NextApiResponse>();
+const router = createRouter<NextApiRequest, NextApiResponse>();
 router
   .use(sessions)
   .use(passportInitialize)
-  .use(passportSession)
   .use(passportAuthenticate);
 
-router.post("/api/sign-in", userController.signIn);
+router.post("/api/sign-in", tryCatchController(userController.signIn));
 
 export default router.handler({
-  onError: (err, req, res) => {
-    console.log(err);
-    res.status(500).end('Something went wrong!');
-  },
+  onError: apiErrorHandler,
   onNoMatch: (req, res) => {
     res.status(404).end('Page is not found');
   }

@@ -17,13 +17,14 @@ import { UserModel } from '@/common/services/user/user.model';
 import { PropertyAddressModel } from '@/common/services/property/property-address.model';
 import { PropertyTypeModel } from '@/common/services/property/property-type.model';
 import { getPropertyTypeNameWithArticle } from '@/common/functions/property.functions';
+import { tryCatchControllerSSR } from '@/server/wrappers/try-catch-controller-ssr.wrapper';
 
 interface IProps {
-    property: PropertyModel & {
+    data: PropertyModel & {
         PropertyAddress: PropertyAddressModel,
-        PropertyType: PropertyTypeModel
+        PropertyType: PropertyTypeModel,
+        User: UserModel;
     };
-    user: UserModel;
 }
 
 interface IContext extends NextPageContext {
@@ -33,16 +34,16 @@ interface IContext extends NextPageContext {
 }
 
 export async function getServerSideProps(context: IContext) {
-    const propertyController = container.resolve<PropertyController>('propertyController');
-    return propertyController.getPropertyByIdServerSideProps({ propertyId: context.query.propertyId });
+    const propertyController: PropertyController = container.resolve<PropertyController>('propertyController');
+    return tryCatchControllerSSR(propertyController.getPropertyById, context);
 }
 
-export default function Property({ property, user }: IProps) {
+export default function Property({ data }: IProps) {
     return (
         <PageWrapper>
             <PageContainer className="py-8">
                 <h1 className="text-dark-blue text-4xl lg:text-6xl font-bold">
-                    { property.title }
+                    { data.title }
                 </h1>
                 <div className="flex flex-col lg:flex-row gap-10 mt-10">
                     <div className="w-full">
@@ -82,13 +83,13 @@ export default function Property({ property, user }: IProps) {
                                     <div className="flex items-center gap-5">
                                         <CompanyIcon />
                                         <span className="text-dark-blue font-bold text-xl">
-                                            {getPropertyTypeNameWithArticle(property.PropertyType)}
+                                            {getPropertyTypeNameWithArticle(data.PropertyType)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-5">
                                         <DimensionIcon />
                                         <span className="text-dark-blue font-bold text-xl flex">
-                                            { property.area }m
+                                            { data.area }m
                                             <div className="h-full flex">
                                                 <span className="text-sm">2</span>
                                             </div>
@@ -97,7 +98,7 @@ export default function Property({ property, user }: IProps) {
                                     <div className="flex items-center gap-5">
                                         <LocationMarkSpotIcon />
                                         <span className="text-dark-blue font-bold text-xl">
-                                            {`${property.PropertyAddress.countryName}, ${property.PropertyAddress.cityName}`}
+                                            {`${data.PropertyAddress.countryName}, ${data.PropertyAddress.cityName}`}
                                         </span>
                                     </div>
                                 </div>
@@ -107,7 +108,7 @@ export default function Property({ property, user }: IProps) {
                                     <div>
                                         <span className="text-dark-blue">Price:</span>
                                         <h3 className="text-dark-blue font-bold text-xl">
-                                            { property.priceAmount } $
+                                            { data.priceAmount } $
                                         </h3>
                                     </div>
                                     <button className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
@@ -117,14 +118,14 @@ export default function Property({ property, user }: IProps) {
                             </div>
                             <div className="mt-8 md:px-20">
                                 <p className="text-dark-blue">
-                                    { property.description }
+                                    { data.description }
                                 </p>
                             </div>
                         </div>
                     </div>
                     <div className="flex flex-col gap-10 lg:max-w-350px w-full">
                         <div className="flex flex-col md:flex-row justify-center lg:justify-normal lg:flex-col w-full gap-10">
-                            <UserInfo user={user} displayBrokerLink className="bg-indigo-50" />
+                            <UserInfo user={data.User} displayBrokerLink className="bg-indigo-50" />
                             <div className="p-4 bg-indigo-50 rounded-sm flex flex-col gap-5">
                                 <h3 className="text-dark-blue text-xl font-bold">
                                     Brief characteristics
@@ -132,27 +133,27 @@ export default function Property({ property, user }: IProps) {
                                 <ul className="flex flex-col gap-3">
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Country:</span>
-                                        &nbsp;{property.PropertyAddress.countryName}
+                                        &nbsp;{data.PropertyAddress.countryName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">City:</span>
-                                        &nbsp;{property.PropertyAddress.cityName}
+                                        &nbsp;{data.PropertyAddress.cityName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Type:</span>
-                                        &nbsp;{property.PropertyType.typeName}
+                                        &nbsp;{data.PropertyType.typeName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Total area:</span>
-                                        &nbsp;{ property.area } m2
+                                        &nbsp;{ data.area } m2
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Number of rooms:</span>
-                                        &nbsp;{ property.bedRooms }
+                                        &nbsp;{ data.bedRooms }
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Number of bathrooms:</span>
-                                        &nbsp;{ property.bathRooms }
+                                        &nbsp;{ data.bathRooms }
                                     </li>
                                 </ul>
                             </div>

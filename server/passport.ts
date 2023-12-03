@@ -31,5 +31,6 @@ passport.deserializeUser(async (userId: string, done) => {
 });
 
 export const passportInitialize: any = passport.initialize();
+
 export const passportSession = passport.session();
 export const passportAuthenticate = passport.authenticate('local');

@@ -24,7 +24,16 @@ export class PropertyService {
     }
 
     async getAllOffers(page: number, limit: number): Promise<PropertiesPage> {
-        const totalCount = await Property.count();
+        const totalCount = await Property.count({
+            include: [
+                { 
+                    model: PropertyStatus,
+                    where: {
+                        statusName: 'For sale'
+                    }
+                }
+            ]  
+        });
         const offset = (page - 1) * limit;
         const properties = await Property.findAll({
             order: [['updatedAt', 'DESC']],
