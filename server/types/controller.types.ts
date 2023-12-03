@@ -11,4 +11,5 @@ export interface ControllerConfig<
   req: INextApiRequestExtended<TBody, TQuery>;
   res: NextApiResponse;
   user?: User;
+  files?: Express.Multer.File[];
 }

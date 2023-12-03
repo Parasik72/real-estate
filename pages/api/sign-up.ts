@@ -1,7 +1,8 @@
 import container from '@/server/container';
 import { UserController } from '@/server/controllers/user.controller';
 import { SignUpDto } from '@/server/dto/user/sign-up.dto';
-import { apiErrorHandler } from '@/server/middlewares/error-handler.middleware';
+import { apiErrorHandler } from '@/server/handlers/api-error.handler';
+import { notFoundHandler } from '@/server/handlers/not-found.handler';
 import { passportInitialize, passportSession } from '@/server/passport';
 import { sessions } from '@/server/sessions';
 import { INextApiRequestExtended } from '@/server/types/http.types';
@@ -21,7 +22,5 @@ router.post("/api/sign-up", tryCatchController(userController.signUp));
 
 export default router.handler({
   onError: apiErrorHandler,
-  onNoMatch: (req, res) => {
-    res.status(404).end('Page is not found');
-  }
+  onNoMatch: notFoundHandler
 });

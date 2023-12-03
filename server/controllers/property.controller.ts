@@ -29,7 +29,7 @@ export class PropertyController {
     return property;
   }
 
-  async createProperty({ body, user }: ControllerConfig<CreatePropertyDto>) {
+  async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
     const propertyService = container.resolve<PropertyService>('propertyService');
     const propertyType = await propertyService.getPropertyTypeById(body.propertyTypeId);
     if (!propertyType) throw new HttpException('The property type was not found', 404);
@@ -44,7 +44,7 @@ export class PropertyController {
       addressLine2: body.addressLine2,
     });
     const propertyId = v4() as UUID;
-    const userId = user?.userId;
+    const userId = user?.userId as UUID;
     const time = BigInt(new Date().getTime());
     await propertyService.createProperty({
       ...body,
@@ -56,6 +56,7 @@ export class PropertyController {
       createdAt: time,
       updatedAt: time,
     });
+    await propertyService.createPropertyImages(propertyId, files);
     return { message: 'The property has been created successfully.' };
   }
 

@@ -8,7 +8,7 @@ export class PropertyImage extends Model<
   InferCreationAttributes<PropertyImage>
 > {
   declare propertyImageId: string;
-  declare imageName: string;
+  declare imgName: string;
   declare propertyId: UUID;
 }
 
@@ -19,7 +19,7 @@ PropertyImage.init(
       primaryKey: true,
       type: DataTypes.UUID
     },
-    imageName: {
+    imgName: {
       allowNull: false,
       type: DataTypes.STRING
     },

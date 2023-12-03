@@ -4,7 +4,8 @@ namespace NodeJS {
     DB_USERNAME: string;
     DB_PASSWORD: string;
     DB_HOSTNAME: string;
-    BACKEND_URL: string;
+    STATIC_PATH: string;
+    PROPERTY_IMGS_PATH: string;
   }
 }
 namespace Express {

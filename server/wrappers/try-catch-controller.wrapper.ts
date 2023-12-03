@@ -13,6 +13,7 @@ export const tryCatchController = <TBody extends Object = {}, TQuery extends Que
         body: req.body,
         query: req.query,
         user: req.user,
+        files: req.files,
         req,
         res
       }));
@@ -20,7 +21,7 @@ export const tryCatchController = <TBody extends Object = {}, TQuery extends Que
       if (error instanceof HttpException) {
         return res.status(error.statusCode).json({ error: error.message });
       }
-      return res.status(500).json({ error: 'Server error.' });
+      return res.status(500).json({ error: `Server error: ${error}` });
     }
   }
 }

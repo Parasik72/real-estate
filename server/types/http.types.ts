@@ -11,4 +11,5 @@ export interface INextApiRequestExtended<
   query: TQuery;
   body: TBody;
   user?: User;
+  files?: Express.Multer.File[];
 }

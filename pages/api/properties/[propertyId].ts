@@ -1,6 +1,7 @@
 import container from '@/server/container';
 import { PropertyController } from '@/server/controllers/property.controller';
-import { apiErrorHandler } from '@/server/middlewares/error-handler.middleware';
+import { apiErrorHandler } from '@/server/handlers/api-error.handler';
+import { notFoundHandler } from '@/server/handlers/not-found.handler';
 import { GetPropertyByIdParams } from '@/server/params/property.params';
 import { passportInitialize, passportSession } from '@/server/passport';
 import { sessions } from '@/server/sessions';
@@ -22,7 +23,5 @@ router.patch("/api/properties/:propertyId", tryCatchController(propertyControlle
 
 export default router.handler({
   onError: apiErrorHandler,
-  onNoMatch: (req, res) => {
-    res.status(404).end('Page is not found');
-  }
+  onNoMatch: notFoundHandler
 });

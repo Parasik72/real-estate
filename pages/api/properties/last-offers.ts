@@ -1,6 +1,7 @@
 import container from '@/server/container';
 import { PropertyController } from '@/server/controllers/property.controller';
-import { apiErrorHandler } from '@/server/middlewares/error-handler.middleware';
+import { apiErrorHandler } from '@/server/handlers/api-error.handler';
+import { notFoundHandler } from '@/server/handlers/not-found.handler';
 import { passportInitialize, passportSession } from '@/server/passport';
 import { sessions } from '@/server/sessions';
 import { INextApiRequestExtended } from '@/server/types/http.types';
@@ -20,7 +21,5 @@ router.get("/api/properties/last-offers", tryCatchController(propertyController.
 
 export default router.handler({
   onError: apiErrorHandler,
-  onNoMatch: (req, res) => {
-    res.status(404).end('Page is not found');
-  }
+  onNoMatch: notFoundHandler
 });

@@ -5,6 +5,12 @@ import { PropertiesPage, UpdateProperty, UpdatePropertyAddress } from "../types/
 import { User } from "@/db/models/user";
 import { PropertyType } from "@/db/models/propertytype";
 import { InferCreationAttributes } from "sequelize";
+import { PropertyImage } from "@/db/models/propertyimage";
+import { UUID } from "crypto";
+import { v4 } from "uuid";
+import { FileUploaderService } from "./file-uploader.service";
+import container from "../container";
+import { PROPERTY_IMGS_PATH } from "../constants/path.constants";
 
 export class PropertyService {
     async getLastOffers(): Promise<Property[]> {
@@ -102,5 +108,20 @@ export class PropertyService {
 
     async updatePropertyById(data: UpdateProperty, propertyId: string) {
         return Property.update(data, { where: { propertyId }});
+    }
+
+    async createPropertyImages(propertyId: UUID, images: Express.Multer.File[]) {
+        const fileUploaderService: FileUploaderService = container.resolve<FileUploaderService>('fileUploaderService');
+        const propertyImages: InferCreationAttributes<PropertyImage>[] = [];
+        images.forEach((image) => {
+            const propertyImageId = v4();
+            const imgName = fileUploaderService.uploadFile(image, PROPERTY_IMGS_PATH);
+            propertyImages.push({
+                propertyId,
+                imgName,
+                propertyImageId
+            });
+        })
+        return PropertyImage.bulkCreate(propertyImages);
     }
 }
