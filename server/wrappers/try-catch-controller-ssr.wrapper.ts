@@ -1,15 +1,14 @@
-import type { NextPageContext } from "next";
-import type { QueryType } from "../types/http.types";
+import type { INextPageContextExtended, QueryType } from "../types/http.types";
 import type { ControllerConfig } from "../types/controller.types";
 
 export const tryCatchControllerSSR = async <TBody extends Object = {}, TQuery extends QueryType = {}>(
   controllerFunc: (config: ControllerConfig<TBody, TQuery>) => Promise<any>,
-  context: NextPageContext
+  context: INextPageContextExtended<TBody, TQuery>
 ) => {
   try {
     const data = await controllerFunc({
       body: {} as TBody,
-      query: context.query,
+      query: context.query as TQuery,
       user: context.user,
       req: context.req,
       res: context.res

@@ -25,10 +25,10 @@ export const FormSearch = () => {
                 <div className="w-full flex flex-col">
                     <div className="flex flex-wrap -mx-3">
                         <div className="w-1/2 p-3 lg:w-1/4">
-                            <Input type="number" placeholder="Number of rooms" name="roomsNum" />
+                            <Input type="number" placeholder="Number of beds" name="bedsNum" />
                         </div>
                         <div className="w-1/2 p-3 lg:w-1/4">
-                            <Input type="number" placeholder="Number of baths" name="bathsNumd" />
+                            <Input type="number" placeholder="Number of baths" name="bathsNum" />
                         </div>
                         <div className="w-1/2 p-3 lg:w-1/4">
                             <Input type="number" placeholder="Min area" name="minArea" />

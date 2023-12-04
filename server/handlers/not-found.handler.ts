@@ -1,8 +1,8 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { INextApiRequestExtended, INextApiResponseExtended } from "../types/http.types";
 
 export const notFoundHandler = (
-  req: NextApiRequest,
-  res: NextApiResponse
+  req: INextApiRequestExtended,
+  res: INextApiResponseExtended
 ) => {
-  return res.status(404).end('Page is not found');
+  res.status(404).end('Page is not found');
 };

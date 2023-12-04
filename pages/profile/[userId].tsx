@@ -7,19 +7,18 @@ import { PropertyModel } from "@/common/services/property/property.model";
 import { UserModel } from "@/common/services/user/user.model";
 import container from "@/server/container";
 import { UserController } from "@/server/controllers/user.controller";
+import { INextPageContextExtended } from "@/server/types/http.types";
 import { tryCatchControllerSSR } from "@/server/wrappers/try-catch-controller-ssr.wrapper";
-import { NextPageContext } from "next";
 import Link from "next/link";
 
 interface IProps {
     data: UserModel & { Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] }
 }
 
-interface IContext extends NextPageContext {
-    query: {
-        userId: string;
-    }
-}
+type Params = {
+    userId: string;
+};
+interface IContext extends INextPageContextExtended<{}, Params> {}
 
 export async function getServerSideProps(context: IContext) {
     const userController: UserController = container.resolve<UserController>('userController');

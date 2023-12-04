@@ -1,27 +1,36 @@
 import { Property } from "@/db/models/property";
 import { PropertyAddress } from "@/db/models/propertyaddress";
 import { PropertyStatus } from "@/db/models/propertystatus";
-import { PropertiesPage, UpdateProperty, UpdatePropertyAddress } from "../types/properties.types";
+import { 
+    ChangePropertyOwner, 
+    PropertiesPage, 
+    PropertyStatuses, 
+    UpdateProperty, 
+    UpdatePropertyAddress 
+} from "../types/properties.types";
 import { User } from "@/db/models/user";
 import { PropertyType } from "@/db/models/propertytype";
-import { InferCreationAttributes } from "sequelize";
+import { InferAttributes, InferCreationAttributes, Op, WhereOptions } from "sequelize";
 import { PropertyImage } from "@/db/models/propertyimage";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
 import { FileUploaderService } from "./file-uploader.service";
 import container from "../container";
 import { PROPERTY_IMGS_PATH } from "../constants/path.constants";
+import { OFFERS_LIMIT_DEFAULT, OFFERS_PAGE_DEFAULT } from "../constants/property.constants";
+import { GetAllPropertiesParams } from "../params/property.params";
+import { allOffersPropertyAddressWhereOptions, allOffersWhereOptions } from "../functions/property.functions";
 
 export class PropertyService {
     async getLastOffers(): Promise<Property[]> {
         return Property.findAll({ 
-            limit: 12,
+            limit: OFFERS_LIMIT_DEFAULT,
             order: [['updatedAt', 'DESC']],
             include: [
                 { 
                     model: PropertyStatus,
                     where: {
-                        statusName: 'For sale'
+                        statusName: PropertyStatuses.ForSale
                     }
                 },
                 { model: PropertyAddress }
@@ -29,14 +38,23 @@ export class PropertyService {
         });
     }
 
-    async getAllOffers(page: number, limit: number): Promise<PropertiesPage> {
+    async getAllOffers(params: GetAllPropertiesParams): Promise<PropertiesPage> {
+        const page = Number(params.page || OFFERS_PAGE_DEFAULT);
+        const limit = Number(params.limit || OFFERS_LIMIT_DEFAULT);
+        const mainWhere = allOffersWhereOptions(params);
+        const propertyAddressWhere = allOffersPropertyAddressWhereOptions(params);
         const totalCount = await Property.count({
+            where: mainWhere,
             include: [
                 { 
                     model: PropertyStatus,
                     where: {
-                        statusName: 'For sale'
+                        statusName: PropertyStatuses.ForSale
                     }
+                },
+                {
+                    model: PropertyAddress,
+                    where: propertyAddressWhere
                 }
             ]  
         });
@@ -45,14 +63,18 @@ export class PropertyService {
             order: [['updatedAt', 'DESC']],
             offset,
             limit,
+            where: mainWhere,
             include: [
                 { 
                     model: PropertyStatus,
                     where: {
-                        statusName: 'For sale'
+                        statusName: PropertyStatuses.ForSale
                     }
                 },
-                { model: PropertyAddress }
+                {
+                    model: PropertyAddress,
+                    where: propertyAddressWhere
+                }
             ] 
         });
         return {
@@ -73,6 +95,17 @@ export class PropertyService {
                 { model: PropertyType },
             ] 
         }) as Promise<Property & { User: User } | null>;
+    }
+
+    async getPropertyWithOwnerAndStatusByPropertyId(propertyId: string)
+    : Promise<Property & { User: User, PropertyStatus: PropertyStatus } | null> {
+        return Property.findOne({ 
+            where: { propertyId }, 
+            include: [
+                { model: User, attributes: { exclude: ['password'] } },
+                { model: PropertyStatus },
+            ] 
+        }) as Promise<Property & { User: User, PropertyStatus: PropertyStatus } | null>;
     }
 
     async getPropertyById(propertyId: string): Promise<Property | null> {
@@ -110,8 +143,12 @@ export class PropertyService {
         return Property.update(data, { where: { propertyId }});
     }
 
+    async changePropertyOwnerById(data: ChangePropertyOwner, propertyId: string) {
+        return Property.update(data, { where: { propertyId }});
+    }
+
     async createPropertyImages(propertyId: UUID, images: Express.Multer.File[]) {
-        const fileUploaderService: FileUploaderService = container.resolve<FileUploaderService>('fileUploaderService');
+        const fileUploaderService = container.resolve<FileUploaderService>('fileUploaderService');
         const propertyImages: InferCreationAttributes<PropertyImage>[] = [];
         images.forEach((image) => {
             const propertyImageId = v4();
@@ -123,5 +160,15 @@ export class PropertyService {
             });
         })
         return PropertyImage.bulkCreate(propertyImages);
+    }
+
+    async deletePropertyImages(propertyImageIds: string[]) {
+        const fileUploaderService = container.resolve<FileUploaderService>('fileUploaderService');
+        const propertyImages = await PropertyImage.findAll({
+            where: { propertyImageId: propertyImageIds }
+        });
+        propertyImages.forEach((propertyImage) => {
+            fileUploaderService.deleteFile(propertyImage.imgName, PROPERTY_IMGS_PATH);
+        });
     }
 }

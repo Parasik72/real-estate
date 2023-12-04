@@ -9,7 +9,7 @@ const demoPropertyStatuses = [
     { 
       propertyStatusId: v4(),
       statusName: 'Awaiting',
-    },
+    }
 ];
 
 const demoPropertyTypes = [
@@ -35,7 +35,11 @@ const demoDealStatuses = [
   { 
     dealStatusId: v4(),
     statusName: 'Awaiting'
-  }
+  },
+  { 
+    dealStatusId: v4(),
+    statusName: 'Canceled',
+  },
 ];
 
 const demoUsers = [

@@ -7,6 +7,9 @@ import { v4 } from "uuid";
 import { UUID } from "crypto";
 import { UpdatePropertyDto } from "../dto/property/update-property.dto";
 import { ControllerConfig } from "../types/controller.types";
+import { OFFERS_LIMIT_DEFAULT, OFFERS_PAGE_DEFAULT } from "../constants/property.constants";
+import { DealService } from "../services/deal.service";
+import { DealStatuses } from "../types/deal.type";
 
 export class PropertyController {
   async getLastOffers() {
@@ -16,9 +19,7 @@ export class PropertyController {
 
   async getAllOffers({ query }: ControllerConfig<{}, GetAllPropertiesParams>) {
     const propertyService = container.resolve<PropertyService>('propertyService');
-    const page = query.page || 1;
-    const limit = query.limit || 12;
-    return propertyService.getAllOffers(+page, +limit);
+    return propertyService.getAllOffers(query);
   }
 
   async getPropertyById({ query }: ControllerConfig<{}, GetPropertyByIdParams>) {
@@ -56,11 +57,13 @@ export class PropertyController {
       createdAt: time,
       updatedAt: time,
     });
-    await propertyService.createPropertyImages(propertyId, files);
+    await propertyService.createPropertyImages(propertyId, files!);
     return { message: 'The property has been created successfully.' };
   }
 
-  async updatePropertyById({ query, body }: ControllerConfig<UpdatePropertyDto, UpdatePropertyParams>) {
+  async updatePropertyById({ query, body, files }
+  : ControllerConfig<UpdatePropertyDto, UpdatePropertyParams>) {
+    const dealService = container.resolve<DealService>('dealService');
     const propertyService = container.resolve<PropertyService>('propertyService');
     const property = await propertyService.getPropertyById(query.propertyId);
     if (!property) throw new HttpException("The property was not found", 404);
@@ -69,8 +72,23 @@ export class PropertyController {
       if (!propertyType) throw new HttpException('The property type was not found', 404);
     }
     if (body.propertyStatusId) {
+      if (property.propertyStatusId === body.propertyStatusId) {
+        throw new HttpException('The property already uses this property status', 400);
+      }
       const propertyStatus = await propertyService.getPropertyStatusById(body.propertyStatusId);
       if (!propertyStatus) throw new HttpException('The property status was not found', 404);
+      const cancelDealStatus = await dealService.getDealStatusByName(DealStatuses.Canceled);
+      if (!cancelDealStatus) {
+        throw new HttpException('The deal status for cancel was not found', 404);
+      }
+      const awaitingDealStatus = await dealService.getDealStatusByName(DealStatuses.Awaiting);
+      if (!awaitingDealStatus) {
+        throw new HttpException('The deal status for await was not found', 404);
+      }
+      await dealService.updateDealsByPropertyIdAndStatusId({ 
+        dealStatusId: cancelDealStatus.dealStatusId,
+        updatedAt: BigInt(new Date().getTime())
+      }, property.propertyId, awaitingDealStatus.dealStatusId);
     }
     await propertyService.updatePropertyAddressById({
       countryName: body.countryName,
@@ -89,6 +107,8 @@ export class PropertyController {
       propertyTypeId: body.propertyTypeId as UUID,
       updatedAt: BigInt(new Date().getTime())
     }, property.propertyId);
+    if (body.imgsToDeleteIds) await propertyService.deletePropertyImages(body.imgsToDeleteIds);
+    if (files) await propertyService.createPropertyImages(property.propertyId, files!);
     return { message: 'The property has been updated successfully.' };
   }
 }

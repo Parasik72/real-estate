@@ -24,9 +24,19 @@ export interface UpdateProperty {
     updatedAt: BigInt;
 }
 
+export interface ChangePropertyOwner {
+    userId: UUID;
+    updatedAt: BigInt;
+}
+
 export interface UpdatePropertyAddress {
     countryName?: string;
     cityName?: string;
     addressLine1?: string;
     addressLine2?: string | null;
+}
+
+export enum PropertyStatuses {
+    ForSale='For sale',
+    Awaiting='Awaiting',
 }

@@ -18,6 +18,7 @@ import { PropertyAddressModel } from '@/common/services/property/property-addres
 import { PropertyTypeModel } from '@/common/services/property/property-type.model';
 import { getPropertyTypeNameWithArticle } from '@/common/functions/property.functions';
 import { tryCatchControllerSSR } from '@/server/wrappers/try-catch-controller-ssr.wrapper';
+import { INextPageContextExtended } from '@/server/types/http.types';
 
 interface IProps {
     data: PropertyModel & {
@@ -27,11 +28,15 @@ interface IProps {
     };
 }
 
-interface IContext extends NextPageContext {
-    query: {
-        propertyId: string;
-    }
+interface IParams {
+    propertyId: string;
 }
+
+type Params = {
+    propertyId: string;
+};
+
+interface IContext extends INextPageContextExtended<{}, Params> {}
 
 export async function getServerSideProps(context: IContext) {
     const propertyController: PropertyController = container.resolve<PropertyController>('propertyController');
@@ -148,7 +153,7 @@ export default function Property({ data }: IProps) {
                                         &nbsp;{ data.area } m2
                                     </li>
                                     <li className="text-dark-blue">
-                                        <span className="font-bold">Number of rooms:</span>
+                                        <span className="font-bold">Number of beds:</span>
                                         &nbsp;{ data.bedRooms }
                                     </li>
                                     <li className="text-dark-blue">

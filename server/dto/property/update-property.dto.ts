@@ -11,4 +11,5 @@ export interface UpdatePropertyDto {
     addressLine2?: string | null;
     propertyStatusId?: string;
     propertyTypeId?: string;
+    imgsToDeleteIds?: string[];
 }

@@ -6,8 +6,8 @@ import { PropertyAddressModel } from "@/common/services/property/property-addres
 import { PropertyModel } from "@/common/services/property/property.model";
 import container from "@/server/container";
 import { PropertyController } from "@/server/controllers/property.controller";
+import { INextPageContextExtended } from "@/server/types/http.types";
 import { tryCatchControllerSSR } from "@/server/wrappers/try-catch-controller-ssr.wrapper";
-import { NextPageContext } from "next";
 
 interface IProps {
     data: {
@@ -15,7 +15,7 @@ interface IProps {
     }
 }
 
-export async function getServerSideProps(context: NextPageContext) {
+export async function getServerSideProps(context: INextPageContextExtended) {
     const propertyController: PropertyController = container.resolve<PropertyController>('propertyController');
     return tryCatchControllerSSR(propertyController.getAllOffers, context);
 }
