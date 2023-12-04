@@ -71,11 +71,12 @@ export default function Home({ data }: IProps) {
           </div>
           <div className="inline-flex gap-5 mt-6 overflow-x-hidden">
             {data.map((property, i) => (
-              <PropertyCard 
-                property={property}
-                key={property.propertyId}
-                className="max-w-250px md:max-w-350px"
-              />
+              <div key={property.propertyId} className="w-full flex-shrink-0 max-w-250px md:max-w-350px">
+                <PropertyCard 
+                  property={property}
+                  className="max-w-250px md:max-w-350px"
+                />
+              </div>
             ))}
           </div>
         </PageContainer>
