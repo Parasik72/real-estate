@@ -7,14 +7,14 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { createRouter } from 'next-connect';
 import { notFoundHandler } from '@/server/handlers/not-found.handler';
 import { DealController } from '@/server/controllers/deal.controller';
-import { islogedIn } from '@/server/middlewares/is-loged-in.middleware';
+import { isLogedIn } from '@/server/middlewares/is-loged-in.middleware';
 
 const router = createRouter<NextApiRequest, NextApiResponse>();
 router
   .use(sessions)
   .use(passportInitialize)
   .use(passportSession)
-  .use(islogedIn);
+  .use(isLogedIn);
 
 const dealController = container.resolve<DealController>('dealController');
 
