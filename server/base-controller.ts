@@ -4,7 +4,7 @@ import { INextApiRequestExtended, INextPageContextExtended } from "./types/http.
 import { HttpException } from "./exceptions/http.exception";
 import { apiErrorHandler } from "./handlers/api-error.handler";
 import { notFoundHandler } from "./handlers/not-found.handler";
-import { ControllerConfig, MiddlewareType } from "./types/controller.types";
+import { ControllerConfig, MiddlewareType, MiddlewareTypeSSR } from "./types/controller.types";
 import 'reflect-metadata';
 
 const getMiddlewares = (
@@ -12,8 +12,10 @@ const getMiddlewares = (
     classMethodName: string
 ) => {
     let middlewares: MiddlewareType[] = [];
-    const classMembers = Reflect.getMetadata(constructor.name, constructor);
-    const methodMembers = Reflect.getMetadata(constructor.name + '_' + classMethodName, constructor);
+    const classMembers = Reflect
+        .getMetadata(constructor.name, constructor);
+    const methodMembers = Reflect
+        .getMetadata(constructor.name + '_' + classMethodName, constructor);
     middlewares = !classMembers || !classMembers.USE 
         ? [] 
         : classMembers.USE;
@@ -69,9 +71,7 @@ export class BaseController {
         });
     }
 
-    public handlerSSR(
-        context: INextPageContextExtended
-    ) {
+    public handlerSSR(context: INextPageContextExtended) {
         const router = createRouter();
         return router.get(async (req, res) => {
             try {
@@ -80,7 +80,7 @@ export class BaseController {
                 const members = Reflect.getMetadata(routePath, this);
                 const [firstMethod] = members[method];
                 getMiddlewares(this.constructor, firstMethod)
-                        .forEach((middleware) => router.use(middleware));
+                        .forEach((middleware) => router.use(middleware as MiddlewareTypeSSR));
                 const callback = (this as any)[firstMethod].bind(this);
                 const data = await callback({
                     body: {},

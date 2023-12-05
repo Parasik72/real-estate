@@ -62,7 +62,6 @@ export class DealController extends BaseController {
         return { message: 'The deal request has been sent successfully.' };
     }
 
-    // @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @POST('/api/deals/sign/:propertyId')
     async signDeal({ query, user }: ControllerConfig<{}, SignDealParams>) {
         const propertyService = container.resolve<PropertyService>('propertyService');
@@ -103,7 +102,6 @@ export class DealController extends BaseController {
         return { message: 'The deal has been signed successfully.' }
     }
 
-    // @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @POST('/api/deals/cancel/:propertyId')
     async cancelDeal({ query, user }: ControllerConfig<{}, CancelDealParams>) {
         const dealService = container.resolve<DealService>('dealService');
@@ -128,7 +126,6 @@ export class DealController extends BaseController {
         return { message: 'The deal has been canceled successfully.' }
     }
 
-    // @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @GET('/api/deals')
     async getAllDeals({ query, user }: ControllerConfig<{}, GetAllDealsParams>) {
         const dealService = container.resolve<DealService>('dealService');

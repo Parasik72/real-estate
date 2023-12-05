@@ -14,6 +14,8 @@ import GET from "../decorators/get.decorator";
 import SSR from "../decorators/ssr.decorator";
 import USE from "../decorators/use.decorator";
 import { UserService } from "../services/user.service";
+import validate from "../validators/validate";
+import { signUpValidSchema } from "../validators/user-schemas/sign-up.schema";
 
 export class UserController extends BaseController {
     @SSR('/user/profile/:userId')
@@ -32,6 +34,7 @@ export class UserController extends BaseController {
     }
 
     @POST('/api/user/sign-up')
+    @USE(validate(signUpValidSchema))
     async signUp({ body }: ControllerConfig<SignUpDto>) {
         const userService = container.resolve<UserService>('userService');
         const emailInUse = await userService.getUserByEmail(body.email);
