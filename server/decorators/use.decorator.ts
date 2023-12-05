@@ -2,8 +2,8 @@ import 'reflect-metadata';
 import { MiddlewareType } from '../types/controller.types';
 
 export default function USE(middlewares: MiddlewareType | MiddlewareType[])
-: (target: object, propertyKey: string) => void {
-    return (target: any, propertyKey: string): void => {
+: (target: object, propertyKey?: string) => void {
+    return (target: any, propertyKey?: string): void => {
         const middlewaresArr = Array.isArray(middlewares) ? middlewares : [middlewares];
         const key = propertyKey 
             ? target.constructor.name + '_' + propertyKey

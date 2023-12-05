@@ -1,7 +1,8 @@
 import { User } from "@/db/models/user";
 import { INextApiRequestExtended, QueryType } from "./http.types";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
 import { NextHandler } from "next-connect";
+import { IncomingMessage, ServerResponse } from "http";
 
 export interface ControllerConfig<
   TBody extends Object = {},
@@ -15,4 +16,5 @@ export interface ControllerConfig<
   files?: Express.Multer.File[];
 }
 
-export type MiddlewareType = (req: NextApiRequest, res: NextApiResponse, next: NextHandler) => Promise<any>;
+export type MiddlewareType = 
+  (req: IncomingMessage, res: ServerResponse<IncomingMessage>, next: NextHandler) => Promise<any>;

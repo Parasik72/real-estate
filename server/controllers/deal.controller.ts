@@ -27,8 +27,8 @@ import { sessions } from "../sessions";
 import { passportInitialize, passportSession } from "../passport";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 
+@USE([sessions, passportInitialize, passportSession, isLogedIn])
 export class DealController extends BaseController {
-    @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @POST('/api/deals/send/:propertyId')
     async sendDeal({ query, user }: ControllerConfig<{}, SendDealParams>) {
         const propertyService = container.resolve<PropertyService>('propertyService');
@@ -62,7 +62,7 @@ export class DealController extends BaseController {
         return { message: 'The deal request has been sent successfully.' };
     }
 
-    @USE([sessions, passportInitialize, passportSession, isLogedIn])
+    // @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @POST('/api/deals/sign/:propertyId')
     async signDeal({ query, user }: ControllerConfig<{}, SignDealParams>) {
         const propertyService = container.resolve<PropertyService>('propertyService');
@@ -103,7 +103,7 @@ export class DealController extends BaseController {
         return { message: 'The deal has been signed successfully.' }
     }
 
-    @USE([sessions, passportInitialize, passportSession, isLogedIn])
+    // @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @POST('/api/deals/cancel/:propertyId')
     async cancelDeal({ query, user }: ControllerConfig<{}, CancelDealParams>) {
         const dealService = container.resolve<DealService>('dealService');
@@ -128,7 +128,7 @@ export class DealController extends BaseController {
         return { message: 'The deal has been canceled successfully.' }
     }
 
-    @USE([sessions, passportInitialize, passportSession, isLogedIn])
+    // @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @GET('/api/deals')
     async getAllDeals({ query, user }: ControllerConfig<{}, GetAllDealsParams>) {
         const dealService = container.resolve<DealService>('dealService');

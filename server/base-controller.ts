@@ -7,6 +7,43 @@ import { notFoundHandler } from "./handlers/not-found.handler";
 import { ControllerConfig, MiddlewareType } from "./types/controller.types";
 import 'reflect-metadata';
 
+const getMiddlewares = (
+    constructor: Function, 
+    classMethodName: string
+) => {
+    let middlewares: MiddlewareType[] = [];
+    const classMembers = Reflect.getMetadata(constructor.name, constructor);
+    const methodMembers = Reflect.getMetadata(constructor.name + '_' + classMethodName, constructor);
+    middlewares = !classMembers || !classMembers.USE 
+        ? [] 
+        : classMembers.USE;
+    middlewares = !methodMembers || !methodMembers.USE 
+        ? middlewares 
+        : [...middlewares, ...methodMembers.USE];
+    return middlewares;
+}
+
+const apiAction = (callback: any, statusCode: number) => (
+    async (req: INextApiRequestExtended, res: NextApiResponse) => {
+        try {
+            const data = await callback({
+                body: req.body,
+                query: req.query,
+                user: req.user,
+                files: req.files,
+                req, 
+                res
+            } as ControllerConfig);
+            return res.status(statusCode).json(data);
+        } catch(error) {
+            if (error instanceof HttpException) {
+              return res.status(error.statusCode).json({ error: error.message });
+            }
+            return res.status(500).json({ error: `Server error: ${error}` });
+        }
+    }
+);
+
 export class BaseController {
     public handler(
         routePath: string,
@@ -17,32 +54,11 @@ export class BaseController {
         Object.keys(members).forEach((method) => {
             for(let i = 0; i < members[method].length; ++i) {
                 const methodName = method.toLowerCase();
-                const key = this.constructor.name + '_' + members[method][i];
                 if (typeof router[methodName as keyof typeof router] === 'function') {
-                    const constructorMembers = Reflect.getMetadata(key, this.constructor);
-                    if (constructorMembers && constructorMembers.USE) {
-                        const middlewares = constructorMembers.USE as Array<MiddlewareType>;
-                        middlewares.forEach((middleware) => router.use(middleware));
-                    }
+                    getMiddlewares(this.constructor, members[method][i])
+                        .forEach((middleware) => router.use(middleware));
                     const callback = (this as any)[members[method][i]].bind(this);
-                    const action = async (req: INextApiRequestExtended, res: NextApiResponse) => {
-                        try {
-                            const data = await callback({
-                                body: req.body,
-                                query: req.query,
-                                user: req.user,
-                                files: req.files,
-                                req, 
-                                res
-                            } as ControllerConfig);
-                            return res.status(expectedStatusCode).json(data);
-                        } catch(error) {
-                            if (error instanceof HttpException) {
-                              return res.status(error.statusCode).json({ error: error.message });
-                            }
-                            return res.status(500).json({ error: `Server error: ${error}` });
-                        }
-                    }
+                    const action = apiAction(callback, expectedStatusCode)
                     router[methodName as keyof typeof router](routePath as any, action as any);
                 }
             }
@@ -63,6 +79,8 @@ export class BaseController {
                 const method = 'SSR';
                 const members = Reflect.getMetadata(routePath, this);
                 const [firstMethod] = members[method];
+                getMiddlewares(this.constructor, firstMethod)
+                        .forEach((middleware) => router.use(middleware));
                 const callback = (this as any)[firstMethod].bind(this);
                 const data = await callback({
                     body: {},
