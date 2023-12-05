@@ -7,8 +7,8 @@ import { PropertyCard } from "@/common/components/property-card.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PropertyModel } from "@/common/services/property/property.model";
-import container from "@/server/container";
 import { PropertyController } from "@/server/controllers/property.controller";
+import container from "@/server/container";
 import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { INextPageContextExtended } from "@/server/types/http.types";
 

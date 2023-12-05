@@ -14,6 +14,11 @@ import { BaseController } from "../base-controller";
 import PATCH from "../decorators/patch.decorator";
 import POST from "../decorators/post.decorator";
 import SSR from "../decorators/ssr.decorator";
+import USE from "../decorators/use.decorator";
+import { sessions } from "../sessions";
+import { passportInitialize, passportSession } from "../passport";
+import multer from "multer";
+import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 
 export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
@@ -30,16 +35,7 @@ export class PropertyController extends BaseController {
     return propertyService.getAllOffers(query);
   }
 
-  @SSR('/properties/:propertyId')
-  @GET('/api/properties/:propertyId')
-  async getPropertyById({ query }: ControllerConfig<{}, GetPropertyByIdParams>) {
-    const propertyService = container.resolve<PropertyService>('propertyService')
-    const { propertyId } = query;
-    const property = await propertyService.getPropertyWithOwnerByPropertyId(propertyId);
-    if (!property) throw new HttpException("The property was not found", 404);
-    return property;
-  }
-
+  @USE([sessions, passportInitialize, passportSession, multer().any()])
   @POST('/api/properties')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
     const propertyService = container.resolve<PropertyService>('propertyService');
@@ -72,7 +68,8 @@ export class PropertyController extends BaseController {
     return { message: 'The property has been created successfully.' };
   }
 
-  @PATCH('/api/properties/:propertyId')
+  @USE([sessions, passportInitialize, passportSession, isLogedIn])
+  @PATCH('/api/properties/patch/:propertyId')
   async updatePropertyById({ query, body, files }
   : ControllerConfig<UpdatePropertyDto, UpdatePropertyParams>) {
     const dealService = container.resolve<DealService>('dealService');
@@ -122,5 +119,15 @@ export class PropertyController extends BaseController {
     if (body.imgsToDeleteIds) await propertyService.deletePropertyImages(body.imgsToDeleteIds);
     if (files) await propertyService.createPropertyImages(property.propertyId, files!);
     return { message: 'The property has been updated successfully.' };
+  }
+
+  @SSR('/properties/:propertyId')
+  @GET('/api/properties/get/:propertyId')
+  async getPropertyById({ query }: ControllerConfig<{}, GetPropertyByIdParams>) {
+    const propertyService = container.resolve<PropertyService>('propertyService')
+    const { propertyId } = query;
+    const property = await propertyService.getPropertyWithOwnerByPropertyId(propertyId);
+    if (!property) throw new HttpException("The property was not found", 404);
+    return property;
   }
 }

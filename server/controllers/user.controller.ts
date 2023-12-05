@@ -1,6 +1,7 @@
+import { sessions } from "../sessions";
+import { passportAuthenticate, passportInitialize } from "../passport";
 import container from "../container";
 import { GetUserProfileParams } from "../params/user.params";
-import { UserService } from "../services/user.service";
 import { SignUpDto } from "../dto/user/sign-up.dto";
 import { HttpException } from "../exceptions/http.exception";
 import bcryptjs from 'bcryptjs';
@@ -11,6 +12,8 @@ import { BaseController } from "../base-controller";
 import POST from "../decorators/post.decorator";
 import GET from "../decorators/get.decorator";
 import SSR from "../decorators/ssr.decorator";
+import USE from "../decorators/use.decorator";
+import { UserService } from "../services/user.service";
 
 export class UserController extends BaseController {
     @SSR('/user/profile/:userId')
@@ -22,6 +25,7 @@ export class UserController extends BaseController {
         return user; 
     }
 
+    @USE([sessions, passportInitialize, passportAuthenticate])
     @POST('/api/user/sign-in')
     async signIn() {
         return { message: 'Successful sign in!' };

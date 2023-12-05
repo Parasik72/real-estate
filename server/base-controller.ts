@@ -4,22 +4,26 @@ import { INextApiRequestExtended, INextPageContextExtended } from "./types/http.
 import { HttpException } from "./exceptions/http.exception";
 import { apiErrorHandler } from "./handlers/api-error.handler";
 import { notFoundHandler } from "./handlers/not-found.handler";
-import { ControllerConfig, MiddlewareType, MiddlewareTypeSSR } from "./types/controller.types";
+import { ControllerConfig, MiddlewareType } from "./types/controller.types";
 import 'reflect-metadata';
 
 export class BaseController {
     public handler(
         routePath: string,
-        middlewares: MiddlewareType[] = [],
         expectedStatusCode: number = 200
     ) {
         const router = createRouter<NextApiRequest, NextApiResponse>();
-        middlewares.forEach((middleware) => router.use(middleware));
         const members = Reflect.getMetadata(routePath, this);
         Object.keys(members).forEach((method) => {
             for(let i = 0; i < members[method].length; ++i) {
                 const methodName = method.toLowerCase();
+                const key = this.constructor.name + '_' + members[method][i];
                 if (typeof router[methodName as keyof typeof router] === 'function') {
+                    const constructorMembers = Reflect.getMetadata(key, this.constructor);
+                    if (constructorMembers && constructorMembers.USE) {
+                        const middlewares = constructorMembers.USE as Array<MiddlewareType>;
+                        middlewares.forEach((middleware) => router.use(middleware));
+                    }
                     const callback = (this as any)[members[method][i]].bind(this);
                     const action = async (req: INextApiRequestExtended, res: NextApiResponse) => {
                         try {
@@ -50,11 +54,9 @@ export class BaseController {
     }
 
     public handlerSSR(
-        context: INextPageContextExtended,
-        middlewares: MiddlewareTypeSSR[] = []
+        context: INextPageContextExtended
     ) {
         const router = createRouter();
-        middlewares.forEach((middleware) => router.use(middleware));
         return router.get(async (req, res) => {
             try {
                 const routePath = context.routePath || context.req.url;
