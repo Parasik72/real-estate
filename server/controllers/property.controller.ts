@@ -6,22 +6,32 @@ import { CreatePropertyDto } from "../dto/property/create-property.dto";
 import { v4 } from "uuid";
 import { UUID } from "crypto";
 import { UpdatePropertyDto } from "../dto/property/update-property.dto";
-import { ControllerConfig } from "../types/controller.types";
-import { OFFERS_LIMIT_DEFAULT, OFFERS_PAGE_DEFAULT } from "../constants/property.constants";
+import type { ControllerConfig } from "../types/controller.types";
 import { DealService } from "../services/deal.service";
 import { DealStatuses } from "../types/deal.type";
+import GET from "../decorators/get.decorator";
+import { BaseController } from "../base-controller";
+import PATCH from "../decorators/patch.decorator";
+import POST from "../decorators/post.decorator";
+import SSR from "../decorators/ssr.decorator";
 
-export class PropertyController {
+export class PropertyController extends BaseController {
+  @SSR('/properties/last-offers')
+  @GET('/api/properties/last-offers')
   async getLastOffers() {
     const propertyService = container.resolve<PropertyService>('propertyService');
     return propertyService.getLastOffers();
   }
 
+  @SSR('/properties/offers')
+  @GET('/api/properties/offers')
   async getAllOffers({ query }: ControllerConfig<{}, GetAllPropertiesParams>) {
     const propertyService = container.resolve<PropertyService>('propertyService');
     return propertyService.getAllOffers(query);
   }
 
+  @SSR('/properties/:propertyId')
+  @GET('/api/properties/:propertyId')
   async getPropertyById({ query }: ControllerConfig<{}, GetPropertyByIdParams>) {
     const propertyService = container.resolve<PropertyService>('propertyService')
     const { propertyId } = query;
@@ -30,6 +40,7 @@ export class PropertyController {
     return property;
   }
 
+  @POST('/api/properties')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
     const propertyService = container.resolve<PropertyService>('propertyService');
     const propertyType = await propertyService.getPropertyTypeById(body.propertyTypeId);
@@ -61,6 +72,7 @@ export class PropertyController {
     return { message: 'The property has been created successfully.' };
   }
 
+  @PATCH('/api/properties/:propertyId')
   async updatePropertyById({ query, body, files }
   : ControllerConfig<UpdatePropertyDto, UpdatePropertyParams>) {
     const dealService = container.resolve<DealService>('dealService');

@@ -1,10 +1,15 @@
 import { v4 } from "uuid";
 import container from "../container";
 import { HttpException } from "../exceptions/http.exception";
-import { CancelDealParams, GetAllDealsParams, SendDealParams, SignDealParams } from "../params/deal.params";
+import { 
+    CancelDealParams, 
+    GetAllDealsParams, 
+    SendDealParams, 
+    SignDealParams 
+} from "../params/deal.params";
 import { DealService } from "../services/deal.service";
 import { PropertyService } from "../services/property.service";
-import { ControllerConfig } from "../types/controller.types";
+import type { ControllerConfig } from "../types/controller.types";
 import { PropertyStatuses } from "../types/properties.types";
 import { UUID } from "crypto";
 import { DealRequestedBy, DealStatuses } from "../types/deal.type";
@@ -14,8 +19,12 @@ import {
     DEALS_REQUESTED_BY_DEFAULT, 
     DEALS_STATUS_NAME_DEFAULT 
 } from "../constants/deal.constants";
+import { BaseController } from "../base-controller";
+import POST from "../decorators/post.decorator";
+import GET from "../decorators/get.decorator";
 
-export class DealController {
+export class DealController extends BaseController {
+    @POST('/api/deals/send/:propertyId')
     async sendDeal({ query, user }: ControllerConfig<{}, SendDealParams>) {
         const propertyService = container.resolve<PropertyService>('propertyService');
         const dealService = container.resolve<DealService>('dealService');
@@ -48,17 +57,18 @@ export class DealController {
         return { message: 'The deal request has been sent successfully.' };
     }
 
+    @POST('/api/deals/sign/:propertyId')
     async signDeal({ query, user }: ControllerConfig<{}, SignDealParams>) {
         const propertyService = container.resolve<PropertyService>('propertyService');
         const dealService = container.resolve<DealService>('dealService');
         const { dealId } = query;
         const deal = await dealService.getDealById(dealId);
         if (!deal) throw new HttpException('The deal was not found', 404);
-        if (deal.DealStatus.statusName !== DealStatuses.Awaiting) {
-            throw new HttpException('You can not sign this deal', 403);
-        }
         if (deal.sellerUserId !== user?.userId) {
             throw new HttpException("You don't have access to sign this deal", 403);
+        }
+        if (deal.DealStatus.statusName !== DealStatuses.Awaiting) {
+            throw new HttpException('You can not sign this deal', 403);
         }
         const doneDealStatus = await dealService.getDealStatusByName(DealStatuses.Done);
         if (!doneDealStatus) throw new HttpException("The deal status was not found", 404);
@@ -87,6 +97,7 @@ export class DealController {
         return { message: 'The deal has been signed successfully.' }
     }
 
+    @POST('/api/deals/cancel/:propertyId')
     async cancelDeal({ query, user }: ControllerConfig<{}, CancelDealParams>) {
         const dealService = container.resolve<DealService>('dealService');
         const { dealId } = query;
@@ -110,6 +121,7 @@ export class DealController {
         return { message: 'The deal has been canceled successfully.' }
     }
 
+    @GET('/api/deals')
     async getAllDeals({ query, user }: ControllerConfig<{}, GetAllDealsParams>) {
         const dealService = container.resolve<DealService>('dealService');
         const page = query.page || DEALS_PAGE_DEFAULT;

@@ -10,14 +10,12 @@ import { PageWrapper } from '@/common/components/page-wrapper.component';
 import { PageContainer } from '@/common/components/page-container.component';
 import Link from 'next/link';
 import { PropertyModel } from '@/common/services/property/property.model';
-import { NextPageContext } from 'next';
 import container from '@/server/container';
 import { PropertyController } from '@/server/controllers/property.controller';
 import { UserModel } from '@/common/services/user/user.model';
 import { PropertyAddressModel } from '@/common/services/property/property-address.model';
 import { PropertyTypeModel } from '@/common/services/property/property-type.model';
 import { getPropertyTypeNameWithArticle } from '@/common/functions/property.functions';
-import { tryCatchControllerSSR } from '@/server/wrappers/try-catch-controller-ssr.wrapper';
 import { INextPageContextExtended } from '@/server/types/http.types';
 
 interface IProps {
@@ -28,10 +26,6 @@ interface IProps {
     };
 }
 
-interface IParams {
-    propertyId: string;
-}
-
 type Params = {
     propertyId: string;
 };
@@ -39,8 +33,8 @@ type Params = {
 interface IContext extends INextPageContextExtended<{}, Params> {}
 
 export async function getServerSideProps(context: IContext) {
-    const propertyController: PropertyController = container.resolve<PropertyController>('propertyController');
-    return tryCatchControllerSSR(propertyController.getPropertyById, context);
+    return container.resolve<PropertyController>('propertyController')
+        .handlerSSR({...context, routePath: '/properties/:propertyId'});
 }
 
 export default function Property({ data }: IProps) {

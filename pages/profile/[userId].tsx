@@ -8,7 +8,6 @@ import { UserModel } from "@/common/services/user/user.model";
 import container from "@/server/container";
 import { UserController } from "@/server/controllers/user.controller";
 import { INextPageContextExtended } from "@/server/types/http.types";
-import { tryCatchControllerSSR } from "@/server/wrappers/try-catch-controller-ssr.wrapper";
 import Link from "next/link";
 
 interface IProps {
@@ -21,8 +20,8 @@ type Params = {
 interface IContext extends INextPageContextExtended<{}, Params> {}
 
 export async function getServerSideProps(context: IContext) {
-    const userController: UserController = container.resolve<UserController>('userController');
-    return tryCatchControllerSSR(userController.getUserProfileById, context);
+    return container.resolve<UserController>('userController')
+        .handlerSSR({...context, routePath: '/user/profile/:userId'});
 }
 
 export default function Profile({ data }: IProps) {

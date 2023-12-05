@@ -10,7 +10,6 @@ import { PropertyModel } from "@/common/services/property/property.model";
 import container from "@/server/container";
 import { PropertyController } from "@/server/controllers/property.controller";
 import { PropertyAddressModel } from "@/common/services/property/property-address.model";
-import { tryCatchControllerSSR } from "@/server/wrappers/try-catch-controller-ssr.wrapper";
 import { INextPageContextExtended } from "@/server/types/http.types";
 
 interface IProps {
@@ -18,8 +17,8 @@ interface IProps {
 }
 
 export async function getServerSideProps(context: INextPageContextExtended) {
-  const propertyController: PropertyController = container.resolve<PropertyController>('propertyController');
-  return tryCatchControllerSSR(propertyController.getLastOffers, context);
+  return container.resolve<PropertyController>('propertyController')
+    .handlerSSR({...context, routePath: '/properties/last-offers'});
 }
 
 export default function Home({ data }: IProps) {

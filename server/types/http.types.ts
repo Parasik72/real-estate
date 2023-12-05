@@ -21,6 +21,7 @@ export interface INextPageContextExtended<
   TQuery extends QueryType = {}
 > extends NextPageContext {
   user?: User;
+  routePath?: string;
   query: TQuery;
   req: INextApiRequestExtended<TBody, TQuery>;
   res: NextApiResponse;

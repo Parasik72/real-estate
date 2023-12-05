@@ -6,9 +6,15 @@ import { HttpException } from "../exceptions/http.exception";
 import bcryptjs from 'bcryptjs';
 import { v4 } from "uuid";
 import { UUID } from "crypto";
-import { ControllerConfig } from "../types/controller.types";
+import type { ControllerConfig } from "../types/controller.types";
+import { BaseController } from "../base-controller";
+import POST from "../decorators/post.decorator";
+import GET from "../decorators/get.decorator";
+import SSR from "../decorators/ssr.decorator";
 
-export class UserController {
+export class UserController extends BaseController {
+    @SSR('/user/profile/:userId')
+    @GET('/api/user/profile/:userId')
     async getUserProfileById({ query }: ControllerConfig<{}, GetUserProfileParams>) {
         const userService = container.resolve<UserService>('userService');
         const user = await userService.getUserProfileById(query.userId);
@@ -16,10 +22,12 @@ export class UserController {
         return user; 
     }
 
+    @POST('/api/user/sign-in')
     async signIn() {
         return { message: 'Successful sign in!' };
     }
 
+    @POST('/api/user/sign-up')
     async signUp({ body }: ControllerConfig<SignUpDto>) {
         const userService = container.resolve<UserService>('userService');
         const emailInUse = await userService.getUserByEmail(body.email);
