@@ -1,5 +1,4 @@
 import { Deal } from "@/db/models/deal";
-import { DealStatus } from "@/db/models/dealstatus";
 import { InferCreationAttributes } from "sequelize";
 import { DealRequestedBy, DealStatuses, DealsPage, UpdateDeal } from "../types/deal.type";
 import { Property } from "@/db/models/property";
@@ -13,11 +12,9 @@ export class DealService {
         return Deal.findOne({
             where: {
                 propertyId,
-                buyerUserId
-            },
-            include: [
-                { model: DealStatus, where: { statusName: DealStatuses.Awaiting } }
-            ]
+                buyerUserId,
+                dealStatus: DealStatuses.Awaiting
+            }
         });
     }
 
@@ -25,20 +22,8 @@ export class DealService {
         return Deal.create(data);
     }
 
-    async getDealStatusByName(statusName: string): Promise<DealStatus | null> {
-        return DealStatus.findOne({
-            where: { statusName }
-        });
-    }
-
-    async getDealStatusByStatusId(dealStatusId: string): Promise<DealStatus | null> {
-        return DealStatus.findByPk(dealStatusId);
-    }
-
-    async getDealById(dealId: string): Promise<Deal & {DealStatus: DealStatus} | null> {
-        return Deal.findByPk(dealId, 
-            { include: [{ model: DealStatus }] }
-        ) as Promise<Deal & {DealStatus: DealStatus} | null>;
+    async getDealById(dealId: string): Promise<Deal | null> {
+        return Deal.findByPk(dealId);
     }
 
     async updateDealById(data: UpdateDeal, dealId: string) {
@@ -46,25 +31,24 @@ export class DealService {
     }
 
     async updateDealsByPropertyIdAndStatusId(
-        data: UpdateDeal, propertyId: string, dealStatusId: string
+        data: UpdateDeal, propertyId: string, dealStatus: DealStatuses
     ) {
-        return Deal.update(data, { where: { propertyId, dealStatusId } });
+        return Deal.update(data, { where: { propertyId, dealStatus } });
     }
 
     async getAllDeals(
         page: number, 
         limit: number, 
         requestedBy: DealRequestedBy, 
-        dealStatusName: DealStatuses,
+        dealStatus: DealStatuses,
         userId: string
     ): Promise<DealsPage> {
         const requestedByFunc = dealRequestedByFindMap[requestedBy];
         const requestedByData = requestedByFunc(userId)
-        const dealStatus = await this.getDealStatusByName(dealStatusName);
         const totalCount = await Deal.count({
             where: {
                 ...requestedByData,
-                dealStatusId: dealStatus?.dealStatusId
+                dealStatus
             }
         });
         const offset = (page - 1) * limit;
@@ -74,7 +58,7 @@ export class DealService {
             limit,
             where: {
                 ...requestedByData,
-                dealStatusId: dealStatus?.dealStatusId
+                dealStatus
             },
             include: [
                 { model: Property, include: [{ model: PropertyAddress }] },

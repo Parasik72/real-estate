@@ -1,47 +1,6 @@
 const { v4 } = require('uuid');
 const bcryptjs =  require('bcryptjs');
 
-const demoPropertyStatuses = [
-    { 
-      propertyStatusId: v4(),
-      statusName: 'For sale'
-    },
-    { 
-      propertyStatusId: v4(),
-      statusName: 'Awaiting',
-    }
-];
-
-const demoPropertyTypes = [
-  { 
-    propertyTypeId: v4(),
-    typeName: 'House'
-  },
-  { 
-    propertyTypeId: v4(),
-    typeName: 'Apartment'
-  },
-  { 
-    propertyTypeId: v4(),
-    typeName: 'Villa'
-  }
-];
-
-const demoDealStatuses = [
-  { 
-    dealStatusId: v4(),
-    statusName: 'Done'
-  },
-  { 
-    dealStatusId: v4(),
-    statusName: 'Awaiting'
-  },
-  { 
-    dealStatusId: v4(),
-    statusName: 'Canceled',
-  },
-];
-
 const demoUsers = [
   {
     userId: v4(),
@@ -103,7 +62,7 @@ const demoProperties = [...new Array(10)].map(() => (
   [
     {
       propertyId: v4(),
-      propertyTypeId: demoPropertyTypes[0].propertyTypeId,
+      propertyType: 'House',
       propertyAddressId: demoPropertyAddresses[0].propertyAddressId,
       bedRooms: 4,
       bathRooms: 1,
@@ -112,13 +71,13 @@ const demoProperties = [...new Array(10)].map(() => (
       description: 'This exceptional waterfront property offers breathtaking views of the serene ocean and provides an unrivaled lifestyle of luxury and tranquility. Situated on a generous lot, this magnificent residence boasts an expansive layout, exquisite finishes, and a private dock, making it the perfect retreat for those seeking a truly exceptional home.',
       priceAmount: 250000,
       userId: demoUsers[0].userId,
-      propertyStatusId: demoPropertyStatuses[0].propertyStatusId,
+      propertyStatus: 'For sale',
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
     },
     {
       propertyId: v4(),
-      propertyTypeId: demoPropertyTypes[1].propertyTypeId,
+      propertyType: 'Apartment',
       propertyAddressId: demoPropertyAddresses[1].propertyAddressId,
       bedRooms: 2,
       bathRooms: 1,
@@ -127,13 +86,13 @@ const demoProperties = [...new Array(10)].map(() => (
       description: 'Step back in time and experience the charm of this exquisite Craftsman home nestled in a prestigious historic neighborhood. Rich in character and architectural detail, this residence exudes warmth and elegance, offering a harmonious blend of modern conveniences and timeless charm.',
       priceAmount: 120000.50,
       userId: demoUsers[1].userId,
-      propertyStatusId: demoPropertyStatuses[1].propertyStatusId,
+      propertyStatus: 'Awaiting',
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
     },
     {
       propertyId: v4(),
-      propertyTypeId: demoPropertyTypes[2].propertyTypeId,
+      propertyType: 'Villa',
       propertyAddressId: demoPropertyAddresses[2].propertyAddressId,
       bedRooms: 8,
       bathRooms: 3,
@@ -142,7 +101,7 @@ const demoProperties = [...new Array(10)].map(() => (
       description: 'Soar above the city in this ultra-modern penthouse, offering unparalleled views of the vibrant cityscape. This sophisticated residence boasts a sleek, contemporary design, expansive living spaces, and state-of-the-art amenities, providing an unparalleled urban living experience.',
       priceAmount: 2200000.74,
       userId: demoUsers[2].userId,
-      propertyStatusId: demoPropertyStatuses[1].propertyStatusId,
+      propertyStatus: 'Awaiting',
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
     },
@@ -152,7 +111,7 @@ const demoProperties = [...new Array(10)].map(() => (
 const demoDeals = [
   {
     dealId: v4(),
-    dealStatusId: demoDealStatuses[0].dealStatusId,
+    dealStatus: 'Done',
     propertyId: demoProperties[0].propertyId,
     sellerUserId: demoUsers[1].userId,
     buyerUserId: demoUsers[0].userId,
@@ -163,7 +122,7 @@ const demoDeals = [
   },
   {
     dealId: v4(),
-    dealStatusId: demoDealStatuses[1].dealStatusId,
+    dealStatus: 'Awaiting',
     propertyId: demoProperties[2].propertyId,
     sellerUserId: demoUsers[2].userId,
     buyerUserId: demoUsers[0].userId,
@@ -174,11 +133,7 @@ const demoDeals = [
   },
 ];
 
-
 module.exports = {
-  demoPropertyStatuses,
-  demoPropertyTypes,
-  demoDealStatuses,
   demoUsers,
   demoPropertyAddresses,
   demoProperties,

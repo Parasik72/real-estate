@@ -1,9 +1,11 @@
 import { Model, InferAttributes, InferCreationAttributes, DataTypes } from 'sequelize';
 import { dbInstance } from '../db-instance';
-import { DealStatus } from './dealstatus';
 import { Property } from './property';
 import { User } from './user';
 import { UUID } from 'crypto';
+import { DealStatuses } from '@/server/types/deal.type';
+
+type DealStatus = DealStatuses.Awaiting | DealStatuses.Canceled | DealStatuses.Done;
 
 export class Deal extends Model<
   InferAttributes<Deal>,
@@ -12,7 +14,7 @@ export class Deal extends Model<
   declare dealId: UUID;
   declare signDate: BigInt | null;
   declare totalPrice: number;
-  declare dealStatusId: UUID;
+  declare dealStatus: DealStatus;
   declare propertyId: UUID;
   declare sellerUserId: UUID;
   declare buyerUserId: UUID;
@@ -35,13 +37,13 @@ Deal.init(
       allowNull: false,
       type: DataTypes.DECIMAL
     },
-    dealStatusId: {
-      type: DataTypes.UUID,
+    dealStatus: {
       allowNull: false,
-      references: {
-        model: 'DealStatuses',
-        key: 'dealStatusId'
-      }
+      type: DataTypes.ENUM(
+        DealStatuses.Awaiting, 
+        DealStatuses.Canceled, 
+        DealStatuses.Done
+      )
     },
     propertyId: {
       type: DataTypes.UUID,
@@ -81,9 +83,6 @@ Deal.init(
     tableName: 'Deals'
   }
 );
-
-DealStatus.hasMany(Deal, { foreignKey: 'dealStatusId' });
-Deal.belongsTo(DealStatus, { foreignKey: 'dealStatusId' });
 
 Property.hasMany(Deal, { foreignKey: 'propertyId' });
 Deal.belongsTo(Property, { foreignKey: 'propertyId' });

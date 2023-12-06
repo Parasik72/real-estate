@@ -1,10 +1,12 @@
 import { Model, InferAttributes, InferCreationAttributes, DataTypes } from 'sequelize';
 import { dbInstance } from '../db-instance';
 import { User } from './user';
-import { PropertyStatus } from './propertystatus';
 import { PropertyAddress } from './propertyaddress';
-import { PropertyType } from './propertytype';
 import { UUID } from 'crypto';
+import { PropertyStatuses, PropertyTypes } from '@/server/types/properties.types';
+
+type PropertyStatus = PropertyStatuses.Awaiting | PropertyStatuses.ForSale;
+type PropertyType = PropertyTypes.House | PropertyTypes.Apartment | PropertyTypes.Villa;
 
 export class Property extends Model<
   InferAttributes<Property>,
@@ -17,10 +19,10 @@ export class Property extends Model<
   declare title: string;
   declare description: string;
   declare priceAmount: number;
-  declare propertyStatusId: UUID;
+  declare propertyStatus: PropertyStatus;
   declare userId: UUID;
   declare propertyAddressId: UUID;
-  declare propertyTypeId: UUID;
+  declare propertyType: PropertyType;
   declare createdAt: BigInt;
   declare updatedAt: BigInt;
 }
@@ -56,13 +58,20 @@ Property.init(
       allowNull: false,
       type: DataTypes.DECIMAL
     },
-    propertyStatusId: { 
-			type: DataTypes.UUID,
+    propertyStatus: {
+      allowNull: false,
+      type: DataTypes.ENUM(
+        PropertyStatuses.Awaiting, 
+        PropertyStatuses.ForSale
+      )
+    },
+    propertyType: { 
 			allowNull: false,
-			references: {
-				model: 'PropertyStatuses',
-				key: 'propertyStatusId'
-			}
+      type: DataTypes.ENUM(
+        PropertyTypes.House, 
+        PropertyTypes.Apartment,
+        PropertyTypes.Villa
+      )
 		},
     userId: {
       type: DataTypes.UUID,
@@ -80,14 +89,6 @@ Property.init(
 				key: 'propertyAddressId'
 			}
 		},
-    propertyTypeId: { 
-			type: DataTypes.UUID,
-			allowNull: false,
-			references: {
-				model: 'PropertyTypes',
-				key: 'propertyTypeId'
-			}
-		},
     createdAt: {
       allowNull: false,
       type: DataTypes.BIGINT
@@ -103,14 +104,8 @@ Property.init(
   }
 );
 
-PropertyStatus.hasMany(Property, { foreignKey: 'propertyStatusId' });
-Property.belongsTo(PropertyStatus, { foreignKey: 'propertyStatusId' });
-
 User.hasMany(Property, { foreignKey: 'userId' });
 Property.belongsTo(User, { foreignKey: 'userId'});
 
 PropertyAddress.hasOne(Property, { foreignKey: 'propertyAddressId' });
 Property.belongsTo(PropertyAddress, { foreignKey: 'propertyAddressId'});
-
-PropertyType.hasMany(Property, { foreignKey: 'propertyTypeId' });
-Property.belongsTo(PropertyType, { foreignKey: 'propertyTypeId'});

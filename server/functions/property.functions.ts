@@ -1,6 +1,7 @@
 import { InferAttributes, Op, WhereOptions } from "sequelize";
 import { GetAllPropertiesParams } from "../params/property.params";
 import { Property } from "@/db/models/property";
+import { PropertyStatuses } from "../types/properties.types";
 
 export const allOffersWhereOptions = 
 (params: GetAllPropertiesParams): WhereOptions<InferAttributes<Property, { omit: never; }>> => ({
@@ -25,6 +26,7 @@ export const allOffersWhereOptions =
             { description: { [Op.regexp]: params.keyword } },
         ]
     }),
+    propertyStatus: PropertyStatuses.ForSale
 });
 
 export const allOffersPropertyAddressWhereOptions =

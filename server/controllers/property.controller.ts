@@ -42,10 +42,6 @@ export class PropertyController extends BaseController {
   @POST('/api/properties')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
     const propertyService = container.resolve<PropertyService>('propertyService');
-    const propertyType = await propertyService.getPropertyTypeById(body.propertyTypeId);
-    if (!propertyType) throw new HttpException('The property type was not found', 404);
-    const propertyStatus = await propertyService.getPropertyStatusById(body.propertyStatusId);
-    if (!propertyStatus) throw new HttpException('The property status was not found', 404);
     const propertyAddressId = v4() as UUID;
     await propertyService.createPropertyAddress({
       propertyAddressId,
@@ -59,8 +55,6 @@ export class PropertyController extends BaseController {
     const time = BigInt(new Date().getTime());
     await propertyService.createProperty({
       ...body,
-      propertyStatusId: propertyStatus.propertyStatusId,
-      propertyTypeId: propertyType.propertyTypeId,
       propertyId,
       userId,
       propertyAddressId,
@@ -89,28 +83,14 @@ export class PropertyController extends BaseController {
     if (property.userId !== user?.userId) {
       throw new HttpException("You don't have a permission to update this property", 403);
     }
-    if (body.propertyTypeId) {
-      const propertyType = await propertyService.getPropertyTypeById(body.propertyTypeId);
-      if (!propertyType) throw new HttpException('The property type was not found', 404);
-    }
-    if (body.propertyStatusId) {
-      if (property.propertyStatusId === body.propertyStatusId) {
+    if (body.propertyStatus) {
+      if (property.propertyStatus === body.propertyStatus) {
         throw new HttpException('The property already uses this property status', 400);
       }
-      const propertyStatus = await propertyService.getPropertyStatusById(body.propertyStatusId);
-      if (!propertyStatus) throw new HttpException('The property status was not found', 404);
-      const cancelDealStatus = await dealService.getDealStatusByName(DealStatuses.Canceled);
-      if (!cancelDealStatus) {
-        throw new HttpException('The deal status for cancel was not found', 404);
-      }
-      const awaitingDealStatus = await dealService.getDealStatusByName(DealStatuses.Awaiting);
-      if (!awaitingDealStatus) {
-        throw new HttpException('The deal status for await was not found', 404);
-      }
       await dealService.updateDealsByPropertyIdAndStatusId({ 
-        dealStatusId: cancelDealStatus.dealStatusId,
+        dealStatus: DealStatuses.Canceled,
         updatedAt: BigInt(new Date().getTime())
-      }, property.propertyId, awaitingDealStatus.dealStatusId);
+      }, property.propertyId, DealStatuses.Awaiting);
     }
     await propertyService.updatePropertyAddressById({
       countryName: body.countryName,
@@ -125,8 +105,8 @@ export class PropertyController extends BaseController {
       title: body.title,
       description: body.description,
       priceAmount: body.priceAmount,
-      propertyStatusId: body.propertyStatusId as UUID,
-      propertyTypeId: body.propertyTypeId as UUID,
+      propertyStatus: body.propertyStatus,
+      propertyType: body.propertyType,
       updatedAt: BigInt(new Date().getTime())
     }, property.propertyId);
     if (body.imgsToDeleteIds) {

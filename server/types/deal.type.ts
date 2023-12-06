@@ -1,5 +1,4 @@
 import { Deal } from "@/db/models/deal";
-import { UUID } from "crypto";
 
 export enum DealStatuses {
     Done='Done',
@@ -15,7 +14,7 @@ export enum DealRequestedBy {
 
 export interface UpdateDeal {
     signDate?: BigInt | null;
-    dealStatusId?: UUID;
+    dealStatus?: DealStatuses;
     updatedAt: BigInt;
 }
 

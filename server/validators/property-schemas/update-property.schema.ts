@@ -1,8 +1,12 @@
+import { PropertyStatuses, PropertyTypes } from "@/server/types/properties.types";
 import { JSONSchemaType } from "ajv";
 
 const moreThanZero = /^[1-9][0-9]*$/
 const minimumZero = /^[0-9]*$/
 const imageValidation = /image\//
+
+const propertyStatusEnum = [PropertyStatuses.Awaiting, PropertyStatuses.ForSale];
+const propertyTypeEnum = [PropertyTypes.Apartment, PropertyTypes.House, PropertyTypes.Villa];
 
 export const updatePropertyValidation: JSONSchemaType<{
     bedRooms?: string;
@@ -15,20 +19,22 @@ export const updatePropertyValidation: JSONSchemaType<{
     cityName?: string;
     addressLine1?: string;
     addressLine2?: string | null;
-    propertyStatusId?: string;
-    propertyTypeId?: string;
+    propertyStatus?: string;
+    propertyType?: string;
     imgsToDeleteIds?: string[];
     files?: object[];
 }> = {
     type: 'object',
     properties: {
-        propertyStatusId: {
+        propertyStatus: {
             type: 'string',
-            nullable: true
+            nullable: true,
+            enum: propertyStatusEnum
         },
-        propertyTypeId: {
+        propertyType: {
             type: 'string',
-            nullable: true
+            nullable: true,
+            enum: propertyTypeEnum
         },
         title: {
             type: 'string',
@@ -110,8 +116,8 @@ export const updatePropertyValidation: JSONSchemaType<{
         }
     },
     anyOf: [
-        { required: ['propertyStatusId'] },
-        { required: ['propertyTypeId'] },
+        { required: ['propertyStatus'] },
+        { required: ['propertyType'] },
         { required: ['title'] },
         { required: ['description'] },
         { required: ['countryName'] },
@@ -127,8 +133,8 @@ export const updatePropertyValidation: JSONSchemaType<{
     ],
     errorMessage: {
         properties: {
-            propertyStatusId: 'propertyStatusId must be a string',
-            propertyTypeId: 'propertyStatusId must be a string',
+            propertyStatus: `propertyStatus must equal to ${propertyStatusEnum}`,
+            propertyType: `propertyStatus must equal to ${propertyTypeEnum}`,
             title: 'title must be within 5 and 100 symbols',
             description: 'description must be within 5 and 1000 symbols',
             countryName: 'countryName must be within 2 and 30 symbols',

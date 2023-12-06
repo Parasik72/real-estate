@@ -14,14 +14,12 @@ import container from '@/server/container';
 import { PropertyController } from '@/server/controllers/property.controller';
 import { UserModel } from '@/common/services/user/user.model';
 import { PropertyAddressModel } from '@/common/services/property/property-address.model';
-import { PropertyTypeModel } from '@/common/services/property/property-type.model';
 import { getPropertyTypeNameWithArticle } from '@/common/functions/property.functions';
 import { INextPageContextExtended } from '@/server/types/http.types';
 
 interface IProps {
     data: PropertyModel & {
         PropertyAddress: PropertyAddressModel,
-        PropertyType: PropertyTypeModel,
         User: UserModel;
     };
 }
@@ -82,7 +80,7 @@ export default function Property({ data }: IProps) {
                                     <div className="flex items-center gap-5">
                                         <CompanyIcon />
                                         <span className="text-dark-blue font-bold text-xl">
-                                            {getPropertyTypeNameWithArticle(data.PropertyType)}
+                                            {getPropertyTypeNameWithArticle(data.propertyType)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-5">
@@ -140,7 +138,7 @@ export default function Property({ data }: IProps) {
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Type:</span>
-                                        &nbsp;{data.PropertyType.typeName}
+                                        &nbsp;{data.propertyType}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Total area:</span>

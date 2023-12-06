@@ -39,20 +39,18 @@ export class DealController extends BaseController {
         if (property.User.userId === user?.userId) {
             throw new HttpException("You can't send deals to yourself", 403);
         }
-        if (property.PropertyStatus.statusName !== PropertyStatuses.ForSale) {
+        if (property.propertyStatus !== PropertyStatuses.ForSale) {
             throw new HttpException("This property is not for sale", 400);
         }
         const dealExists = await dealService.getAwaitingDealByPropertyIdAndBuyerId(property.propertyId, user?.userId!);
         if (dealExists) throw new HttpException("You already have the awaiting deal with this property", 400);
-        const dealStatus = await dealService.getDealStatusByName(DealStatuses.Awaiting);
-        if (!dealStatus) throw new HttpException("The deal status was not found", 404);
         const dealId = v4() as UUID;
         const time = BigInt(new Date().getTime());
         await dealService.createDeal({
             dealId,
             buyerUserId: user?.userId!,
             sellerUserId: property.userId,
-            dealStatusId: dealStatus.dealStatusId,
+            dealStatus: DealStatuses.Awaiting,
             propertyId: property.propertyId,
             signDate: null,
             totalPrice: property.priceAmount,
@@ -72,33 +70,23 @@ export class DealController extends BaseController {
         if (deal.sellerUserId !== user?.userId) {
             throw new HttpException("You don't have access to sign this deal", 403);
         }
-        if (deal.DealStatus.statusName !== DealStatuses.Awaiting) {
+        if (deal.dealStatus !== DealStatuses.Awaiting) {
             throw new HttpException('You can not sign this deal', 403);
-        }
-        const doneDealStatus = await dealService.getDealStatusByName(DealStatuses.Done);
-        if (!doneDealStatus) throw new HttpException("The deal status was not found", 404);
-        const cancelDealStatus = await dealService.getDealStatusByName(DealStatuses.Canceled);
-        if (!cancelDealStatus) {
-            throw new HttpException('The deal status for cancel was not found', 404);
-        }
-        const awaitingDealStatus = await dealService.getDealStatusByName(DealStatuses.Awaiting);
-        if (!awaitingDealStatus) {
-            throw new HttpException('The deal status for await was not found', 404);
         }
         const time = BigInt(new Date().getTime());
         await dealService.updateDealById({
             updatedAt: time,
             signDate: time,
-            dealStatusId: doneDealStatus.dealStatusId
+            dealStatus: DealStatuses.Done
         }, deal.dealId);
         await propertyService.changePropertyOwnerById({ 
             userId: deal.buyerUserId,
             updatedAt: time
         }, deal.propertyId);
         await dealService.updateDealsByPropertyIdAndStatusId({ 
-            dealStatusId: cancelDealStatus.dealStatusId,
+            dealStatus: DealStatuses.Canceled,
             updatedAt: time
-        }, deal.propertyId, awaitingDealStatus.dealStatusId);
+        }, deal.propertyId, DealStatuses.Awaiting);
         return { message: 'The deal has been signed successfully.' }
     }
 
@@ -108,19 +96,15 @@ export class DealController extends BaseController {
         const { dealId } = query;
         const deal = await dealService.getDealById(dealId);
         if (!deal) throw new HttpException('The deal was not found', 404);
-        if (deal.DealStatus?.statusName !== DealStatuses.Awaiting) {
+        if (deal.dealStatus !== DealStatuses.Awaiting) {
             throw new HttpException('You can not cancel this deal', 403);
         }
         if (deal.buyerUserId !== user?.userId && deal.sellerUserId !== user?.userId) {
             throw new HttpException("You don't have access to cancel this deal", 403);
         }
-        const cancelDealStatus = await dealService.getDealStatusByName(DealStatuses.Canceled);
-        if (!cancelDealStatus) {
-            throw new HttpException('The deal status for cancel was not found', 404);
-        }
         const time = BigInt(new Date().getTime());
         await dealService.updateDealById({ 
-            dealStatusId: cancelDealStatus.dealStatusId,
+            dealStatus: DealStatuses.Canceled,
             updatedAt: time
         }, deal.dealId);
         return { message: 'The deal has been canceled successfully.' }

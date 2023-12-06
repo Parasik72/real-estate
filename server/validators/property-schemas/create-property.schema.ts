@@ -1,8 +1,12 @@
+import { PropertyStatuses, PropertyTypes } from "@/server/types/properties.types";
 import { JSONSchemaType } from "ajv";
 
 const moreThanZero = /^[1-9][0-9]*$/
 const minimumZero = /^[0-9]*$/
 const imageValidation = /image\//
+
+const propertyStatusEnum = [PropertyStatuses.Awaiting, PropertyStatuses.ForSale];
+const propertyTypeEnum = [PropertyTypes.Apartment, PropertyTypes.House, PropertyTypes.Villa];
 
 export const createPropertyValidation
 : JSONSchemaType<{
@@ -16,17 +20,19 @@ export const createPropertyValidation
     cityName: string;
     addressLine1: string;
     addressLine2: string | null;
-    propertyStatusId: string;
-    propertyTypeId: string;
+    propertyStatus: string;
+    propertyType: string;
     files: object[];
 }> = {
     type: 'object',
     properties: {
-        propertyStatusId: {
-            type: 'string'
+        propertyStatus: {
+            type: 'string',
+            enum: propertyStatusEnum
         },
-        propertyTypeId: {
-            type: 'string'
+        propertyType: {
+            type: 'string',
+            enum: propertyTypeEnum
         },
         title: {
             type: 'string',
@@ -99,15 +105,15 @@ export const createPropertyValidation
         "countryName",
         "description",
         "priceAmount",
-        "propertyStatusId",
-        "propertyTypeId",
+        "propertyStatus",
+        "propertyType",
         "title",
         "files"
     ],
     errorMessage: {
         properties: {
-            propertyStatusId: 'propertyStatusId must be a string',
-            propertyTypeId: 'propertyStatusId must be a string',
+            propertyStatus: `propertyStatus must equal to ${propertyStatusEnum}`,
+            propertyType: `propertyStatus must equal to ${propertyTypeEnum}`,
             title: 'title must be within 5 and 100 symbols',
             description: 'description must be within 5 and 1000 symbols',
             countryName: 'countryName must be within 2 and 30 symbols',

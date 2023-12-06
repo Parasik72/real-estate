@@ -7,10 +7,10 @@ export class PropertyModel {
         public title: string,
         public description: string,
         public priceAmount: number,
-        public propertyStatusId: string,
+        public propertyStatus: string,
         public userId: string,
         public propertyAddressId: string,
-        public propertyTypeId: string,
+        public propertyType: string,
         public createdAt: BigInt,
         public updatedAt: BigInt
     ) {}
@@ -25,10 +25,10 @@ export const createPropertyModel =
         item.title,
         item.description,
         item.priceAmount,
-        item.propertyStatusId,
+        item.propertyStatus,
         item.userId,
         item.propertyAddressId,
-        item.propertyTypeId,
+        item.propertyType,
         item.createdAt,
         item.updatedAt
     );

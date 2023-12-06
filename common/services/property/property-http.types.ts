@@ -6,10 +6,10 @@ export interface GetPropertyResponse {
     title: string,
     description: string,
     priceAmount: number,
-    propertyStatusId: string,
+    propertyStatus: string,
     userId: string,
     propertyAddressId: string,
-    propertyTypeId: string,
+    propertyType: string,
     createdAt: BigInt,
     updatedAt: BigInt
 }

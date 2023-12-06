@@ -2,6 +2,10 @@
 
 const tableName = 'Deals';
 
+const statusAwaiting = 'Awaiting';
+const statusCanceled = 'Canceled';
+const statusDone = 'Done';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -10,18 +14,12 @@ module.exports = {
         dealId CHAR(36) PRIMARY KEY NOT NULL,
         signDate BIGINT,
         totalPrice DECIMAL NOT NULL,
-        dealStatusId CHAR(36) NOT NULL,
+        dealStatus ENUM('${statusAwaiting}', '${statusCanceled}', '${statusDone}') NOT NULL,
         propertyId CHAR(36) NOT NULL,
         sellerUserId CHAR(36) NOT NULL,
         buyerUserId CHAR(36) NOT NULL,
         createdAt BIGINT NOT NULL,
         updatedAt BIGINT NOT NULL,
-
-        CONSTRAINT ${tableName}_dealStatusId_foreign_idx
-        FOREIGN KEY (dealStatusId)
-        REFERENCES DealStatuses (dealStatusId)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
 
         CONSTRAINT ${tableName}_propertyId_foreign_idx
         FOREIGN KEY (propertyId)

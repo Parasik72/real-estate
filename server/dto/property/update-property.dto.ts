@@ -1,3 +1,5 @@
+import { PropertyStatuses, PropertyTypes } from "@/server/types/properties.types";
+
 export interface UpdatePropertyDto {
     bedRooms?: number;
     bathRooms?: number;
@@ -9,7 +11,7 @@ export interface UpdatePropertyDto {
     cityName?: string;
     addressLine1?: string;
     addressLine2?: string | null;
-    propertyStatusId?: string;
-    propertyTypeId?: string;
+    propertyStatus?: PropertyStatuses;
+    propertyType?: PropertyTypes;
     imgsToDeleteIds?: string[];
 }

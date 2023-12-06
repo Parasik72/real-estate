@@ -1,6 +1,5 @@
 import { Property } from "@/db/models/property";
 import { PropertyAddress } from "@/db/models/propertyaddress";
-import { PropertyStatus } from "@/db/models/propertystatus";
 import { 
     ChangePropertyOwner, 
     PropertiesPage, 
@@ -9,8 +8,7 @@ import {
     UpdatePropertyAddress 
 } from "../types/properties.types";
 import { User } from "@/db/models/user";
-import { PropertyType } from "@/db/models/propertytype";
-import { InferAttributes, InferCreationAttributes, Op, WhereOptions } from "sequelize";
+import { InferCreationAttributes } from "sequelize";
 import { PropertyImage } from "@/db/models/propertyimage";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
@@ -26,13 +24,10 @@ export class PropertyService {
         return Property.findAll({ 
             limit: OFFERS_LIMIT_DEFAULT,
             order: [['updatedAt', 'DESC']],
+            where: {
+                propertyStatus: PropertyStatuses.ForSale
+            },
             include: [
-                { 
-                    model: PropertyStatus,
-                    where: {
-                        statusName: PropertyStatuses.ForSale
-                    }
-                },
                 { model: PropertyAddress }
             ]
         });
@@ -46,12 +41,6 @@ export class PropertyService {
         const totalCount = await Property.count({
             where: mainWhere,
             include: [
-                { 
-                    model: PropertyStatus,
-                    where: {
-                        statusName: PropertyStatuses.ForSale
-                    }
-                },
                 {
                     model: PropertyAddress,
                     where: propertyAddressWhere
@@ -65,12 +54,6 @@ export class PropertyService {
             limit,
             where: mainWhere,
             include: [
-                { 
-                    model: PropertyStatus,
-                    where: {
-                        statusName: PropertyStatuses.ForSale
-                    }
-                },
                 {
                     model: PropertyAddress,
                     where: propertyAddressWhere
@@ -91,21 +74,19 @@ export class PropertyService {
             where: { propertyId }, 
             include: [
                 { model: User, attributes: { exclude: ['password'] } },
-                { model: PropertyAddress },
-                { model: PropertyType },
+                { model: PropertyAddress }
             ] 
         }) as Promise<Property & { User: User } | null>;
     }
 
     async getPropertyWithOwnerAndStatusByPropertyId(propertyId: string)
-    : Promise<Property & { User: User, PropertyStatus: PropertyStatus } | null> {
+    : Promise<Property & { User: User } | null> {
         return Property.findOne({ 
             where: { propertyId }, 
             include: [
                 { model: User, attributes: { exclude: ['password'] } },
-                { model: PropertyStatus },
             ] 
-        }) as Promise<Property & { User: User, PropertyStatus: PropertyStatus } | null>;
+        }) as Promise<Property & { User: User } | null>;
     }
 
     async getPropertyById(propertyId: string): Promise<Property | null> {
@@ -116,14 +97,6 @@ export class PropertyService {
         return Property.findAll({
             where: { userId }
         });
-    }
-
-    async getPropertyTypeById(propertyTypeId: string): Promise<PropertyType | null> {
-        return PropertyType.findByPk(propertyTypeId);
-    }
-
-    async getPropertyStatusById(propertyStatusId: string): Promise<PropertyStatus | null> {
-        return PropertyStatus.findByPk(propertyStatusId);
     }
 
     async createProperty(data: InferCreationAttributes<Property>): Promise<Property> {
@@ -167,8 +140,13 @@ export class PropertyService {
         const propertyImages = await PropertyImage.findAll({
             where: { propertyImageId: propertyImageIds, propertyId }
         });
+        const propertyImagesIds: string[] = [];
         propertyImages.forEach((propertyImage) => {
             fileUploaderService.deleteFile(propertyImage.imgName, PROPERTY_IMGS_PATH);
+            propertyImagesIds.push(propertyImage.propertyImageId);
+        });
+        await PropertyImage.destroy({
+            where: { propertyImageId: propertyImagesIds }
         });
     }
 }

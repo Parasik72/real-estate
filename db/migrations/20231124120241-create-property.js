@@ -2,6 +2,13 @@
 
 const tableName = 'Properties';
 
+const statusAwaiting = 'Awaiting';
+const statusForSale= 'For sale';
+
+const typeHouse = 'House';
+const typeApartment = 'Apartment';
+const typeVilla = 'Villa';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -14,6 +21,8 @@ module.exports = {
         title VARCHAR(100) NOT NULL,
         description VARCHAR(1000) NOT NULL,
         priceAmount DECIMAL NOT NULL,
+        propertyStatus ENUM('${statusAwaiting}', '${statusForSale}') NOT NULL,
+        propertyType ENUM('${typeHouse}', '${typeApartment}', '${typeVilla}') NOT NULL,
         createdAt BIGINT NOT NULL,
         updatedAt BIGINT NOT NULL
       );

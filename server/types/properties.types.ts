@@ -12,6 +12,17 @@ export interface PropertiesPage {
 
 export type PropertyWithAddress = Property & { PropertyAddress: PropertyAddress };
 
+export enum PropertyStatuses {
+    ForSale='For sale',
+    Awaiting='Awaiting',
+}
+
+export enum PropertyTypes {
+    House='House',
+    Apartment='Apartment',
+    Villa='Villa'
+}
+
 export interface UpdateProperty {
     bedRooms?: number;
     bathRooms?: number;
@@ -19,8 +30,8 @@ export interface UpdateProperty {
     title?: string;
     description?: string;
     priceAmount?: number;
-    propertyStatusId?: UUID;
-    propertyTypeId?: UUID;
+    propertyStatus?: PropertyStatuses;
+    propertyType?: PropertyTypes;
     updatedAt: BigInt;
 }
 
@@ -34,9 +45,4 @@ export interface UpdatePropertyAddress {
     cityName?: string;
     addressLine1?: string;
     addressLine2?: string | null;
-}
-
-export enum PropertyStatuses {
-    ForSale='For sale',
-    Awaiting='Awaiting',
 }
