@@ -34,36 +34,38 @@ const demoUsers = [
   },
 ];
 
-const demoPropertyAddresses = [
-  {
-    propertyAddressId: v4(),
-    countryName: 'Ukraine',
-    cityName: 'Kyiv',
-    addressLine1: '12/2 M. Grushevs’kyi Street',
-    addressLine2: '01008'
-  },
-  {
-    propertyAddressId: v4(),
-    countryName: 'Ukraine',
-    cityName: 'Kyiv',
-    addressLine1: '24 Khreshchatyk Street',
-    addressLine2: null
-  },
-  {
-    propertyAddressId: v4(),
-    countryName: 'USA',
-    cityName: 'New York',
-    addressLine1: '47 W 13th St',
-    addressLine2: '10011'
-  },
-];
+const demoPropertyAddresses = [...new Array(10)].map(() => (
+  [
+    {
+      propertyAddressId: v4(),
+      countryName: 'Ukraine',
+      cityName: 'Kyiv',
+      addressLine1: '12/2 M. Grushevs’kyi Street',
+      addressLine2: '01008'
+    },
+    {
+      propertyAddressId: v4(),
+      countryName: 'Ukraine',
+      cityName: 'Kyiv',
+      addressLine1: '24 Khreshchatyk Street',
+      addressLine2: null
+    },
+    {
+      propertyAddressId: v4(),
+      countryName: 'USA',
+      cityName: 'New York',
+      addressLine1: '47 W 13th St',
+      addressLine2: '10011'
+    },
+  ]
+)).flat();
 
-const demoProperties = [...new Array(10)].map(() => (
+const demoProperties = [...new Array(10)].map((_, index) => (
   [
     {
       propertyId: v4(),
       propertyType: 'House',
-      propertyAddressId: demoPropertyAddresses[0].propertyAddressId,
+      propertyAddressId: demoPropertyAddresses[index].propertyAddressId,
       bedRooms: 4,
       bathRooms: 1,
       area: 60,
@@ -78,7 +80,7 @@ const demoProperties = [...new Array(10)].map(() => (
     {
       propertyId: v4(),
       propertyType: 'Apartment',
-      propertyAddressId: demoPropertyAddresses[1].propertyAddressId,
+      propertyAddressId: demoPropertyAddresses[index].propertyAddressId,
       bedRooms: 2,
       bathRooms: 1,
       area: 35,
@@ -93,7 +95,7 @@ const demoProperties = [...new Array(10)].map(() => (
     {
       propertyId: v4(),
       propertyType: 'Villa',
-      propertyAddressId: demoPropertyAddresses[2].propertyAddressId,
+      propertyAddressId: demoPropertyAddresses[index].propertyAddressId,
       bedRooms: 8,
       bathRooms: 3,
       area: 230,
