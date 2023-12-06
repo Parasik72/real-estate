@@ -15,7 +15,8 @@ import SSR from "../decorators/ssr.decorator";
 import USE from "../decorators/use.decorator";
 import { UserService } from "../services/user.service";
 import validate from "../validators/validate";
-import { signUpValidSchema } from "../validators/user-schemas/sign-up.schema";
+import { signUpValidation } from "../validators/user-schemas/sign-up.schema";
+import { signInValidation } from "../validators/user-schemas/sign-in.schema";
 
 export class UserController extends BaseController {
     @SSR('/user/profile/:userId')
@@ -28,13 +29,14 @@ export class UserController extends BaseController {
     }
 
     @USE([sessions, passportInitialize, passportAuthenticate])
+    @USE(validate(signInValidation))
     @POST('/api/user/sign-in')
     async signIn() {
         return { message: 'Successful sign in!' };
     }
 
     @POST('/api/user/sign-up')
-    @USE(validate(signUpValidSchema))
+    @USE(validate(signUpValidation))
     async signUp({ body }: ControllerConfig<SignUpDto>) {
         const userService = container.resolve<UserService>('userService');
         const emailInUse = await userService.getUserByEmail(body.email);

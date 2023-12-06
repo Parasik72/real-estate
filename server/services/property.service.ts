@@ -162,10 +162,10 @@ export class PropertyService {
         return PropertyImage.bulkCreate(propertyImages);
     }
 
-    async deletePropertyImages(propertyImageIds: string[]) {
+    async deletePropertyImages(propertyImageIds: string[], propertyId: string) {
         const fileUploaderService = container.resolve<FileUploaderService>('fileUploaderService');
         const propertyImages = await PropertyImage.findAll({
-            where: { propertyImageId: propertyImageIds }
+            where: { propertyImageId: propertyImageIds, propertyId }
         });
         propertyImages.forEach((propertyImage) => {
             fileUploaderService.deleteFile(propertyImage.imgName, PROPERTY_IMGS_PATH);

@@ -19,6 +19,9 @@ import { sessions } from "../sessions";
 import { passportInitialize, passportSession } from "../passport";
 import multer from "multer";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
+import { createPropertyValidation } from "../validators/property-schemas/create-property.schema";
+import { updatePropertyValidation } from "../validators/property-schemas/update-property.schema";
+import validate from "../validators/validate";
 
 export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
@@ -35,7 +38,7 @@ export class PropertyController extends BaseController {
     return propertyService.getAllOffers(query);
   }
 
-  @USE([sessions, passportInitialize, passportSession, multer().any()])
+  @USE([sessions, passportInitialize, passportSession, multer().any(), validate(createPropertyValidation)])
   @POST('/api/properties')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
     const propertyService = container.resolve<PropertyService>('propertyService');
@@ -68,14 +71,24 @@ export class PropertyController extends BaseController {
     return { message: 'The property has been created successfully.' };
   }
 
-  @USE([sessions, passportInitialize, passportSession, isLogedIn])
+  @USE([
+    sessions, 
+    passportInitialize, 
+    passportSession, 
+    isLogedIn, 
+    multer().any(), 
+    validate(updatePropertyValidation)
+  ])
   @PATCH('/api/properties/patch/:propertyId')
-  async updatePropertyById({ query, body, files }
+  async updatePropertyById({ query, body, files, user }
   : ControllerConfig<UpdatePropertyDto, UpdatePropertyParams>) {
     const dealService = container.resolve<DealService>('dealService');
     const propertyService = container.resolve<PropertyService>('propertyService');
     const property = await propertyService.getPropertyById(query.propertyId);
     if (!property) throw new HttpException("The property was not found", 404);
+    if (property.userId !== user?.userId) {
+      throw new HttpException("You don't have a permission to update this property", 403);
+    }
     if (body.propertyTypeId) {
       const propertyType = await propertyService.getPropertyTypeById(body.propertyTypeId);
       if (!propertyType) throw new HttpException('The property type was not found', 404);
@@ -116,7 +129,9 @@ export class PropertyController extends BaseController {
       propertyTypeId: body.propertyTypeId as UUID,
       updatedAt: BigInt(new Date().getTime())
     }, property.propertyId);
-    if (body.imgsToDeleteIds) await propertyService.deletePropertyImages(body.imgsToDeleteIds);
+    if (body.imgsToDeleteIds) {
+      await propertyService.deletePropertyImages(body.imgsToDeleteIds, property.propertyId);
+    } 
     if (files) await propertyService.createPropertyImages(property.propertyId, files!);
     return { message: 'The property has been updated successfully.' };
   }

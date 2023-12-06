@@ -1,0 +1,146 @@
+import { JSONSchemaType } from "ajv";
+
+const moreThanZero = /^[1-9][0-9]*$/
+const minimumZero = /^[0-9]*$/
+const imageValidation = /image\//
+
+export const updatePropertyValidation: JSONSchemaType<{
+    bedRooms?: string;
+    bathRooms?: string;
+    area?: string;
+    title?: string;
+    description?: string;
+    priceAmount?: string;
+    countryName?: string;
+    cityName?: string;
+    addressLine1?: string;
+    addressLine2?: string | null;
+    propertyStatusId?: string;
+    propertyTypeId?: string;
+    imgsToDeleteIds?: string[];
+    files?: object[];
+}> = {
+    type: 'object',
+    properties: {
+        propertyStatusId: {
+            type: 'string',
+            nullable: true
+        },
+        propertyTypeId: {
+            type: 'string',
+            nullable: true
+        },
+        title: {
+            type: 'string',
+            minLength: 5,
+            maxLength: 100,
+            nullable: true
+        },
+        description: {
+            type: 'string',
+            minLength: 5,
+            maxLength: 1000,
+            nullable: true
+        },
+        countryName: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 30,
+            nullable: true
+        },
+        cityName: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 30,
+            nullable: true
+        },
+        addressLine1: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 50,
+            nullable: true
+        },
+        addressLine2: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 50,
+            nullable: true
+        },
+        area: {
+            type: 'string',
+            nullable: true,
+            pattern: moreThanZero.source
+        },
+        bathRooms: {
+            type: 'string',
+            nullable: true,
+            pattern: minimumZero.source
+        },
+        bedRooms: {
+            type: 'string',
+            nullable: true,
+            pattern: minimumZero.source
+        },
+        priceAmount: {
+            type: 'string',
+            nullable: true,
+            pattern: moreThanZero.source
+        },
+        imgsToDeleteIds: {
+            type: 'array',
+            nullable: true,
+            minItems: 0,
+            items: {
+                type: 'string'
+            }
+        },
+        files: {
+            type: 'array',
+            nullable: true,
+            minItems: 0,
+            items: {
+                type: 'object',
+                properties: {
+                    mimetype: {
+                        type: 'string',
+                        pattern: imageValidation.source
+                    }
+                }
+            }
+        }
+    },
+    anyOf: [
+        { required: ['propertyStatusId'] },
+        { required: ['propertyTypeId'] },
+        { required: ['title'] },
+        { required: ['description'] },
+        { required: ['countryName'] },
+        { required: ['cityName'] },
+        { required: ['addressLine1'] },
+        { required: ['addressLine2'] },
+        { required: ['area'] },
+        { required: ['bathRooms'] },
+        { required: ['bedRooms'] },
+        { required: ['priceAmount'] },
+        { required: ['imgsToDeleteIds'] },
+        { required: ['files'] },
+    ],
+    errorMessage: {
+        properties: {
+            propertyStatusId: 'propertyStatusId must be a string',
+            propertyTypeId: 'propertyStatusId must be a string',
+            title: 'title must be within 5 and 100 symbols',
+            description: 'description must be within 5 and 1000 symbols',
+            countryName: 'countryName must be within 2 and 30 symbols',
+            cityName: 'cityName must be within 2 and 30 symbols',
+            addressLine1: 'addressLine1 must be within 2 and 50 symbols',
+            addressLine2: 'addressLine2 must be within 2 and 50 symbols or null',
+            area: 'area must be more than 0',
+            bathRooms: 'bathRooms must be minimum 0',
+            bedRooms: 'bedRooms must be minimum 0',
+            priceAmount: 'priceAmount must be more than 0',
+            imgsToDeleteIds: 'imgsToDeleteIds must consist of more than 0 items',
+            files: 'images must consist of more than 0 items and be an image type'
+        }
+    }
+};
