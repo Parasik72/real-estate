@@ -1,7 +1,7 @@
 import { UUID } from "crypto";
 import { PropertyWithAddress } from "./properties.types";
 import { Model } from "sequelize";
-export interface IUser extends Model<IUser, IUser> {
+export interface IUser extends Model {
   userId: UUID;
   firstName: string;
   lastName: string;

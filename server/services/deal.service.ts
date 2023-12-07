@@ -1,6 +1,7 @@
 import { DealRequestedBy, DealStatuses, DealsPage, IDeal, UpdateDeal } from "../types/deal.type";
 import { dealRequestedByFindMap } from "../functions/deal.functions";
 import BaseContext from "../context/base-context";
+import { InferCreationAttributes } from "sequelize";
 
 export class DealService extends BaseContext {
     async getAwaitingDealByPropertyIdAndBuyerId(propertyId: string, buyerUserId: string)
@@ -14,7 +15,7 @@ export class DealService extends BaseContext {
         });
     }
 
-    async createDeal(data: IDeal): Promise<IDeal> {
+    async createDeal(data: InferCreationAttributes<IDeal>): Promise<IDeal> {
         return this.di.Deal.create(data);
     }
 

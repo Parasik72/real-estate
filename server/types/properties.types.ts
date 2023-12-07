@@ -4,7 +4,7 @@ import { Model } from "sequelize";
 export type PropertyStatus = PropertyStatuses.Awaiting | PropertyStatuses.ForSale;
 export type PropertyType = PropertyTypes.House | PropertyTypes.Apartment | PropertyTypes.Villa;
 
-export interface IProperty extends Model<IProperty, IProperty> {
+export interface IProperty extends Model {
   propertyId: UUID;
   bedRooms: number;
   bathRooms: number;
@@ -20,7 +20,7 @@ export interface IProperty extends Model<IProperty, IProperty> {
   updatedAt: BigInt;
 }
 
-export interface IPropertyAddress extends Model<IPropertyAddress, IPropertyAddress> {
+export interface IPropertyAddress extends Model {
     propertyAddressId: UUID;
     countryName: string;
     cityName: string;
@@ -28,7 +28,7 @@ export interface IPropertyAddress extends Model<IPropertyAddress, IPropertyAddre
     addressLine2: string | null;
 }
 
-export interface IPropertyImage extends Model<IPropertyImage, IPropertyImage> {
+export interface IPropertyImage extends Model {
     propertyImageId: string;
     imgName: string;
     propertyId: UUID;

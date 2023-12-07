@@ -1,5 +1,6 @@
 import { IUser, UserProfile } from "../types/user.types";
 import BaseContext from "../context/base-context";
+import { InferCreationAttributes } from "sequelize";
 
 export class UserService extends BaseContext {
     async getUserByEmail(email: string): Promise<IUser | null>  {
@@ -19,7 +20,7 @@ export class UserService extends BaseContext {
         }) as Promise<UserProfile | null>;
     }
 
-    async createUser(data: IUser): Promise<IUser> {
+    async createUser(data: InferCreationAttributes<IUser>): Promise<IUser> {
         return this.di.User.create(data);
     }
 }

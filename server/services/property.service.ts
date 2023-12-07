@@ -7,6 +7,7 @@ import { GetAllPropertiesParams } from "../params/property.params";
 import { allOffersPAWhereOptions, allOffersWhereOptions } from "../functions/property.functions";
 import BaseContext from "../context/base-context";
 import { IUser } from "../types/user.types";
+import { InferAttributes, InferCreationAttributes } from "sequelize";
 
 export class PropertyService extends BaseContext {
     async getLastOffers(): Promise<Types.IProperty[]> {
@@ -89,11 +90,11 @@ export class PropertyService extends BaseContext {
         });
     }
 
-    async createProperty(data: Types.IProperty): Promise<Types.IProperty> {
+    async createProperty(data: InferCreationAttributes<Types.IProperty>): Promise<Types.IProperty> {
         return this.di.Property.create(data);
     }
 
-    async createPropertyAddress(data: Types.IPropertyAddress)
+    async createPropertyAddress(data: InferCreationAttributes<Types.IPropertyAddress>)
     : Promise<Types.IPropertyAddress> {
         return this.di.PropertyAddress.create(data);
     }
@@ -112,7 +113,7 @@ export class PropertyService extends BaseContext {
 
     async createPropertyImages(propertyId: UUID, images: Express.Multer.File[]) {
         const { fileUploaderService } = this.di;
-        const propertyImages: Types.IPropertyImage[] = [];
+        const propertyImages: InferAttributes<Types.IPropertyImage>[] = [];
         images.forEach((image) => {
             const propertyImageId = v4();
             const imgName = fileUploaderService.uploadFile(image, PROPERTY_IMGS_PATH);

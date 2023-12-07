@@ -2,7 +2,7 @@ import { UUID } from "crypto";
 import { Model } from "sequelize";
 
 export type DealStatus = DealStatuses.Awaiting | DealStatuses.Canceled | DealStatuses.Done;
-export interface IDeal extends Model<IDeal, IDeal> {
+export interface IDeal extends Model {
     dealId: UUID;
     signDate: BigInt | null;
     totalPrice: number;
