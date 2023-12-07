@@ -6,12 +6,8 @@ interface HttpRequestConfig<ReqBody extends Object> {
 }
 
 export class HttpService {
-    constructor(
-        private baseUrl: string = process.env.BACKEND_URL
-    ) {}
-
     private getFullApiUrl(path: string) {
-        return `${this.baseUrl || 'api'}/${path}`;
+        return `${'/api'}/${path}`;
     }
 
     protected async get<ResBody extends Object>(config: HttpRequestConfig<Object>)

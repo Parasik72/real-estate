@@ -1,3 +1,6 @@
+import { PropertyAddressModel } from "./property-address.model";
+import { PropertyModel } from "./property.model";
+
 export interface GetPropertyResponse {
     propertyId: string,
     bedRooms: number,
@@ -19,5 +22,5 @@ export interface PropertiesPageResponse {
     limit: number;
     offset: number;
     totalPages: number;
-    properties: GetPropertyResponse[];
+    properties: (PropertyModel & { PropertyAddress: PropertyAddressModel; })[];
 }

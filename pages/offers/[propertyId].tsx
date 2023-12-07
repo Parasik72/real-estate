@@ -10,37 +10,57 @@ import { PageWrapper } from '@/common/components/page-wrapper.component';
 import { PageContainer } from '@/common/components/page-container.component';
 import Link from 'next/link';
 import { PropertyModel } from '@/common/services/property/property.model';
-import container from '@/server/container';
-import { PropertyController } from '@/server/controllers/property.controller';
 import { UserModel } from '@/common/services/user/user.model';
 import { PropertyAddressModel } from '@/common/services/property/property-address.model';
 import { getPropertyTypeNameWithArticle } from '@/common/functions/property.functions';
-import { INextPageContextExtended } from '@/server/types/http.types';
+import { RootState } from '@/common/store/root.reducer';
+import { setPropertyAction } from '@/common/store/property/property.actions';
+import { Dispatch } from 'redux';
+import { SetPropertyAction } from '@/common/store/property/property.action.interface';
+import { useEffect } from 'react';
+import { propertyService } from '@/common/services/property/property.service';
+import { connect } from 'react-redux';
+import { useRouter } from 'next/router';
 
-interface IProps {
-    data: PropertyModel & {
-        PropertyAddress: PropertyAddressModel,
-        User: UserModel;
-    };
+interface IState {
+    property?: PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel};
+}
+  
+function mapStateToProps(state: RootState): IState {
+  return { property: state.propertyReducer.property }
 }
 
-type Params = {
-    propertyId: string;
-};
-
-interface IContext extends INextPageContextExtended<{}, Params> {}
-
-export async function getServerSideProps(context: IContext) {
-    return container.resolve<PropertyController>('propertyController')
-        .handlerSSR({...context, routePath: '/properties/:propertyId'});
+interface IDispatch {
+    setProperty: (payload: PropertyModel & {
+        PropertyAddress: PropertyAddressModel, User: UserModel
+    }) => SetPropertyAction
 }
 
-export default function Property({ data }: IProps) {
+const mapDispatchToProps = (dispatch: Dispatch<any>): IDispatch => {
+  return {
+    setProperty: (
+          payload: PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel}
+      ) => dispatch(setPropertyAction(payload))
+  }
+}
+
+function Property({ property, setProperty }: IState & IDispatch) {
+    const router = useRouter();
+    useEffect(() => {
+        if (!router.query.propertyId) return;
+        const propertyId = router.query.propertyId as string || '';
+        async function getProperty() {
+            const data = await propertyService.getPropertyById(propertyId);
+            if (data) setProperty(data);
+        }
+        getProperty();
+    }, [router.query.propertyId]);
+    if (!property) return <div>Loading...</div>
     return (
         <PageWrapper>
             <PageContainer className="py-8">
                 <h1 className="text-dark-blue text-4xl lg:text-6xl font-bold">
-                    { data.title }
+                    { property.title }
                 </h1>
                 <div className="flex flex-col lg:flex-row gap-10 mt-10">
                     <div className="w-full">
@@ -80,13 +100,13 @@ export default function Property({ data }: IProps) {
                                     <div className="flex items-center gap-5">
                                         <CompanyIcon />
                                         <span className="text-dark-blue font-bold text-xl">
-                                            {getPropertyTypeNameWithArticle(data.propertyType)}
+                                            {getPropertyTypeNameWithArticle(property.propertyType)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-5">
                                         <DimensionIcon />
                                         <span className="text-dark-blue font-bold text-xl flex">
-                                            { data.area }m
+                                            { property.area }m
                                             <div className="h-full flex">
                                                 <span className="text-sm">2</span>
                                             </div>
@@ -95,7 +115,7 @@ export default function Property({ data }: IProps) {
                                     <div className="flex items-center gap-5">
                                         <LocationMarkSpotIcon />
                                         <span className="text-dark-blue font-bold text-xl">
-                                            {`${data.PropertyAddress.countryName}, ${data.PropertyAddress.cityName}`}
+                                            {`${property.PropertyAddress.countryName}, ${property.PropertyAddress.cityName}`}
                                         </span>
                                     </div>
                                 </div>
@@ -105,7 +125,7 @@ export default function Property({ data }: IProps) {
                                     <div>
                                         <span className="text-dark-blue">Price:</span>
                                         <h3 className="text-dark-blue font-bold text-xl">
-                                            { data.priceAmount } $
+                                            { property.priceAmount } $
                                         </h3>
                                     </div>
                                     <button className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
@@ -115,14 +135,14 @@ export default function Property({ data }: IProps) {
                             </div>
                             <div className="mt-8 md:px-20">
                                 <p className="text-dark-blue">
-                                    { data.description }
+                                    { property.description }
                                 </p>
                             </div>
                         </div>
                     </div>
                     <div className="flex flex-col gap-10 lg:max-w-350px w-full">
                         <div className="flex flex-col md:flex-row justify-center lg:justify-normal lg:flex-col w-full gap-10">
-                            <UserInfo user={data.User} displayBrokerLink className="bg-indigo-50" />
+                            <UserInfo user={property.User} displayBrokerLink className="bg-indigo-50" />
                             <div className="p-4 bg-indigo-50 rounded-sm flex flex-col gap-5">
                                 <h3 className="text-dark-blue text-xl font-bold">
                                     Brief characteristics
@@ -130,27 +150,27 @@ export default function Property({ data }: IProps) {
                                 <ul className="flex flex-col gap-3">
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Country:</span>
-                                        &nbsp;{data.PropertyAddress.countryName}
+                                        &nbsp;{property.PropertyAddress.countryName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">City:</span>
-                                        &nbsp;{data.PropertyAddress.cityName}
+                                        &nbsp;{property.PropertyAddress.cityName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Type:</span>
-                                        &nbsp;{data.propertyType}
+                                        &nbsp;{property.propertyType}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Total area:</span>
-                                        &nbsp;{ data.area } m2
+                                        &nbsp;{ property.area } m2
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Number of beds:</span>
-                                        &nbsp;{ data.bedRooms }
+                                        &nbsp;{ property.bedRooms }
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Number of bathrooms:</span>
-                                        &nbsp;{ data.bathRooms }
+                                        &nbsp;{ property.bathRooms }
                                     </li>
                                 </ul>
                             </div>
@@ -164,3 +184,5 @@ export default function Property({ data }: IProps) {
         </PageWrapper>
     )
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Property);

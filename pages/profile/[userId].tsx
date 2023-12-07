@@ -5,26 +5,50 @@ import { UserInfo } from "@/common/components/profile/user-info.component";
 import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { UserModel } from "@/common/services/user/user.model";
-import container from "@/server/container";
-import { UserController } from "@/server/controllers/user.controller";
-import { INextPageContextExtended } from "@/server/types/http.types";
+import { userService } from "@/common/services/user/user.service";
+import { RootState } from "@/common/store/root.reducer";
+import { SetProfileAction } from "@/common/store/user/user.action.interface";
+import { setProfileAction } from "@/common/store/user/user.actions";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { connect } from "react-redux";
+import { Dispatch } from "redux";
 
-interface IProps {
-    data: UserModel & { Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] }
+interface IState {
+    profile?: UserModel & { Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] };
+}
+  
+function mapStateToProps(state: RootState): IState {
+  return { profile: state.userReducer.profile };
 }
 
-type Params = {
-    userId: string;
-};
-interface IContext extends INextPageContextExtended<{}, Params> {}
-
-export async function getServerSideProps(context: IContext) {
-    return container.resolve<UserController>('userController')
-        .handlerSSR({...context, routePath: '/user/profile/:userId'});
+interface IDispatch {
+    setProfile: (payload: UserModel & {
+        Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] 
+    }) => SetProfileAction
 }
 
-export default function Profile({ data }: IProps) {
+const mapDispatchToProps = (dispatch: Dispatch<any>): IDispatch => {
+  return {
+    setProfile: (
+        payload: UserModel & { Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] }
+    ) => dispatch(setProfileAction(payload))
+  }
+}
+
+function Profile({ profile, setProfile }: IState & IDispatch) {
+    const router = useRouter();
+    useEffect(() => {
+        if (!router.query.userId) return;
+        const userId = router.query.userId as string || '';
+        async function getProfile() {
+            const data = await userService.getProfileByUserId(userId);
+            if (data) setProfile(data);
+        }
+        getProfile();
+    }, [router.query.userId]);
+    if (!profile) return <div>Loading...</div>
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -33,7 +57,7 @@ export default function Profile({ data }: IProps) {
                         User profile
                     </h2>
                     <div className="mt-4">
-                        <UserInfo user={data} displayEditLink />
+                        <UserInfo user={profile} displayEditLink />
                     </div>
                 </div>
             </PageContainer>
@@ -53,10 +77,12 @@ export default function Profile({ data }: IProps) {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <ListOfProperties properties={data.Properties} />
+                        <ListOfProperties properties={profile.Properties} />
                     </div>
                 </PageContainer>
             </div>
         </PageWrapper>
     )
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);

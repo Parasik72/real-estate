@@ -4,22 +4,44 @@ import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { PropertyModel } from "@/common/services/property/property.model";
-import container from "@/server/container";
-import { PropertyController } from "@/server/controllers/property.controller";
-import { INextPageContextExtended } from "@/server/types/http.types";
+import { propertyService } from "@/common/services/property/property.service";
+import { SetOffersAction } from "@/common/store/property/property.action.interface";
+import { setOffersAction } from "@/common/store/property/property.actions";
+import { RootState } from "@/common/store/root.reducer";
+import { useEffect } from "react";
+import { connect } from "react-redux";
+import { Dispatch } from "redux";
 
-interface IProps {
-    data: {
-        properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+interface IState {
+    offers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+}
+
+function mapStateToProps(state: RootState): IState {
+    return { offers: state.propertyReducer.offers }
+}
+
+interface IDispatch {
+    setOffers: (payload: (PropertyModel & {
+        PropertyAddress: PropertyAddressModel;
+    })[]) => SetOffersAction;
+}
+
+const mapDispatchToProps = (dispatch: Dispatch<any>): IDispatch => {
+    return {
+        setOffers: (
+            payload: (PropertyModel & { PropertyAddress: PropertyAddressModel; })[]
+        ) => dispatch(setOffersAction(payload))
     }
 }
 
-export async function getServerSideProps(context: INextPageContextExtended) {
-    return container.resolve<PropertyController>('propertyController')
-        .handlerSSR({...context, routePath: '/properties/offers'});
-}
-
-export default function Offers({ data }: IProps) {
+function Offers({ offers, setOffers }: IState & IDispatch) {
+    useEffect(() => {
+        async function getOffers() {
+            const data = await propertyService.getAllOffers();
+            if (data) setOffers(data);
+        }
+        getOffers();
+    }, []);
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -38,8 +60,10 @@ export default function Offers({ data }: IProps) {
                 </PageContainer>
             </div>
             <PageContainer className="py-8">
-                <ListOfProperties properties={data.properties} />
+                <ListOfProperties properties={offers} />
             </PageContainer>
         </PageWrapper>
     )
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Offers);

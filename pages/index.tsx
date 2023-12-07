@@ -7,21 +7,45 @@ import { PropertyCard } from "@/common/components/property-card.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PropertyModel } from "@/common/services/property/property.model";
-import { PropertyController } from "@/server/controllers/property.controller";
-import container from "@/server/container";
 import { PropertyAddressModel } from "@/common/services/property/property-address.model";
-import { INextPageContextExtended } from "@/server/types/http.types";
+import { RootState } from "@/common/store/root.reducer";
+import { SetLastOffersAction } from "@/common/store/property/property.action.interface";
+import { Dispatch } from "redux";
+import { setLastOffersAction } from "@/common/store/property/property.actions";
+import { connect } from "react-redux";
+import { useEffect } from "react";
+import { propertyService } from "@/common/services/property/property.service";
 
-interface IProps {
-  data: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+interface IState {
+  lastOffers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
 }
 
-export async function getServerSideProps(context: INextPageContextExtended) {
-  return container.resolve<PropertyController>('propertyController')
-    .handlerSSR({...context, routePath: '/properties/last-offers'});
+function mapStateToProps(state: RootState): IState {
+  return { lastOffers: state.propertyReducer.lastOffers }
 }
 
-export default function Home({ data }: IProps) {
+interface IDispatch {
+  setLastOffers: (payload: (PropertyModel & {
+    PropertyAddress: PropertyAddressModel;
+  })[]) => SetLastOffersAction;
+}
+
+const mapDispatchToProps = (dispatch: Dispatch<any>): IDispatch => {
+  return {
+    setLastOffers: (
+      payload: (PropertyModel & { PropertyAddress: PropertyAddressModel; })[]
+    ) => dispatch(setLastOffersAction(payload))
+  }
+}
+
+function Home({ lastOffers, setLastOffers }: IState & IDispatch) {
+  useEffect(() => {
+    async function getLastOffers() {
+      const data = await propertyService.getLastOffers();
+      if (data) setLastOffers(data);
+    }
+    getLastOffers();
+  }, []);
   return (
     <PageWrapper className="overflow-x-hidden">
       <PageContainer className="relative py-12">
@@ -69,7 +93,7 @@ export default function Home({ data }: IProps) {
             </div>
           </div>
           <div className="inline-flex gap-5 mt-6 overflow-x-hidden">
-            {data.map((property, i) => (
+            {lastOffers.map((property, i) => (
               <div key={property.propertyId} className="w-full flex-shrink-0 max-w-250px md:max-w-350px">
                 <PropertyCard 
                   property={property}
@@ -105,3 +129,5 @@ export default function Home({ data }: IProps) {
     </PageWrapper>
   )
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
