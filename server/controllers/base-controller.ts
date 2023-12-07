@@ -1,11 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { createRouter } from "next-connect";
-import { INextApiRequestExtended, INextPageContextExtended } from "./types/http.types";
-import { HttpException } from "./exceptions/http.exception";
-import { apiErrorHandler } from "./handlers/api-error.handler";
-import { notFoundHandler } from "./handlers/not-found.handler";
-import { ControllerConfig, MiddlewareType, MiddlewareTypeSSR } from "./types/controller.types";
+import { INextApiRequestExtended, INextPageContextExtended } from "../types/http.types";
+import { HttpException } from "../exceptions/http.exception";
+import { apiErrorHandler } from "../handlers/api-error.handler";
+import { notFoundHandler } from "../handlers/not-found.handler";
+import { ControllerConfig, MiddlewareType, MiddlewareTypeSSR } from "../types/controller.types";
 import 'reflect-metadata';
+import BaseContext from "../context/base-context";
 
 const getMiddlewares = (
     constructor: Function, 
@@ -46,7 +47,7 @@ const apiAction = (callback: any, statusCode: number) => (
     }
 );
 
-export class BaseController {
+export class BaseController extends BaseContext {
     public handler(
         routePath: string,
         expectedStatusCode: number = 200

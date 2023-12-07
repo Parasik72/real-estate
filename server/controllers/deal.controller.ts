@@ -1,25 +1,12 @@
 import { v4 } from "uuid";
-import container from "../container";
 import { HttpException } from "../exceptions/http.exception";
-import { 
-    CancelDealParams, 
-    GetAllDealsParams, 
-    SendDealParams, 
-    SignDealParams 
-} from "../params/deal.params";
-import { DealService } from "../services/deal.service";
-import { PropertyService } from "../services/property.service";
+import * as Params from "../params/deal.params";
 import type { ControllerConfig } from "../types/controller.types";
 import { PropertyStatuses } from "../types/properties.types";
 import { UUID } from "crypto";
 import { DealRequestedBy, DealStatuses } from "../types/deal.type";
-import { 
-    DEALS_LIMIT_DEFAULT, 
-    DEALS_PAGE_DEFAULT, 
-    DEALS_REQUESTED_BY_DEFAULT, 
-    DEALS_STATUS_NAME_DEFAULT 
-} from "../constants/deal.constants";
-import { BaseController } from "../base-controller";
+import * as Constants from "../constants/deal.constants";
+import { BaseController } from "./base-controller";
 import POST from "../decorators/post.decorator";
 import GET from "../decorators/get.decorator";
 import USE from "../decorators/use.decorator";
@@ -30,9 +17,8 @@ import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 @USE([sessions, passportInitialize, passportSession, isLogedIn])
 export class DealController extends BaseController {
     @POST('/api/deals/send/:propertyId')
-    async sendDeal({ query, user }: ControllerConfig<{}, SendDealParams>) {
-        const propertyService = container.resolve<PropertyService>('propertyService');
-        const dealService = container.resolve<DealService>('dealService');
+    async sendDeal({ query, user }: ControllerConfig<{}, Params.SendDealParams>) {
+        const { propertyService, dealService } = this.di;
         const { propertyId } = query;
         const property = await propertyService.getPropertyWithOwnerAndStatusByPropertyId(propertyId);
         if (!property) throw new HttpException("The property was not found", 404);
@@ -61,9 +47,8 @@ export class DealController extends BaseController {
     }
 
     @POST('/api/deals/sign/:propertyId')
-    async signDeal({ query, user }: ControllerConfig<{}, SignDealParams>) {
-        const propertyService = container.resolve<PropertyService>('propertyService');
-        const dealService = container.resolve<DealService>('dealService');
+    async signDeal({ query, user }: ControllerConfig<{}, Params.SignDealParams>) {
+        const { propertyService, dealService } = this.di;
         const { dealId } = query;
         const deal = await dealService.getDealById(dealId);
         if (!deal) throw new HttpException('The deal was not found', 404);
@@ -91,8 +76,8 @@ export class DealController extends BaseController {
     }
 
     @POST('/api/deals/cancel/:propertyId')
-    async cancelDeal({ query, user }: ControllerConfig<{}, CancelDealParams>) {
-        const dealService = container.resolve<DealService>('dealService');
+    async cancelDeal({ query, user }: ControllerConfig<{}, Params.CancelDealParams>) {
+        const { dealService } = this.di;
         const { dealId } = query;
         const deal = await dealService.getDealById(dealId);
         if (!deal) throw new HttpException('The deal was not found', 404);
@@ -111,12 +96,14 @@ export class DealController extends BaseController {
     }
 
     @GET('/api/deals')
-    async getAllDeals({ query, user }: ControllerConfig<{}, GetAllDealsParams>) {
-        const dealService = container.resolve<DealService>('dealService');
-        const page = query.page || DEALS_PAGE_DEFAULT;
-        const limit = query.limit || DEALS_LIMIT_DEFAULT;
-        const requestedBy = query.requestedBy as DealRequestedBy || DEALS_REQUESTED_BY_DEFAULT;
-        const dealStatusName = query.dealStatusName as DealStatuses || DEALS_STATUS_NAME_DEFAULT;
+    async getAllDeals({ query, user }: ControllerConfig<{}, Params.GetAllDealsParams>) {
+        const { dealService } = this.di;
+        const page = query.page || Constants.DEALS_PAGE_DEFAULT;
+        const limit = query.limit || Constants.DEALS_LIMIT_DEFAULT;
+        const requestedBy = 
+            query.requestedBy as DealRequestedBy || Constants.DEALS_REQUESTED_BY_DEFAULT;
+        const dealStatusName = 
+            query.dealStatusName as DealStatuses || Constants.DEALS_STATUS_NAME_DEFAULT;
         return dealService.getAllDeals(
             +page, +limit, requestedBy, dealStatusName, user?.userId!
         );

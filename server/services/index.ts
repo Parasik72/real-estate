@@ -4,6 +4,13 @@ import { PropertyService } from './property.service';
 import { FileUploaderService } from './file-uploader.service';
 import { DealService } from './deal.service';
 
+export interface IServiceContainer {
+    userService: UserService;
+    propertyService: PropertyService;
+    fileUploaderService: FileUploaderService;
+    dealService: DealService;
+}
+
 export default {
     userService: asClass(UserService).singleton(),
     propertyService: asClass(PropertyService).singleton(),

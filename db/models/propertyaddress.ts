@@ -1,20 +1,13 @@
-import { Model, InferAttributes, InferCreationAttributes, DataTypes } from 'sequelize';
-import { dbInstance } from '../db-instance';
-import { UUID } from 'crypto';
+import { Model, DataTypes, BuildOptions } from 'sequelize';
+import { IPropertyAddress } from '@/server/types/properties.types';
+import IContextContainer from '@/server/context/icontext-container';
 
-export class PropertyAddress extends Model<
-  InferAttributes<PropertyAddress>,
-  InferCreationAttributes<PropertyAddress>
-> {
-  declare propertyAddressId: UUID;
-  declare countryName: string;
-  declare cityName: string;
-  declare addressLine1: string;
-  declare addressLine2: string | null;
+export type PropertyAddressType = typeof Model & {
+  new (values?: object, options?: BuildOptions): IPropertyAddress;
 }
 
-PropertyAddress.init(
-  {
+export default (ctx: IContextContainer) => {
+  const PropertyAddress = <PropertyAddressType>ctx.dbInstance.define('PropertyAddresses', {
     propertyAddressId: {
       allowNull: false,
       primaryKey: true,
@@ -36,9 +29,10 @@ PropertyAddress.init(
       allowNull: true,
       type: DataTypes.STRING
     }
-  },
-  {
-    sequelize: dbInstance,
-    tableName: 'PropertyAddresses'
-  }
-);
+  });
+
+  PropertyAddress.hasOne(ctx.Property, { foreignKey: 'propertyAddressId' });
+  ctx.Property.belongsTo(PropertyAddress, { foreignKey: 'propertyAddressId'});
+
+  return PropertyAddress;
+}

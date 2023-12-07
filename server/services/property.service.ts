@@ -1,61 +1,50 @@
-import { Property } from "@/db/models/property";
-import { PropertyAddress } from "@/db/models/propertyaddress";
-import { 
-    ChangePropertyOwner, 
-    PropertiesPage, 
-    PropertyStatuses, 
-    UpdateProperty, 
-    UpdatePropertyAddress 
-} from "../types/properties.types";
-import { User } from "@/db/models/user";
-import { InferCreationAttributes } from "sequelize";
-import { PropertyImage } from "@/db/models/propertyimage";
+import * as Types from "../types/properties.types";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
-import { FileUploaderService } from "./file-uploader.service";
-import container from "../container";
 import { PROPERTY_IMGS_PATH } from "../constants/path.constants";
 import { OFFERS_LIMIT_DEFAULT, OFFERS_PAGE_DEFAULT } from "../constants/property.constants";
 import { GetAllPropertiesParams } from "../params/property.params";
-import { allOffersPropertyAddressWhereOptions, allOffersWhereOptions } from "../functions/property.functions";
+import { allOffersPAWhereOptions, allOffersWhereOptions } from "../functions/property.functions";
+import BaseContext from "../context/base-context";
+import { IUser } from "../types/user.types";
 
-export class PropertyService {
-    async getLastOffers(): Promise<Property[]> {
-        return Property.findAll({ 
+export class PropertyService extends BaseContext {
+    async getLastOffers(): Promise<Types.IProperty[]> {
+        return this.di.Property.findAll({ 
             limit: OFFERS_LIMIT_DEFAULT,
             order: [['updatedAt', 'DESC']],
             where: {
-                propertyStatus: PropertyStatuses.ForSale
+                propertyStatus: Types.PropertyStatuses.ForSale
             },
             include: [
-                { model: PropertyAddress }
+                { model: this.di.PropertyAddress }
             ]
         });
     }
 
-    async getAllOffers(params: GetAllPropertiesParams): Promise<PropertiesPage> {
+    async getAllOffers(params: GetAllPropertiesParams): Promise<Types.PropertiesPage> {
         const page = Number(params.page || OFFERS_PAGE_DEFAULT);
         const limit = Number(params.limit || OFFERS_LIMIT_DEFAULT);
         const mainWhere = allOffersWhereOptions(params);
-        const propertyAddressWhere = allOffersPropertyAddressWhereOptions(params);
-        const totalCount = await Property.count({
+        const propertyAddressWhere = allOffersPAWhereOptions(params);
+        const totalCount = await this.di.Property.count({
             where: mainWhere,
             include: [
                 {
-                    model: PropertyAddress,
+                    model: this.di.PropertyAddress,
                     where: propertyAddressWhere
                 }
             ]  
         });
         const offset = (page - 1) * limit;
-        const properties = await Property.findAll({
+        const properties = await this.di.Property.findAll({
             order: [['updatedAt', 'DESC']],
             offset,
             limit,
             where: mainWhere,
             include: [
                 {
-                    model: PropertyAddress,
+                    model: this.di.PropertyAddress,
                     where: propertyAddressWhere
                 }
             ] 
@@ -69,60 +58,61 @@ export class PropertyService {
         };
     }
 
-    async getPropertyWithOwnerByPropertyId(propertyId: string): Promise<Property & { User: User } | null> {
-        return Property.findOne({ 
+    async getPropertyWithOwnerByPropertyId(propertyId: string)
+    : Promise<Types.IProperty & { User: IUser } | null> {
+        return this.di.Property.findOne({ 
             where: { propertyId }, 
             include: [
-                { model: User, attributes: { exclude: ['password'] } },
-                { model: PropertyAddress }
+                { model: this.di.User, attributes: { exclude: ['password'] } },
+                { model: this.di.PropertyAddress }
             ] 
-        }) as Promise<Property & { User: User } | null>;
+        }) as Promise<Types.IProperty & { User: IUser } | null>;
     }
 
     async getPropertyWithOwnerAndStatusByPropertyId(propertyId: string)
-    : Promise<Property & { User: User } | null> {
-        return Property.findOne({ 
+    : Promise<Types.IProperty & { User: IUser } | null> {
+        return this.di.Property.findOne({ 
             where: { propertyId }, 
             include: [
-                { model: User, attributes: { exclude: ['password'] } },
+                { model: this.di.User, attributes: { exclude: ['password'] } },
             ] 
-        }) as Promise<Property & { User: User } | null>;
+        }) as Promise<Types.IProperty & { User: IUser } | null>;
     }
 
-    async getPropertyById(propertyId: string): Promise<Property | null> {
-        return Property.findByPk(propertyId);
+    async getPropertyById(propertyId: string): Promise<Types.IProperty | null> {
+        return this.di.Property.findByPk(propertyId);
     }
 
-    async getPropertiesByUserId(userId: string): Promise<Property[]> {
-        return Property.findAll({
+    async getPropertiesByUserId(userId: string): Promise<Types.IProperty[]> {
+        return this.di.Property.findAll({
             where: { userId }
         });
     }
 
-    async createProperty(data: InferCreationAttributes<Property>): Promise<Property> {
-        return Property.create(data);
+    async createProperty(data: Types.IProperty): Promise<Types.IProperty> {
+        return this.di.Property.create(data);
     }
 
-    async createPropertyAddress(data: InferCreationAttributes<PropertyAddress>)
-    : Promise<PropertyAddress> {
-        return PropertyAddress.create(data);
+    async createPropertyAddress(data: Types.IPropertyAddress)
+    : Promise<Types.IPropertyAddress> {
+        return this.di.PropertyAddress.create(data);
     }
 
-    async updatePropertyAddressById(data: UpdatePropertyAddress, propertyAddressId: string) {
-        return PropertyAddress.update(data, { where: { propertyAddressId } });
+    async updatePropertyAddressById(data: Types.UpdatePropertyAddress, propertyAddressId: string) {
+        return this.di.PropertyAddress.update(data, { where: { propertyAddressId } });
     }
 
-    async updatePropertyById(data: UpdateProperty, propertyId: string) {
-        return Property.update(data, { where: { propertyId }});
+    async updatePropertyById(data: Types.UpdateProperty, propertyId: string) {
+        return this.di.Property.update(data, { where: { propertyId }});
     }
 
-    async changePropertyOwnerById(data: ChangePropertyOwner, propertyId: string) {
-        return Property.update(data, { where: { propertyId }});
+    async changePropertyOwnerById(data: Types.ChangePropertyOwner, propertyId: string) {
+        return this.di.Property.update(data, { where: { propertyId }});
     }
 
     async createPropertyImages(propertyId: UUID, images: Express.Multer.File[]) {
-        const fileUploaderService = container.resolve<FileUploaderService>('fileUploaderService');
-        const propertyImages: InferCreationAttributes<PropertyImage>[] = [];
+        const { fileUploaderService } = this.di;
+        const propertyImages: Types.IPropertyImage[] = [];
         images.forEach((image) => {
             const propertyImageId = v4();
             const imgName = fileUploaderService.uploadFile(image, PROPERTY_IMGS_PATH);
@@ -132,12 +122,12 @@ export class PropertyService {
                 propertyImageId
             });
         })
-        return PropertyImage.bulkCreate(propertyImages);
+        return this.di.PropertyImage.bulkCreate(propertyImages);
     }
 
     async deletePropertyImages(propertyImageIds: string[], propertyId: string) {
-        const fileUploaderService = container.resolve<FileUploaderService>('fileUploaderService');
-        const propertyImages = await PropertyImage.findAll({
+        const { fileUploaderService } = this.di;
+        const propertyImages = await this.di.PropertyImage.findAll({
             where: { propertyImageId: propertyImageIds, propertyId }
         });
         const propertyImagesIds: string[] = [];
@@ -145,7 +135,7 @@ export class PropertyService {
             fileUploaderService.deleteFile(propertyImage.imgName, PROPERTY_IMGS_PATH);
             propertyImagesIds.push(propertyImage.propertyImageId);
         });
-        await PropertyImage.destroy({
+        await this.di.PropertyImage.destroy({
             where: { propertyImageId: propertyImagesIds }
         });
     }

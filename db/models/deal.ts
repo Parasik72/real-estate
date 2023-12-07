@@ -1,29 +1,13 @@
-import { Model, InferAttributes, InferCreationAttributes, DataTypes } from 'sequelize';
-import { dbInstance } from '../db-instance';
-import { Property } from './property';
-import { User } from './user';
-import { UUID } from 'crypto';
-import { DealStatuses } from '@/server/types/deal.type';
+import { Model, DataTypes, BuildOptions } from 'sequelize';
+import { DealStatuses, IDeal } from '@/server/types/deal.type';
+import IContextContainer from '@/server/context/icontext-container';
 
-type DealStatus = DealStatuses.Awaiting | DealStatuses.Canceled | DealStatuses.Done;
-
-export class Deal extends Model<
-  InferAttributes<Deal>,
-  InferCreationAttributes<Deal>
-> {
-  declare dealId: UUID;
-  declare signDate: BigInt | null;
-  declare totalPrice: number;
-  declare dealStatus: DealStatus;
-  declare propertyId: UUID;
-  declare sellerUserId: UUID;
-  declare buyerUserId: UUID;
-  declare createdAt: BigInt;
-  declare updatedAt: BigInt;
+export type DealType = typeof Model & {
+  new (values?: object, options?: BuildOptions): IDeal;
 }
 
-Deal.init(
-  {
+export default (ctx: IContextContainer) => {
+  const Deal = <DealType>ctx.dbInstance.define('Deals', {
     dealId: {
       allowNull: false,
       primaryKey: true,
@@ -77,18 +61,16 @@ Deal.init(
       allowNull: false,
       type: DataTypes.BIGINT
     }
-  },
-  {
-    sequelize: dbInstance,
-    tableName: 'Deals'
-  }
-);
+  });
 
-Property.hasMany(Deal, { foreignKey: 'propertyId' });
-Deal.belongsTo(Property, { foreignKey: 'propertyId' });
+  ctx.Property.hasMany(Deal, { foreignKey: 'propertyId' });
+  Deal.belongsTo(ctx.Property, { foreignKey: 'propertyId' });
 
-User.hasMany(Deal, { foreignKey: 'sellerUserId' });
-Deal.belongsTo(User, { foreignKey: 'sellerUserId', as: 'seller' });
+  ctx.User.hasMany(Deal, { foreignKey: 'sellerUserId' });
+  Deal.belongsTo(ctx.User, { foreignKey: 'sellerUserId', as: 'seller' });
 
-User.hasMany(Deal, { foreignKey: 'buyerUserId' });
-Deal.belongsTo(User, { foreignKey: 'buyerUserId', as: 'buyer' });
+  ctx.User.hasMany(Deal, { foreignKey: 'buyerUserId' });
+  Deal.belongsTo(ctx.User, { foreignKey: 'buyerUserId', as: 'buyer' });
+
+  return Deal;
+}

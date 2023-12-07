@@ -1,23 +1,13 @@
-import { Model, InferAttributes, InferCreationAttributes, DataTypes } from 'sequelize';
-import { dbInstance } from '../db-instance';
-import { UUID } from 'crypto';
+import { Model, DataTypes, BuildOptions } from 'sequelize';
+import { IUser } from '@/server/types/user.types';
+import IContextContainer from '@/server/context/icontext-container';
 
-export class User extends Model<
-  InferAttributes<User>,
-  InferCreationAttributes<User>
-> {
-  declare userId: UUID;
-  declare firstName: string;
-  declare lastName: string;
-  declare email: string;
-  declare phone: string;
-  declare password: string;
-  declare createdAt: BigInt;
-  declare updatedAt: BigInt;
+export type UserType = typeof Model & {
+  new (values?: object, options?: BuildOptions): IUser;
 }
 
-User.init(
-  {
+export default (ctx: IContextContainer) => {
+  const User = <UserType>ctx.dbInstance.define('Users', {
     userId: {
       allowNull: false,
       primaryKey: true,
@@ -52,9 +42,6 @@ User.init(
       allowNull: true,
       type: DataTypes.BIGINT
     }
-  },
-  {
-    sequelize: dbInstance,
-    tableName: 'Users'
-  }
-);
+  });
+  return User;
+}

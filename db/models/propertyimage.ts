@@ -1,19 +1,13 @@
-import { Model, InferAttributes, InferCreationAttributes, DataTypes } from 'sequelize';
-import { dbInstance } from '../db-instance';
-import { Property } from './property';
-import { UUID } from 'crypto';
+import { Model, DataTypes, BuildOptions } from 'sequelize';
+import { IPropertyImage } from '@/server/types/properties.types';
+import IContextContainer from '@/server/context/icontext-container';
 
-export class PropertyImage extends Model<
-  InferAttributes<PropertyImage>,
-  InferCreationAttributes<PropertyImage>
-> {
-  declare propertyImageId: string;
-  declare imgName: string;
-  declare propertyId: UUID;
+export type PropertyImageType = typeof Model & {
+  new (values?: object, options?: BuildOptions): IPropertyImage;
 }
 
-PropertyImage.init(
-  {
+export default (ctx: IContextContainer) => {
+  const PropertyImage = <PropertyImageType>ctx.dbInstance.define('PropertyImages', {
     propertyImageId: {
       allowNull: false,
       primaryKey: true,
@@ -31,12 +25,10 @@ PropertyImage.init(
         key: 'propertyId'
       }
     }
-  },
-  {
-    sequelize: dbInstance,
-    tableName: 'PropertyImages'
-  }
-);
+  });
 
-Property.hasMany(PropertyImage, { foreignKey: 'propertyId' });
-PropertyImage.belongsTo(Property, { foreignKey: 'propertyId' });
+  PropertyImage.belongsTo(ctx.Property, { foreignKey: 'propertyId' });
+  ctx.Property.hasMany(PropertyImage, { foreignKey: 'propertyId' });
+
+  return PropertyImage;
+}

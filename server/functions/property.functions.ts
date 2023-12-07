@@ -1,10 +1,9 @@
-import { InferAttributes, Op, WhereOptions } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import { GetAllPropertiesParams } from "../params/property.params";
-import { Property } from "@/db/models/property";
-import { PropertyStatuses } from "../types/properties.types";
+import { IProperty, PropertyStatuses } from "../types/properties.types";
 
 export const allOffersWhereOptions = 
-(params: GetAllPropertiesParams): WhereOptions<InferAttributes<Property, { omit: never; }>> => ({
+(params: GetAllPropertiesParams): WhereOptions<IProperty> => ({
     ...(params.propertyTypeId && { propertyTypeId: params.propertyTypeId}),
     ...(params.bedsNum && { bedRooms: params.bedsNum}),
     ...(params.bathsNum && { bathRooms: params.bathsNum}),
@@ -29,7 +28,7 @@ export const allOffersWhereOptions =
     propertyStatus: PropertyStatuses.ForSale
 });
 
-export const allOffersPropertyAddressWhereOptions =
+export const allOffersPAWhereOptions =
 (params: GetAllPropertiesParams) => ({
     ...(params.country && { countryName: { [Op.regexp]: params.country }}),
     ...(params.city && { cityName: { [Op.regexp]: params.city }}),

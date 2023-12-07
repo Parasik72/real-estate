@@ -1,34 +1,17 @@
-import { Model, InferAttributes, InferCreationAttributes, DataTypes } from 'sequelize';
-import { dbInstance } from '../db-instance';
-import { User } from './user';
-import { PropertyAddress } from './propertyaddress';
-import { UUID } from 'crypto';
-import { PropertyStatuses, PropertyTypes } from '@/server/types/properties.types';
+import { Model, DataTypes, BuildOptions } from 'sequelize';
+import { 
+  IProperty, 
+  PropertyStatuses, 
+  PropertyTypes 
+} from '@/server/types/properties.types';
+import IContextContainer from '@/server/context/icontext-container';
 
-type PropertyStatus = PropertyStatuses.Awaiting | PropertyStatuses.ForSale;
-type PropertyType = PropertyTypes.House | PropertyTypes.Apartment | PropertyTypes.Villa;
-
-export class Property extends Model<
-  InferAttributes<Property>,
-  InferCreationAttributes<Property>
-> {
-  declare propertyId: UUID;
-  declare bedRooms: number;
-  declare bathRooms: number;
-  declare area: number;
-  declare title: string;
-  declare description: string;
-  declare priceAmount: number;
-  declare propertyStatus: PropertyStatus;
-  declare userId: UUID;
-  declare propertyAddressId: UUID;
-  declare propertyType: PropertyType;
-  declare createdAt: BigInt;
-  declare updatedAt: BigInt;
+export type PropertyType = typeof Model & {
+  new (values?: object, options?: BuildOptions): IProperty;
 }
 
-Property.init(
-  {
+export default (ctx: IContextContainer) => {
+  const Property = <PropertyType>ctx.dbInstance.define('Properties', {
     propertyId: {
       allowNull: false,
       primaryKey: true,
@@ -97,15 +80,10 @@ Property.init(
       allowNull: false,
       type: DataTypes.BIGINT
     }
-  },
-  {
-    sequelize: dbInstance,
-    tableName: 'Properties'
-  }
-);
+  });
 
-User.hasMany(Property, { foreignKey: 'userId' });
-Property.belongsTo(User, { foreignKey: 'userId'});
+  Property.belongsTo(ctx.User, { foreignKey: 'userId'});
+  ctx.User.hasMany(Property, { foreignKey: 'userId' });
 
-PropertyAddress.hasOne(Property, { foreignKey: 'propertyAddressId' });
-Property.belongsTo(PropertyAddress, { foreignKey: 'propertyAddressId'});
+  return Property;
+}

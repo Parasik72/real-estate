@@ -1,6 +1,5 @@
 import { sessions } from "../sessions";
 import { passportAuthenticate, passportInitialize } from "../passport";
-import container from "../container";
 import { GetUserProfileParams } from "../params/user.params";
 import { SignUpDto } from "../dto/user/sign-up.dto";
 import { HttpException } from "../exceptions/http.exception";
@@ -8,12 +7,11 @@ import bcryptjs from 'bcryptjs';
 import { v4 } from "uuid";
 import { UUID } from "crypto";
 import type { ControllerConfig } from "../types/controller.types";
-import { BaseController } from "../base-controller";
+import { BaseController } from "./base-controller";
 import POST from "../decorators/post.decorator";
 import GET from "../decorators/get.decorator";
 import SSR from "../decorators/ssr.decorator";
 import USE from "../decorators/use.decorator";
-import { UserService } from "../services/user.service";
 import validate from "../validators/validate";
 import { signUpValidation } from "../validators/user-schemas/sign-up.schema";
 import { signInValidation } from "../validators/user-schemas/sign-in.schema";
@@ -22,7 +20,7 @@ export class UserController extends BaseController {
     @SSR('/user/profile/:userId')
     @GET('/api/user/profile/:userId')
     async getUserProfileById({ query }: ControllerConfig<{}, GetUserProfileParams>) {
-        const userService = container.resolve<UserService>('userService');
+        const { userService } = this.di;
         const user = await userService.getUserProfileById(query.userId);
         if (!user) throw new HttpException('The user was not found', 404);
         return user; 
@@ -38,7 +36,7 @@ export class UserController extends BaseController {
     @POST('/api/user/sign-up')
     @USE(validate(signUpValidation))
     async signUp({ body }: ControllerConfig<SignUpDto>) {
-        const userService = container.resolve<UserService>('userService');
+        const { userService } = this.di;
         const emailInUse = await userService.getUserByEmail(body.email);
         if (emailInUse) throw new HttpException('This email is already in use', 400);
         const userId = v4() as UUID;

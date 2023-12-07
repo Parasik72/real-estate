@@ -1,15 +1,11 @@
-import { Deal } from "@/db/models/deal";
-import { InferCreationAttributes } from "sequelize";
-import { DealRequestedBy, DealStatuses, DealsPage, UpdateDeal } from "../types/deal.type";
-import { Property } from "@/db/models/property";
+import { DealRequestedBy, DealStatuses, DealsPage, IDeal, UpdateDeal } from "../types/deal.type";
 import { dealRequestedByFindMap } from "../functions/deal.functions";
-import { User } from "@/db/models/user";
-import { PropertyAddress } from "@/db/models/propertyaddress";
+import BaseContext from "../context/base-context";
 
-export class DealService {
+export class DealService extends BaseContext {
     async getAwaitingDealByPropertyIdAndBuyerId(propertyId: string, buyerUserId: string)
-    : Promise<Deal | null> {
-        return Deal.findOne({
+    : Promise<IDeal | null> {
+        return this.di.Deal.findOne({
             where: {
                 propertyId,
                 buyerUserId,
@@ -18,22 +14,22 @@ export class DealService {
         });
     }
 
-    async createDeal(data: InferCreationAttributes<Deal>): Promise<Deal> {
-        return Deal.create(data);
+    async createDeal(data: IDeal): Promise<IDeal> {
+        return this.di.Deal.create(data);
     }
 
-    async getDealById(dealId: string): Promise<Deal | null> {
-        return Deal.findByPk(dealId);
+    async getDealById(dealId: string): Promise<IDeal | null> {
+        return this.di.Deal.findByPk(dealId);
     }
 
     async updateDealById(data: UpdateDeal, dealId: string) {
-        return Deal.update(data, { where: { dealId } });
+        return this.di.Deal.update(data, { where: { dealId } });
     }
 
     async updateDealsByPropertyIdAndStatusId(
         data: UpdateDeal, propertyId: string, dealStatus: DealStatuses
     ) {
-        return Deal.update(data, { where: { propertyId, dealStatus } });
+        return this.di.Deal.update(data, { where: { propertyId, dealStatus } });
     }
 
     async getAllDeals(
@@ -45,14 +41,14 @@ export class DealService {
     ): Promise<DealsPage> {
         const requestedByFunc = dealRequestedByFindMap[requestedBy];
         const requestedByData = requestedByFunc(userId)
-        const totalCount = await Deal.count({
+        const totalCount = await this.di.Deal.count({
             where: {
                 ...requestedByData,
                 dealStatus
             }
         });
         const offset = (page - 1) * limit;
-        const deals = await Deal.findAll({
+        const deals = await this.di.Deal.findAll({
             order: [['updatedAt', 'DESC']],
             offset,
             limit,
@@ -61,9 +57,9 @@ export class DealService {
                 dealStatus
             },
             include: [
-                { model: Property, include: [{ model: PropertyAddress }] },
-                { model: User, as: 'seller', attributes: { exclude: ['password'] } },
-                { model: User, as: 'buyer', attributes: { exclude: ['password'] } }
+                { model: this.di.Property, include: [{ model: this.di.PropertyAddress }] },
+                { model: this.di.User, as: 'seller', attributes: { exclude: ['password'] } },
+                { model: this.di.User, as: 'buyer', attributes: { exclude: ['password'] } }
             ]
         });
         return {

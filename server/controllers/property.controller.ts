@@ -1,16 +1,13 @@
-import container from "../container";
-import { PropertyService } from "../services/property.service";
 import { HttpException } from "../exceptions/http.exception";
-import { GetAllPropertiesParams, GetPropertyByIdParams, UpdatePropertyParams } from "../params/property.params";
+import * as Params from "../params/property.params";
 import { CreatePropertyDto } from "../dto/property/create-property.dto";
 import { v4 } from "uuid";
 import { UUID } from "crypto";
 import { UpdatePropertyDto } from "../dto/property/update-property.dto";
 import type { ControllerConfig } from "../types/controller.types";
-import { DealService } from "../services/deal.service";
 import { DealStatuses } from "../types/deal.type";
 import GET from "../decorators/get.decorator";
-import { BaseController } from "../base-controller";
+import { BaseController } from "./base-controller";
 import PATCH from "../decorators/patch.decorator";
 import POST from "../decorators/post.decorator";
 import SSR from "../decorators/ssr.decorator";
@@ -27,21 +24,19 @@ export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
   @GET('/api/properties/last-offers')
   async getLastOffers() {
-    const propertyService = container.resolve<PropertyService>('propertyService');
-    return propertyService.getLastOffers();
+    return this.di.propertyService.getLastOffers();
   }
 
   @SSR('/properties/offers')
   @GET('/api/properties/offers')
-  async getAllOffers({ query }: ControllerConfig<{}, GetAllPropertiesParams>) {
-    const propertyService = container.resolve<PropertyService>('propertyService');
-    return propertyService.getAllOffers(query);
+  async getAllOffers({ query }: ControllerConfig<{}, Params.GetAllPropertiesParams>) {
+    return this.di.propertyService.getAllOffers(query);
   }
 
   @USE([sessions, passportInitialize, passportSession, multer().any(), validate(createPropertyValidation)])
   @POST('/api/properties')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
-    const propertyService = container.resolve<PropertyService>('propertyService');
+    const { propertyService } = this.di;
     const propertyAddressId = v4() as UUID;
     await propertyService.createPropertyAddress({
       propertyAddressId,
@@ -75,9 +70,8 @@ export class PropertyController extends BaseController {
   ])
   @PATCH('/api/properties/patch/:propertyId')
   async updatePropertyById({ query, body, files, user }
-  : ControllerConfig<UpdatePropertyDto, UpdatePropertyParams>) {
-    const dealService = container.resolve<DealService>('dealService');
-    const propertyService = container.resolve<PropertyService>('propertyService');
+  : ControllerConfig<UpdatePropertyDto, Params.UpdatePropertyParams>) {
+    const { propertyService, dealService } = this.di;
     const property = await propertyService.getPropertyById(query.propertyId);
     if (!property) throw new HttpException("The property was not found", 404);
     if (property.userId !== user?.userId) {
@@ -118,8 +112,8 @@ export class PropertyController extends BaseController {
 
   @SSR('/properties/:propertyId')
   @GET('/api/properties/get/:propertyId')
-  async getPropertyById({ query }: ControllerConfig<{}, GetPropertyByIdParams>) {
-    const propertyService = container.resolve<PropertyService>('propertyService')
+  async getPropertyById({ query }: ControllerConfig<{}, Params.GetPropertyByIdParams>) {
+    const { propertyService } = this.di;
     const { propertyId } = query;
     const property = await propertyService.getPropertyWithOwnerByPropertyId(propertyId);
     if (!property) throw new HttpException("The property was not found", 404);

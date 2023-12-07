@@ -1,4 +1,18 @@
-import { Deal } from "@/db/models/deal";
+import { UUID } from "crypto";
+import { Model } from "sequelize";
+
+export type DealStatus = DealStatuses.Awaiting | DealStatuses.Canceled | DealStatuses.Done;
+export interface IDeal extends Model<IDeal, IDeal> {
+    dealId: UUID;
+    signDate: BigInt | null;
+    totalPrice: number;
+    dealStatus: DealStatus;
+    propertyId: UUID;
+    sellerUserId: UUID;
+    buyerUserId: UUID;
+    createdAt: BigInt;
+    updatedAt: BigInt;
+}
 
 export enum DealStatuses {
     Done='Done',
@@ -23,5 +37,5 @@ export interface DealsPage {
     limit: number;
     offset: number;
     totalPages: number;
-    deals: Deal[];
+    deals: IDeal[];
 }
