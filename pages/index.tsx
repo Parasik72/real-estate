@@ -9,12 +9,10 @@ import { PageContainer } from "@/common/components/page-container.component";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { RootState } from "@/common/store/root.reducer";
-import { SetLastOffersAction } from "@/common/store/property/property.action.interface";
-import { Dispatch } from "redux";
-import { setLastOffersAction } from "@/common/store/property/property.actions";
+import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
 import { useEffect } from "react";
-import { propertyService } from "@/common/services/property/property.service";
+import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
 
 interface IState {
   lastOffers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
@@ -25,25 +23,19 @@ function mapStateToProps(state: RootState): IState {
 }
 
 interface IDispatch {
-  setLastOffers: (payload: (PropertyModel & {
-    PropertyAddress: PropertyAddressModel;
-  })[]) => SetLastOffersAction;
+  getLastOffers: () => {
+    type: PropertyEffectActions;
+  };
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<any>): IDispatch => {
+const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): IDispatch => {
   return {
-    setLastOffers: (
-      payload: (PropertyModel & { PropertyAddress: PropertyAddressModel; })[]
-    ) => dispatch(setLastOffersAction(payload))
+    getLastOffers: () => dispatch({ type: PropertyEffectActions.GET_LAST_OFFERS })
   }
 }
 
-function Home({ lastOffers, setLastOffers }: IState & IDispatch) {
+function Home({ lastOffers, getLastOffers }: IState & IDispatch) {
   useEffect(() => {
-    async function getLastOffers() {
-      const data = await propertyService.getLastOffers();
-      if (data) setLastOffers(data);
-    }
     getLastOffers();
   }, []);
   return (
