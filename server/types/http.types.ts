@@ -1,6 +1,6 @@
-import { User } from "@/db/models/user";
 import { IncomingMessage, ServerResponse } from "http";
 import { NextApiRequest, NextApiResponse, NextPageContext } from "next";
+import { IUser } from "./user.types";
 
 export type QueryType = { [key: string]: string | string[]; };
 
@@ -10,7 +10,7 @@ export interface INextApiRequestExtended<
 > extends NextApiRequest, IncomingMessage {
   query: TQuery;
   body: TBody;
-  user?: User;
+  user?: IUser;
   files?: Express.Multer.File[];
 }
 
@@ -20,7 +20,7 @@ export interface INextPageContextExtended<
   TBody extends Object = {},
   TQuery extends QueryType = {}
 > extends NextPageContext {
-  user?: User;
+  user?: IUser;
   routePath?: string;
   query: TQuery;
   req: INextApiRequestExtended<TBody, TQuery>;

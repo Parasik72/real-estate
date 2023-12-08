@@ -1,8 +1,8 @@
-import { User } from "@/db/models/user";
 import { INextApiRequestExtended, QueryType } from "./http.types";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextHandler } from "next-connect";
 import { IncomingMessage, ServerResponse } from "http";
+import { IUser } from "./user.types";
 
 export interface ControllerConfig<
   TBody extends Object = {},
@@ -12,7 +12,7 @@ export interface ControllerConfig<
   body: TBody;
   req: INextApiRequestExtended<TBody, TQuery>;
   res: NextApiResponse;
-  user?: User;
+  user?: IUser;
   files?: Express.Multer.File[];
 }
 

@@ -1,5 +1,5 @@
 import { sessions } from "../sessions";
-import { passportAuthenticate, passportInitialize } from "../passport";
+import { passportAuthenticate, passportInitialize, passportSession } from "../passport";
 import { GetUserProfileParams } from "../params/user.params";
 import { SignUpDto } from "../dto/user/sign-up.dto";
 import { HttpException } from "../exceptions/http.exception";
@@ -15,6 +15,7 @@ import USE from "../decorators/use.decorator";
 import validate from "../validators/validate";
 import { signUpValidation } from "../validators/user-schemas/sign-up.schema";
 import { signInValidation } from "../validators/user-schemas/sign-in.schema";
+import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 
 export class UserController extends BaseController {
     @SSR('/user/profile/:userId')
@@ -50,5 +51,14 @@ export class UserController extends BaseController {
             updatedAt: time
         });
         return { message: 'Successful sign up!' };
+    }
+
+    @USE([sessions, passportInitialize, passportSession])
+    @SSR('/user/sign-in')
+    async auth({ user }: ControllerConfig) {
+        return {
+            isAuth: user !== undefined,
+            userId: user?.userId 
+        };
     }
 }

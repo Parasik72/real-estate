@@ -5,8 +5,8 @@ import { HttpException } from "../exceptions/http.exception";
 import { apiErrorHandler } from "../handlers/api-error.handler";
 import { notFoundHandler } from "../handlers/not-found.handler";
 import { ControllerConfig, MiddlewareType, MiddlewareTypeSSR } from "../types/controller.types";
-import 'reflect-metadata';
 import BaseContext from "../context/base-context";
+import 'reflect-metadata';
 
 const getMiddlewares = (
     constructor: Function, 
@@ -73,32 +73,32 @@ export class BaseController extends BaseContext {
     }
 
     public handlerSSR(context: INextPageContextExtended) {
-        const router = createRouter();
-        return router.get(async (req, res) => {
-            try {
-                const routePath = context.routePath || context.req.url;
-                const method = 'SSR';
-                const members = Reflect.getMetadata(routePath, this);
-                const [firstMethod] = members[method];
-                getMiddlewares(this.constructor, firstMethod)
-                        .forEach((middleware) => router.use(middleware as MiddlewareTypeSSR));
-                const callback = (this as any)[firstMethod].bind(this);
+        try {
+            const router = createRouter();
+            const routePath = context.routePath || context.req.url;
+            const method = 'SSR';
+            const members = Reflect.getMetadata(routePath, this);
+            const [firstMethod] = members[method];
+            // getMiddlewares(this.constructor, firstMethod)
+            //     .forEach((middleware) => router.use(middleware as MiddlewareTypeSSR));
+            const callback = (this as any)[firstMethod].bind(this);
+            return router.get(async (req: any, res) => {
                 const data = await callback({
                     body: {},
-                    query: context.query,
-                    user: context.user,
-                    req: context.req,
-                    res: context.res
+                    query: req.query,
+                    user: req.user,
+                    req: req,
+                    res: res
                 } as ControllerConfig);
                 return {
                     props: { data: JSON.parse(JSON.stringify(data)) }
                 };
-            } catch (error) {
-                return { 
-                    props: { message: error }, 
-                    notFound: error instanceof HttpException && error.statusCode === 404
-                };
-            }
-        }).run(context.req, context.res);
+            }).run(context.req, context.res);
+        } catch (error) {
+            return { 
+                props: { message: error }, 
+                notFound: error instanceof HttpException && error.statusCode === 404
+            };
+        }
     }
 }

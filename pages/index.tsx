@@ -12,6 +12,9 @@ import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
 import { useEffect } from "react";
 import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
+import container from "@/server/container";
+import { BaseController } from "@/server/controllers/base-controller";
+import { INextPageContextExtended } from "@/server/types/http.types";
 
 interface IState {
   properties: PropertyModel[];
@@ -33,7 +36,17 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
   }
 }
 
-function Home({ properties, getLastOffers }: IState & IDispatch) {
+export const getServerSideProps = (context: INextPageContextExtended) => {
+  return container
+    .resolve<BaseController>('userController')
+    .handlerSSR({...context, routePath: '/user/sign-in'});
+}
+
+interface IProps extends IState, IDispatch {
+  userId?: string;
+}
+
+function Home({ properties, getLastOffers, userId }: IProps) {
   useEffect(() => {
     getLastOffers();
   }, []);
