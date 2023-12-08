@@ -7,7 +7,6 @@ import { PropertyCard } from "@/common/components/property-card.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PropertyModel } from "@/common/services/property/property.model";
-import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { RootState } from "@/common/store/root.reducer";
 import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
@@ -15,11 +14,11 @@ import { useEffect } from "react";
 import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
 
 interface IState {
-  lastOffers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+  properties: PropertyModel[];
 }
 
 function mapStateToProps(state: RootState): IState {
-  return { lastOffers: state.propertyReducer.lastOffers }
+  return { properties: Object.values(state.propertyReducer.entities.properties) };
 }
 
 interface IDispatch {
@@ -34,7 +33,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
   }
 }
 
-function Home({ lastOffers, getLastOffers }: IState & IDispatch) {
+function Home({ properties, getLastOffers }: IState & IDispatch) {
   useEffect(() => {
     getLastOffers();
   }, []);
@@ -85,7 +84,7 @@ function Home({ lastOffers, getLastOffers }: IState & IDispatch) {
             </div>
           </div>
           <div className="inline-flex gap-5 mt-6 overflow-x-hidden">
-            {lastOffers.map((property, i) => (
+            {properties.map((property, i) => (
               <div key={property.propertyId} className="w-full flex-shrink-0 max-w-250px md:max-w-350px">
                 <PropertyCard 
                   property={property}

@@ -4,10 +4,9 @@ import Link from "next/link";
 import { FC } from "react";
 import { PropertyModel } from "../services/property/property.model";
 import CardImg from '../../common/images/card-img-1.png';
-import { PropertyAddressModel } from "../services/property/property-address.model";
 
 interface IProps {
-  property: PropertyModel & {PropertyAddress: PropertyAddressModel};
+  property: PropertyModel;
   className?: string;
 }
 
@@ -27,7 +26,7 @@ export const PropertyCard: FC<IProps> = ({
         <div className="flex flex-col gap-1">
           <span className="font-bold text-blue-900">{property.priceAmount}$</span>
           <span className="text-dark-blue">
-            {`${property.PropertyAddress.countryName}, ${property.PropertyAddress.cityName}`}
+            {`${property.PropertyAddress?.countryName}, ${property.PropertyAddress?.cityName}`}
           </span>
         </div>
       </div>

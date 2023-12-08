@@ -2,53 +2,53 @@ import { ListOfProperties } from "@/common/components/list-of-properties.compone
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { UserInfo } from "@/common/components/profile/user-info.component";
-import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { UserModel } from "@/common/services/user/user.model";
-import { userService } from "@/common/services/user/user.service";
 import { RootState } from "@/common/store/root.reducer";
-import { SetProfileAction } from "@/common/store/user/user.action.interface";
-import { setProfileAction } from "@/common/store/user/user.actions";
+import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
+import { StoreEntity } from "@/common/store/types/store.types";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { connect } from "react-redux";
-import { Dispatch } from "redux";
+import { Action, Dispatch } from "redux";
 
 interface IState {
-    profile?: UserModel & { Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] };
+    users: StoreEntity<UserModel>;
+    properties: PropertyModel[];
 }
   
 function mapStateToProps(state: RootState): IState {
-  return { profile: state.userReducer.profile };
+  return { 
+    users: state.userReducer.entities.users,
+    properties: Object.values(state.propertyReducer.entities.properties)
+  };
 }
 
 interface IDispatch {
-    setProfile: (payload: UserModel & {
-        Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] 
-    }) => SetProfileAction
+    getProfile: (userId: string) => {
+        type: UserEffectActions;
+        payload: {
+            userId: string;
+        };
+    }  
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<any>): IDispatch => {
+const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDispatch => {
   return {
-    setProfile: (
-        payload: UserModel & { Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] }
-    ) => dispatch(setProfileAction(payload))
+    getProfile: (userId: string) => 
+        dispatch({ type: UserEffectActions.GET_USER_PROFILE, payload: { userId } })
   }
 }
 
-function Profile({ profile, setProfile }: IState & IDispatch) {
+function Profile({ users, properties, getProfile }: IState & IDispatch) {
     const router = useRouter();
+    const userId = router.query.userId as string || '';
     useEffect(() => {
-        if (!router.query.userId) return;
-        const userId = router.query.userId as string || '';
-        async function getProfile() {
-            const data = await userService.getProfileByUserId(userId);
-            if (data) setProfile(data);
-        }
-        getProfile();
-    }, [router.query.userId]);
-    if (!profile) return <div>Loading...</div>
+        if (!userId) return;
+        getProfile(userId);
+    }, [userId]);
+    if (!users[userId]) return <div>Loading...</div>
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -57,7 +57,7 @@ function Profile({ profile, setProfile }: IState & IDispatch) {
                         User profile
                     </h2>
                     <div className="mt-4">
-                        <UserInfo user={profile} displayEditLink />
+                        <UserInfo user={users[userId]} displayEditLink />
                     </div>
                 </div>
             </PageContainer>
@@ -77,7 +77,7 @@ function Profile({ profile, setProfile }: IState & IDispatch) {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <ListOfProperties properties={profile.Properties} />
+                        <ListOfProperties properties={properties} />
                     </div>
                 </PageContainer>
             </div>

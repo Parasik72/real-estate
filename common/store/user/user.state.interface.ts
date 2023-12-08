@@ -1,7 +1,8 @@
-import { PropertyAddressModel } from "@/common/services/property/property-address.model";
-import { PropertyModel } from "@/common/services/property/property.model";
 import { UserModel } from "@/common/services/user/user.model";
+import { StoreEntity } from "../types/store.types";
 
 export interface UserState {
-    profile?: UserModel & { Properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[] }
+    entities: {
+        users: StoreEntity<UserModel>
+    }
 }

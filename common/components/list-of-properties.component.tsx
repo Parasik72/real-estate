@@ -1,10 +1,9 @@
 import { PropertyCard } from "./property-card.component";
 import { PropertyModel } from "../services/property/property.model";
 import { FC } from "react";
-import { PropertyAddressModel } from "../services/property/property-address.model";
 
 interface IProps {
-    properties: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+    properties: PropertyModel[];
 }
 
 export const ListOfProperties: FC<IProps> = ({ properties }) => (

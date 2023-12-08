@@ -1,6 +1,12 @@
-import { takeEvery } from "redux-saga/effects";
-import { PropertyEffectActions, fetchLastOffers } from "./property.saga-effects";
+import { all } from "redux-saga/effects";
+import { watchAllOffers, watchLastOffers, watchProperty } from "./property.saga-effects";
+import { watchUserProfile } from "./user.saga-effects";
 
-export default function* mySaga() {
-    yield takeEvery(PropertyEffectActions.GET_LAST_OFFERS, fetchLastOffers);
+export default function* rootSaga() {
+    yield all([
+        watchLastOffers(),
+        watchAllOffers(),
+        watchProperty(),
+        watchUserProfile()
+    ]);
 }

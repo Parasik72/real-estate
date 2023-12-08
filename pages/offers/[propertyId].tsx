@@ -11,51 +11,52 @@ import { PageContainer } from '@/common/components/page-container.component';
 import Link from 'next/link';
 import { PropertyModel } from '@/common/services/property/property.model';
 import { UserModel } from '@/common/services/user/user.model';
-import { PropertyAddressModel } from '@/common/services/property/property-address.model';
 import { getPropertyTypeNameWithArticle } from '@/common/functions/property.functions';
 import { RootState } from '@/common/store/root.reducer';
-import { setPropertyAction } from '@/common/store/property/property.actions';
-import { Dispatch } from 'redux';
-import { SetPropertyAction } from '@/common/store/property/property.action.interface';
+import { Action, Dispatch } from 'redux';
 import { useEffect } from 'react';
-import { propertyService } from '@/common/services/property/property.service';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
+import { PropertyEffectActions } from '@/common/store/saga-effects/property.saga-effects';
+import { StoreEntity } from '@/common/store/types/store.types';
 
 interface IState {
-    property?: PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel};
+    properties: StoreEntity<PropertyModel>;
+    users: StoreEntity<UserModel>;
 }
   
 function mapStateToProps(state: RootState): IState {
-  return { property: state.propertyReducer.property }
-}
-
-interface IDispatch {
-    setProperty: (payload: PropertyModel & {
-        PropertyAddress: PropertyAddressModel, User: UserModel
-    }) => SetPropertyAction
-}
-
-const mapDispatchToProps = (dispatch: Dispatch<any>): IDispatch => {
-  return {
-    setProperty: (
-          payload: PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel}
-      ) => dispatch(setPropertyAction(payload))
+  return { 
+    properties: state.propertyReducer.entities.properties,
+    users: state.userReducer.entities.users,
   }
 }
 
-function Property({ property, setProperty }: IState & IDispatch) {
+interface IDispatch {
+    getProperty: (propertyId: string) => {
+        type: PropertyEffectActions.GET_PROPERTY;
+        payload: {
+            propertyId: string;
+        };
+    };
+}
+
+const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): IDispatch => {
+  return {
+    getProperty: (propertyId: string) => 
+        dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: { propertyId } })
+  }
+}
+
+function Property({ properties, users, getProperty }: IState & IDispatch) {
     const router = useRouter();
+    const propertyId = router.query.propertyId as string || '';
     useEffect(() => {
-        if (!router.query.propertyId) return;
-        const propertyId = router.query.propertyId as string || '';
-        async function getProperty() {
-            const data = await propertyService.getPropertyById(propertyId);
-            if (data) setProperty(data);
-        }
-        getProperty();
-    }, [router.query.propertyId]);
-    if (!property) return <div>Loading...</div>
+        if (!propertyId) return;
+        getProperty(propertyId);
+    }, [propertyId]);
+    const property = properties[propertyId];
+    if (!property || !users[property.userId]) return <div>Loading...</div>
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -115,7 +116,7 @@ function Property({ property, setProperty }: IState & IDispatch) {
                                     <div className="flex items-center gap-5">
                                         <LocationMarkSpotIcon />
                                         <span className="text-dark-blue font-bold text-xl">
-                                            {`${property.PropertyAddress.countryName}, ${property.PropertyAddress.cityName}`}
+                                            {`${property.PropertyAddress?.countryName}, ${property.PropertyAddress?.cityName}`}
                                         </span>
                                     </div>
                                 </div>
@@ -142,7 +143,7 @@ function Property({ property, setProperty }: IState & IDispatch) {
                     </div>
                     <div className="flex flex-col gap-10 lg:max-w-350px w-full">
                         <div className="flex flex-col md:flex-row justify-center lg:justify-normal lg:flex-col w-full gap-10">
-                            <UserInfo user={property.User} displayBrokerLink className="bg-indigo-50" />
+                            <UserInfo user={users[property.userId]} displayBrokerLink className="bg-indigo-50" />
                             <div className="p-4 bg-indigo-50 rounded-sm flex flex-col gap-5">
                                 <h3 className="text-dark-blue text-xl font-bold">
                                     Brief characteristics
@@ -150,11 +151,11 @@ function Property({ property, setProperty }: IState & IDispatch) {
                                 <ul className="flex flex-col gap-3">
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Country:</span>
-                                        &nbsp;{property.PropertyAddress.countryName}
+                                        &nbsp;{property.PropertyAddress?.countryName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">City:</span>
-                                        &nbsp;{property.PropertyAddress.cityName}
+                                        &nbsp;{property.PropertyAddress?.cityName}
                                     </li>
                                     <li className="text-dark-blue">
                                         <span className="font-bold">Type:</span>

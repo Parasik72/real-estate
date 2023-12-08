@@ -1,3 +1,5 @@
+import { PropertyAddressModel } from "./property-address.model";
+
 export class PropertyModel {
     constructor(
         public propertyId: string,
@@ -12,7 +14,8 @@ export class PropertyModel {
         public propertyAddressId: string,
         public propertyType: string,
         public createdAt: BigInt,
-        public updatedAt: BigInt
+        public updatedAt: BigInt,
+        public PropertyAddress?: PropertyAddressModel
     ) {}
 }
 
@@ -30,5 +33,6 @@ export const createPropertyModel =
         item.propertyAddressId,
         item.propertyType,
         item.createdAt,
-        item.updatedAt
+        item.updatedAt,
+        item.PropertyAddress
     );

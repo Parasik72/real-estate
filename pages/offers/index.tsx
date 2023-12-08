@@ -2,45 +2,36 @@ import { ListOfProperties } from "@/common/components/list-of-properties.compone
 import { FormSearch } from "@/common/components/offers/form-search.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
-import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { PropertyModel } from "@/common/services/property/property.model";
-import { propertyService } from "@/common/services/property/property.service";
-import { SetOffersAction } from "@/common/store/property/property.action.interface";
-import { setOffersAction } from "@/common/store/property/property.actions";
 import { RootState } from "@/common/store/root.reducer";
+import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
 import { useEffect } from "react";
 import { connect } from "react-redux";
-import { Dispatch } from "redux";
+import { Action, Dispatch } from "redux";
 
 interface IState {
-    offers: (PropertyModel & {PropertyAddress: PropertyAddressModel})[];
+    properties: PropertyModel[];
 }
 
 function mapStateToProps(state: RootState): IState {
-    return { offers: state.propertyReducer.offers }
+    return { properties: Object.values(state.propertyReducer.entities.properties) };
 }
 
 interface IDispatch {
-    setOffers: (payload: (PropertyModel & {
-        PropertyAddress: PropertyAddressModel;
-    })[]) => SetOffersAction;
+    getAllOffers: () => {
+        type: PropertyEffectActions.GET_ALL_OFFERS;
+    };
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<any>): IDispatch => {
+const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): IDispatch => {
     return {
-        setOffers: (
-            payload: (PropertyModel & { PropertyAddress: PropertyAddressModel; })[]
-        ) => dispatch(setOffersAction(payload))
+        getAllOffers: () => dispatch({ type: PropertyEffectActions.GET_ALL_OFFERS })
     }
 }
 
-function Offers({ offers, setOffers }: IState & IDispatch) {
+function Offers({ properties, getAllOffers }: IState & IDispatch) {
     useEffect(() => {
-        async function getOffers() {
-            const data = await propertyService.getAllOffers();
-            if (data) setOffers(data);
-        }
-        getOffers();
+        getAllOffers();
     }, []);
     return (
         <PageWrapper>
@@ -60,7 +51,7 @@ function Offers({ offers, setOffers }: IState & IDispatch) {
                 </PageContainer>
             </div>
             <PageContainer className="py-8">
-                <ListOfProperties properties={offers} />
+                <ListOfProperties properties={properties} />
             </PageContainer>
         </PageWrapper>
     )
