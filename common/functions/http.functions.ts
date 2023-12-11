@@ -1,11 +1,13 @@
 const getBody = (method: string, body: any) => {
-    return method === 'GET' ? null : JSON.stringify(body);
+    if (method === 'GET') return null;
+    if (body instanceof FormData) return body;
+    return JSON.stringify(body);
 }
 
 export async function sendRequest<ReqBody extends Object, ResBody extends Object>
 (url: string, method: string = 'GET', body: ReqBody | null = null): Promise<ResBody | Error> {
     try {
-        const headers: HeadersInit = {
+        const headers: HeadersInit = body instanceof FormData ? {} : {
             'Content-Type': 'application/json'
         };
         const response = await fetch(url, { method, body: getBody(method, body), headers });

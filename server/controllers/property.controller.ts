@@ -48,7 +48,7 @@ export class PropertyController extends BaseController {
     const propertyId = v4() as UUID;
     const userId = user?.userId as UUID;
     const time = BigInt(new Date().getTime());
-    await propertyService.createProperty({
+    const property = await propertyService.createProperty({
       ...body,
       propertyId,
       userId,
@@ -57,7 +57,10 @@ export class PropertyController extends BaseController {
       updatedAt: time,
     });
     await propertyService.createPropertyImages(propertyId, files!);
-    return { message: 'The property has been created successfully.' };
+    return { 
+      message: 'The property has been created successfully.',
+      propertyId: property.propertyId 
+    };
   }
 
   @USE([

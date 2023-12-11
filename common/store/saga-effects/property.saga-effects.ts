@@ -9,11 +9,13 @@ import { StoreEntity } from "../types/store.types";
 import { addUserAction } from "../user/user.actions";
 import { PropertySchema } from "../normalizr/property.schema";
 import { UserSchema } from "../normalizr/user.schema";
+import { AddPropertyDto } from "@/common/services/property/dto/add-property.dto";
 
 export enum PropertyEffectActions {
     GET_LAST_OFFERS = 'GET_LAST_OFFERS',
     GET_ALL_OFFERS = 'GET_ALL_OFFERS',
     GET_PROPERTY = 'GET_PROPERTY',
+    ADD_PROPERTY = 'ADD_PROPERTY'
 }
 
 function* fetchLastOffers() {
@@ -31,7 +33,7 @@ function* fetchLastOffers() {
     }
 }
 
-export function* watchLastOffers() {
+function* watchLastOffers() {
     yield takeEvery(PropertyEffectActions.GET_LAST_OFFERS, fetchLastOffers);
 }
 
@@ -50,7 +52,7 @@ function* fetchAllOffers() {
     }
 }
 
-export function* watchAllOffers() {
+function* watchAllOffers() {
     yield takeEvery(PropertyEffectActions.GET_ALL_OFFERS, fetchAllOffers);
 }
 
@@ -74,12 +76,31 @@ function* fetchProperty(action: SagaEffectAction<{ propertyId: string }>) {
     }
 }
 
-export function* watchProperty() {
+function* watchProperty() {
     yield takeEvery(PropertyEffectActions.GET_PROPERTY, fetchProperty);
+}
+
+function* addProperty(action: SagaEffectAction<{
+    values: AddPropertyDto,
+    callback: (propertyId: string) => void;
+}>) {
+    try {
+        const response: { propertyId: string } = 
+            yield call(propertyService.addProperty.bind(propertyService, action.payload.values));
+        if (!response) return;
+        action.payload.callback(response.propertyId);
+    } catch (e) {
+        yield put({type: "PROPERTY_FETCH_FAILED", message: e});
+    }
+}
+
+function* watchAddProperty() {
+    yield takeEvery(PropertyEffectActions.ADD_PROPERTY, addProperty);
 }
 
 export default [
     watchLastOffers(),
     watchAllOffers(),
     watchProperty(),
+    watchAddProperty()
 ];
