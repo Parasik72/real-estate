@@ -90,7 +90,7 @@ function* addProperty(action: SagaEffectAction<{
         if (!response) return;
         action.payload.callback(response.propertyId);
     } catch (e) {
-        yield put({type: "PROPERTY_FETCH_FAILED", message: e});
+        yield put({type: "ADD_PROPERTY_FAILED", message: e});
     }
 }
 

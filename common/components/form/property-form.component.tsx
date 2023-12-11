@@ -69,16 +69,9 @@ export function PropertyForm<T extends PropertyVariableTypes>({ data, images, se
                     </label>
                 </div>
                 <Divider />
-                {data.type === PropertyTypeForm.EDIT && (
-                    <>
-                        <button className="py-4 w-full bg-red-900 text-white rounded-md font-bold">Remove the property</button>
-                        <Divider />
-                    </>
-                )}
                 <button
                     type="submit"
-                    disabled={!images} 
-                    className="py-4 w-full bg-blue-900 text-white rounded-md font-bold disabled:bg-blue-200"
+                    className="py-4 w-full bg-blue-900 text-white rounded-md font-bold"
                 >
                     Submit
                 </button>

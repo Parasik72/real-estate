@@ -20,6 +20,7 @@ import { useRouter } from 'next/router';
 import { PropertyEffectActions } from '@/common/store/saga-effects/property.saga-effects';
 import { StoreEntity } from '@/common/store/types/store.types';
 import { AuthUser } from '@/common/store/user/user.state.interface';
+import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
 
 interface IState {
     properties: StoreEntity<PropertyModel>;
@@ -184,7 +185,10 @@ function Property({ properties, users, authUser, getProperty }: IState & IDispat
                         </div>
                         {isCurrentUserOwner && (
                             <div className="md:px-20 lg:px-0">
-                                <Link href="/offers/edit/1" className="text-center block py-4 w-full bg-blue-900 text-white rounded-md font-bold">
+                                <Link 
+                                    href={FRONT_PATHS.editOfferById.replace(':propertyId', propertyId)} 
+                                    className="text-center block py-4 w-full bg-blue-900 text-white rounded-md font-bold"
+                                >
                                     Edit the property
                                 </Link>
                             </div>
