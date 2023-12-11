@@ -19,16 +19,19 @@ import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
 import { PropertyEffectActions } from '@/common/store/saga-effects/property.saga-effects';
 import { StoreEntity } from '@/common/store/types/store.types';
+import { AuthUser } from '@/common/store/user/user.state.interface';
 
 interface IState {
     properties: StoreEntity<PropertyModel>;
     users: StoreEntity<UserModel>;
+    authUser: AuthUser;
 }
   
 function mapStateToProps(state: RootState): IState {
   return { 
     properties: state.propertyReducer.entities.properties,
     users: state.userReducer.entities.users,
+    authUser: state.userReducer.authUser
   }
 }
 
@@ -48,7 +51,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
   }
 }
 
-function Property({ properties, users, getProperty }: IState & IDispatch) {
+function Property({ properties, users, authUser, getProperty }: IState & IDispatch) {
     const router = useRouter();
     const propertyId = router.query.propertyId as string || '';
     useEffect(() => {
@@ -56,7 +59,8 @@ function Property({ properties, users, getProperty }: IState & IDispatch) {
         getProperty(propertyId);
     }, [propertyId]);
     const property = properties[propertyId];
-    if (!property || !users[property.userId]) return <div>Loading...</div>
+    if (!property || !users[property.userId]) return <div>Loading...</div>;
+    const isCurrentUserOwner = authUser.isAuth && property.userId === authUser.userId;
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -129,9 +133,11 @@ function Property({ properties, users, getProperty }: IState & IDispatch) {
                                             { property.priceAmount } $
                                         </h3>
                                     </div>
-                                    <button className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
-                                        Send the deal
-                                    </button>
+                                    {authUser.isAuth && !isCurrentUserOwner && (
+                                        <button className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
+                                            Send the deal
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                             <div className="mt-8 md:px-20">
@@ -176,9 +182,13 @@ function Property({ properties, users, getProperty }: IState & IDispatch) {
                                 </ul>
                             </div>
                         </div>
-                        <div className="md:px-20 lg:px-0">
-                            <Link href="/offers/edit/1" className="text-center block py-4 w-full bg-blue-900 text-white rounded-md font-bold">Edit the property</Link>
-                        </div>
+                        {isCurrentUserOwner && (
+                            <div className="md:px-20 lg:px-0">
+                                <Link href="/offers/edit/1" className="text-center block py-4 w-full bg-blue-900 text-white rounded-md font-bold">
+                                    Edit the property
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </PageContainer>

@@ -77,3 +77,9 @@ function* fetchProperty(action: SagaEffectAction<{ propertyId: string }>) {
 export function* watchProperty() {
     yield takeEvery(PropertyEffectActions.GET_PROPERTY, fetchProperty);
 }
+
+export default [
+    watchLastOffers(),
+    watchAllOffers(),
+    watchProperty(),
+];

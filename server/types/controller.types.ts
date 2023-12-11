@@ -1,4 +1,4 @@
-import { INextApiRequestExtended, QueryType } from "./http.types";
+import { INextApiRequestExtended, INextApiResponseExtended, QueryType } from "./http.types";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextHandler } from "next-connect";
 import { IncomingMessage, ServerResponse } from "http";
@@ -11,7 +11,7 @@ export interface ControllerConfig<
   query: TQuery;
   body: TBody;
   req: INextApiRequestExtended<TBody, TQuery>;
-  res: NextApiResponse;
+  res: INextApiResponseExtended;
   user?: IUser;
   files?: Express.Multer.File[];
 }

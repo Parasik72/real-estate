@@ -12,6 +12,7 @@ export interface INextApiRequestExtended<
   body: TBody;
   user?: IUser;
   files?: Express.Multer.File[];
+  logout?: () => any;
 }
 
 export interface INextApiResponseExtended extends NextApiResponse, ServerResponse {}

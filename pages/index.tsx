@@ -12,16 +12,15 @@ import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
 import { useEffect } from "react";
 import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
-import container from "@/server/container";
-import { BaseController } from "@/server/controllers/base-controller";
-import { INextPageContextExtended } from "@/server/types/http.types";
+import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
 
 interface IState {
   properties: PropertyModel[];
 }
 
 function mapStateToProps(state: RootState): IState {
-  return { properties: Object.values(state.propertyReducer.entities.properties) };
+  const properties = state.propertyReducer.entities.properties;
+  return { properties: properties ? Object.values(properties) : [] };
 }
 
 interface IDispatch {
@@ -30,23 +29,20 @@ interface IDispatch {
   };
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): IDispatch => {
+const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions | UserEffectActions>>): IDispatch => {
   return {
-    getLastOffers: () => dispatch({ type: PropertyEffectActions.GET_LAST_OFFERS })
+    getLastOffers: () => dispatch({ type: PropertyEffectActions.GET_LAST_OFFERS }),
   }
 }
 
-export const getServerSideProps = (context: INextPageContextExtended) => {
-  return container
-    .resolve<BaseController>('userController')
-    .handlerSSR({...context, routePath: '/user/sign-in'});
-}
-
 interface IProps extends IState, IDispatch {
-  userId?: string;
+  data: {
+    userId?: string;
+    isAuth: boolean;
+  }
 }
 
-function Home({ properties, getLastOffers, userId }: IProps) {
+function Home({ properties, getLastOffers }: IProps) {
   useEffect(() => {
     getLastOffers();
   }, []);

@@ -30,5 +30,5 @@ const getSession = nextSession({
 
 export const sessions = async (req: NextApiRequest, res: NextApiResponse, next: any) => {
   await getSession(req, res);
-  await next();
+  return next();
 }

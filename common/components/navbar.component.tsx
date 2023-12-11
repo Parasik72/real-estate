@@ -5,8 +5,38 @@ import { useEffect, useState } from "react"
 import clsx from "clsx"
 import { CrossIcon } from "../icons/cross.icon"
 import { useRouter } from "next/router"
+import { AuthUser } from "../store/user/user.state.interface"
+import { RootState } from "../store/root.reducer"
+import { UserEffectActions } from "../store/saga-effects/user.saga-effects"
+import { Action, Dispatch } from "redux"
+import { connect } from "react-redux"
+import { FRONT_PATHS } from "../constants/front-paths.constants"
 
-export const Navbar = () => {
+interface IState {
+  authUser: AuthUser;
+}
+
+function mapStateToProps(state: RootState): IState {
+  return { authUser: state.userReducer.authUser };
+}
+
+interface IDispatch {
+  getAuthUser: () => {
+    type: UserEffectActions.GET_AUTH_USER;
+  };
+  logout: () => {
+    type: UserEffectActions.LOG_OUT;
+  }
+}
+ 
+const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDispatch => {
+  return {
+    getAuthUser: () => dispatch({ type: UserEffectActions.GET_AUTH_USER }),
+    logout: () => dispatch({ type: UserEffectActions.LOG_OUT })
+  }
+}
+
+const Navbar = ({ getAuthUser, logout, authUser }: IState & IDispatch) => {
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const toggleMenu = () => setIsMenuOpen(prev => !prev);
@@ -14,6 +44,15 @@ export const Navbar = () => {
     useEffect(() => {
         setIsMenuOpen(false);
     }, [router.pathname]);
+
+    useEffect(() => {
+        getAuthUser();
+    }, []);
+
+    const onLogout = () => {
+        logout();
+        router.push(FRONT_PATHS.home);
+    }
 
     return (
         <header className="bg-gray-100 shadow-lg lg:shadow-transparent lg:bg-transparent">
@@ -37,8 +76,17 @@ export const Navbar = () => {
                             <Link href="#topoffers" className="text-gray-800">About us</Link>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center gap-5">
-                            <Link href="/sign-in" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign In</Link>
-                            <Link href="/sign-up" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign Up</Link>
+                            {authUser.isAuth ? (
+                                <>
+                                    <Link href={FRONT_PATHS.profileById.replace(':userId', authUser.userId!)} className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Profile</Link>
+                                    <button onClick={onLogout} className="px-6 py-2 text-white bg-red-900 rounded-md font-bold">Logout</button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link href="/sign-in" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign In</Link>
+                                    <Link href="/sign-up" className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Sign Up</Link>
+                                </>
+                            )}
                         </div>
                     </nav>
                 </div>
@@ -46,3 +94,5 @@ export const Navbar = () => {
         </header>
     )
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navbar);

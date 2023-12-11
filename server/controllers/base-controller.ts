@@ -79,16 +79,16 @@ export class BaseController extends BaseContext {
             const method = 'SSR';
             const members = Reflect.getMetadata(routePath, this);
             const [firstMethod] = members[method];
-            // getMiddlewares(this.constructor, firstMethod)
-            //     .forEach((middleware) => router.use(middleware as MiddlewareTypeSSR));
+            getMiddlewares(this.constructor, firstMethod)
+                .forEach((middleware) => router.use(middleware as MiddlewareTypeSSR));
             const callback = (this as any)[firstMethod].bind(this);
             return router.get(async (req: any, res) => {
                 const data = await callback({
                     body: {},
                     query: req.query,
                     user: req.user,
-                    req: req,
-                    res: res
+                    req,
+                    res
                 } as ControllerConfig);
                 return {
                     props: { data: JSON.parse(JSON.stringify(data)) }

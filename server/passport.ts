@@ -20,7 +20,7 @@ passport.use(
 ));
 
 passport.serializeUser((user, done) => {
-  done(null, user.userId)
+  return done(null, user.userId)
 });
 passport.deserializeUser(async (userId: string, done) => {
   const userService = container.resolve<UserService>('userService');
@@ -33,3 +33,12 @@ export const passportInitialize: any = passport.initialize();
 
 export const passportSession = passport.session();
 export const passportAuthenticate = passport.authenticate('local');
+
+export const deserializeUserSSR = async (req: any, res: any, next: any) => {
+  if (!req?.session?.passport?.user) return next();
+  const userService = container.resolve<UserService>('userService');
+  const user = await userService.getUserById(req?.session?.passport?.user);
+  if (!user) return next();
+  req.user = user;
+  return next();
+}

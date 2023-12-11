@@ -30,8 +30,11 @@ export class UserController extends BaseController {
     @USE([sessions, passportInitialize, passportAuthenticate])
     @USE(validate(signInValidation))
     @POST('/api/user/sign-in')
-    async signIn() {
-        return { message: 'Successful sign in!' };
+    async signIn({ user }: ControllerConfig) {
+        return {
+            isAuth: true,
+            userId: user?.userId 
+        };
     }
 
     @POST('/api/user/sign-up')
@@ -54,11 +57,19 @@ export class UserController extends BaseController {
     }
 
     @USE([sessions, passportInitialize, passportSession])
-    @SSR('/user/sign-in')
+    @GET('/api/user/auth')
     async auth({ user }: ControllerConfig) {
         return {
             isAuth: user !== undefined,
             userId: user?.userId 
         };
+    }
+
+    @USE([sessions, passportInitialize, passportSession, isLogedIn])
+    @GET('/api/user/log-out')
+    async logout({ req }: ControllerConfig) {
+        if (!req.logout) throw new HttpException('Unauthorized', 401);
+        req.logout();
+        return { message: 'Successful log out!' };
     }
 }

@@ -16,16 +16,20 @@ const signUpInitialVariablesForm = (): SignUpVariablesForm => ({
     phone: ''
 });
 
-export const signInInitialDataForm = (): AuthActionsForm<SignInVariablesForm> => ({
+export const signInInitialDataForm = (
+    onSubmit: (values: SignInVariablesForm) => void
+): AuthActionsForm<SignInVariablesForm> => ({
     type: AuthTypeForm.SIGN_IN,
     variables: signInInitialVariablesForm(),
     validationSchema: signInSchemaForm,
-    onSubmit: userService.signIn.bind(userService)
+    onSubmit
 });
 
-export const signUpInitialDataForm = (): AuthActionsForm<SignUpVariablesForm> => ({
+export const signUpInitialDataForm = (
+    onSubmit: (values: SignUpVariablesForm) => void
+): AuthActionsForm<SignUpVariablesForm> => ({
     type: AuthTypeForm.SIGN_UP,
     variables: signUpInitialVariablesForm(),
     validationSchema: signUpSchemaForm,
-    onSubmit: userService.signIn.bind(userService)
+    onSubmit
 });
