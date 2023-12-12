@@ -3,7 +3,7 @@ import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { editPropertyInitForm } from "@/common/functions/property.functions";
 import { PropertyModel } from "@/common/services/property/property.model";
-import { StoreEntity } from "@/common/store/types/store.types";
+import { Entity, StoreEntity } from "@/common/store/types/store.types";
 import { EditPropertyVariablesForm } from "@/common/types/property.type";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -12,14 +12,19 @@ import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga
 import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
 import { PropertyAddressModel } from "@/common/services/property/property-address.model";
+import { EditPropertyDto } from "@/common/services/property/dto/edit-roperty.dto";
+import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
+import { PropertyImageModel } from "@/common/services/property/property-image.model";
 
 interface IState {
-    properties: StoreEntity<PropertyModel>;
+    properties: Entity<PropertyModel>;
+    propertyImagesStore: StoreEntity<PropertyImageModel>;
 }
   
 function mapStateToProps(state: RootState): IState {
   return { 
-    properties: state.propertyReducer.entities.properties || {}
+    properties: state.propertyReducer.entities.properties.byId,
+    propertyImagesStore: state.propertyReducer.entities.propertyImages
   }
 }
 
@@ -30,24 +35,36 @@ interface IDispatch {
             propertyId: string;
         };
     };
+    editProperty: (propertyId: string, values: EditPropertyDto, callback: () => void) => {
+        type: PropertyEffectActions.EDIT_PROPERTY;
+        payload: {
+            propertyId: string;
+            values: EditPropertyDto;
+            callback: () => void;
+        };
+    };
 }
 
 const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): IDispatch => {
   return {
     getProperty: (propertyId: string) => 
-        dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: { propertyId } })
+        dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: { propertyId } }),
+    editProperty: (
+        propertyId: string, values: EditPropertyDto, callback: () => void
+    ) =>
+        dispatch({ type: PropertyEffectActions.EDIT_PROPERTY, payload: { propertyId, values, callback } })
   }
 }
 
-function EditProperty({ properties, getProperty }: IState & IDispatch) {
-    const [images, setImages] = useState<FileList | null>(null);
+function EditProperty({ properties, propertyImagesStore, getProperty, editProperty }: IState & IDispatch) {
+    const [newImages, setNewImages] = useState<FileList | null>(null);
     const router = useRouter();
     const propertyId = router.query.propertyId as string || '';
     const property = properties[propertyId];
 
-
     const onSubmit = (values: EditPropertyVariablesForm) => {
-        const data = {...values};
+        if (values.imgsToDeleteIds?.length === propertyImagesStore.allIds.length) return;
+        const data: EditPropertyDto = {...values};
         Object.entries(values).forEach((value) => {
             if (value[1] === property[value[0] as keyof typeof property]) {
                 delete data[value[0] as keyof typeof data];
@@ -58,7 +75,17 @@ function EditProperty({ properties, getProperty }: IState & IDispatch) {
                 delete data[value[0] as keyof typeof data];
             }
         });
-        console.log('Result', data);
+        if (newImages) data['images'] = newImages;
+        else delete data['images'];
+        const callback = () => router.push(FRONT_PATHS.offerById.replace(':propertyId', propertyId));
+        if (Object.values(data).length !== 0) {
+            return editProperty(
+                propertyId, 
+                data, 
+                callback
+            );
+        }
+        callback();
     }
 
     useEffect(() => {
@@ -77,8 +104,9 @@ function EditProperty({ properties, getProperty }: IState & IDispatch) {
                         </h2>
                         <PropertyForm 
                             data={editPropertyInitForm(property, onSubmit)} 
-                            images={images}
-                            setImages={setImages}
+                            newImages={newImages}
+                            setNewImages={setNewImages}
+                            propertyImagesStore={propertyImagesStore}
                         />
                     </div>
                 </div>

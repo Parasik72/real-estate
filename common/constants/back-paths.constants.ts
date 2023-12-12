@@ -7,5 +7,6 @@ export const BACK_PATHS = {
     getAllOffers: 'properties/offers',
     getLastOffers: 'properties/last-offers',
     addProperty: 'properties',
+    editProperty: 'properties/patch/:propertyId',
     getProfileByUserId: 'user/profile/:userId',
 };

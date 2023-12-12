@@ -1,4 +1,5 @@
 import { PropertyAddressModel } from "./property-address.model";
+import { PropertyImageModel } from "./property-image.model";
 
 export class PropertyModel {
     constructor(
@@ -15,7 +16,8 @@ export class PropertyModel {
         public propertyType: string,
         public createdAt: BigInt,
         public updatedAt: BigInt,
-        public PropertyAddress?: PropertyAddressModel
+        public PropertyAddress?: PropertyAddressModel,
+        public PropertyImages?: PropertyImageModel[],
     ) {}
 }
 
@@ -34,5 +36,6 @@ export const createPropertyModel =
         item.propertyType,
         item.createdAt,
         item.updatedAt,
-        item.PropertyAddress
+        item.PropertyAddress,
+        item.PropertyImages,
     );

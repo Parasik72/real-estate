@@ -3,7 +3,14 @@ import { PropertyState } from "./property.state.interface";
 
 const defaultState: PropertyState = {
     entities: {
-        properties: {}
+        properties: {
+            byId: {},
+            allIds: []
+        },
+        propertyImages: {
+            byId: {},
+            allIds: []
+        }
     }
 };
 
@@ -26,11 +33,26 @@ export const propertyReducer =
                         ...state.entities,
                         properties: {
                             ...state.entities.properties,
-                            [property.propertyId]: property
+                            byId: {
+                                ...state.entities.properties.byId,
+                                [property.propertyId]: property
+                            },
+                            allIds: [
+                                ...state.entities.properties.allIds, 
+                                property.propertyId
+                            ]
                         }
                     }
                 }
             }
+            case PropertyActions.SET_PROPERTY_IMAGES:
+                return {
+                    ...state,
+                    entities: {
+                        ...state.entities,
+                        propertyImages: action.payload
+                    }
+                }
             default: return state;
         }
     }

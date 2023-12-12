@@ -1,7 +1,3 @@
-import Image from 'next/image';
-import PropertyPrimaryImg from '../../common/images/property-primary.png';
-import PropertySecondImg from '../../common/images/property-second.png';
-import { ArrowIcon } from '@/common/icons/arrow.icon';
 import { CompanyIcon } from '@/common/icons/company.icon';
 import { DimensionIcon } from '@/common/icons/dimension.icon';
 import { LocationMarkSpotIcon } from '@/common/icons/location-mark-spot.icon';
@@ -18,20 +14,24 @@ import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
 import { PropertyEffectActions } from '@/common/store/saga-effects/property.saga-effects';
-import { StoreEntity } from '@/common/store/types/store.types';
+import { Entity, StoreEntity } from '@/common/store/types/store.types';
 import { AuthUser } from '@/common/store/user/user.state.interface';
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
+import { PropertyImageModel } from '@/common/services/property/property-image.model';
+import { PropertyImages } from '@/common/components/property/property-images.component';
 
 interface IState {
-    properties: StoreEntity<PropertyModel>;
-    users: StoreEntity<UserModel>;
+    properties: Entity<PropertyModel>;
+    propertyImagesStore: StoreEntity<PropertyImageModel>;
+    users: Entity<UserModel>;
     authUser: AuthUser;
 }
   
 function mapStateToProps(state: RootState): IState {
   return { 
-    properties: state.propertyReducer.entities.properties || {},
-    users: state.userReducer.entities.users || {},
+    properties: state.propertyReducer.entities.properties.byId || {},
+    propertyImagesStore: state.propertyReducer.entities.propertyImages,
+    users: state.userReducer.entities.users.byId || {},
     authUser: state.userReducer.authUser
   }
 }
@@ -52,7 +52,13 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
   }
 }
 
-function Property({ properties, users, authUser, getProperty }: IState & IDispatch) {
+function Property({ 
+    properties,
+    propertyImagesStore,
+    users, 
+    authUser, 
+    getProperty 
+}: IState & IDispatch) {
     const router = useRouter();
     const propertyId = router.query.propertyId as string || '';
     useEffect(() => {
@@ -62,6 +68,7 @@ function Property({ properties, users, authUser, getProperty }: IState & IDispat
     const property = properties[propertyId];
     if (!property || !users[property.userId]) return <div>Loading...</div>;
     const isCurrentUserOwner = authUser.isAuth && property.userId === authUser.userId;
+
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -71,36 +78,7 @@ function Property({ properties, users, authUser, getProperty }: IState & IDispat
                 <div className="flex flex-col lg:flex-row gap-10 mt-10">
                     <div className="w-full">
                         <div>
-                            <div className="md:block bg-indigo-50">
-                                <Image className="w-full object-cover object-center shadow-sm" src={PropertyPrimaryImg} width={735} height={363} alt='primary' />
-                            </div>
-                            <div className="flex py-4 items-center justify-between gap-4">
-                                <button className="hidden md:block bg-indigo-100 rounded-full px-6 py-5">
-                                    <ArrowIcon reverse />
-                                </button>
-                                <div className="hidden w-full md:flex justify-between gap-4">
-                                    <div className="w-full xl:max-h-24">
-                                        <Image className="h-full object-cover object-center shadow-sm" src={PropertyPrimaryImg} width={191} height={84} alt='second1' />
-                                    </div>
-                                    <div  className="w-full xl:max-h-24">
-                                        <Image className="h-full object-cover object-center shadow-sm" src={PropertySecondImg} width={191} height={84} alt='second2' />
-                                    </div>
-                                    <div  className="w-full xl:max-h-24">
-                                        <Image className="h-full object-cover object-center shadow-sm" src={PropertySecondImg} width={191} height={84} alt='second3' />
-                                    </div>
-                                </div>
-                                <button className="hidden md:block bg-blue-900 rounded-full px-6 py-5">
-                                    <ArrowIcon />
-                                </button>
-                            </div>
-                            <div className="flex justify-center gap-5 md:hidden">
-                                <button className="bg-indigo-100 rounded-full px-6 py-5">
-                                    <ArrowIcon reverse />
-                                </button>
-                                <button className="bg-blue-900 rounded-full px-6 py-5">
-                                    <ArrowIcon />
-                                </button>
-                            </div>
+                            <PropertyImages propertyImagesStore={propertyImagesStore} />
                             <div className="flex flex-col gap-5 md:px-20 mt-5">
                                 <div className="flex flex-col md:flex-row justify-between gap-4">
                                     <div className="flex items-center gap-5">
@@ -173,7 +151,7 @@ function Property({ properties, users, authUser, getProperty }: IState & IDispat
                                         &nbsp;{ property.area } m2
                                     </li>
                                     <li className="text-dark-blue">
-                                        <span className="font-bold">Number of beds:</span>
+                                        <span className="font-bold">Number of bedrooms:</span>
                                         &nbsp;{ property.bedRooms }
                                     </li>
                                     <li className="text-dark-blue">

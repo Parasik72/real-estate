@@ -19,7 +19,7 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
-  const properties = state.propertyReducer.entities.properties;
+  const properties = state.propertyReducer.entities.properties.byId;
   return { properties: properties ? Object.values(properties) : [] };
 }
 

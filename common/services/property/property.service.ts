@@ -5,6 +5,7 @@ import { PropertiesPageResponse } from "./property-http.types";
 import { PropertyAddressModel } from "./property-address.model";
 import { UserModel } from "../user/user.model";
 import { AddPropertyDto } from "./dto/add-property.dto";
+import { EditPropertyDto } from "./dto/edit-roperty.dto";
 
 class PropertyService extends HttpService {
     async getLastOffers()
@@ -36,19 +37,16 @@ class PropertyService extends HttpService {
     }
 
     async addProperty(dto: AddPropertyDto) {
-        const formData = new FormData;
-        Object.entries(dto).map((value) => {
-            if (value[1] instanceof FileList) {
-                for(let i = 0; i < value[1].length; ++i) {
-                    formData.append(`${value[0]}`, value[1].item(i) || '');
-                }
-            } else {
-                formData.append(value[0], value[1]);
-            }
-        });
         return this.post<FormData, { propertyId: string }>({
             url: BACK_PATHS.addProperty,
-            body: formData
+            body: this.toFormData(dto)
+        });
+    }
+
+    async editProperty(dto: EditPropertyDto, propertyId: string) {
+        return this.patch<FormData, { message: string }>({
+            url: BACK_PATHS.editProperty.replace(':propertyId', propertyId),
+            body: this.toFormData(dto)
         });
     }
 }

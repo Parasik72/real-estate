@@ -12,10 +12,11 @@ interface IProps {
     as?: string;
     children?: React.ReactNode;
     optional?: boolean;
+    value?: string;
 }
 
 export const FormikInput: FC<IProps> = ({ 
-    placeholder, className, type, name, id, title, as, children, optional
+    placeholder, className, type, name, id, title, as, children, optional, value
 }) => (
     <div className="h-full">
         {as !== 'button' && (
@@ -32,6 +33,7 @@ export const FormikInput: FC<IProps> = ({
                 className={clsx("py-4 w-full h-full border-gray-300 rounded-md", className)} 
                 type={type}
                 as={as}
+                {...{...(value && {value})}}
             >
                 {children}
             </Field>

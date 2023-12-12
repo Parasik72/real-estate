@@ -5,7 +5,7 @@ import { call, put, takeEvery } from "redux-saga/effects";
 import { userService } from "@/common/services/user/user.service";
 import { normalize } from "normalizr";
 import { addUserAction, setAuthUserAction, unsetAuthUserAction } from "../user/user.actions";
-import { StoreEntity } from "../types/store.types";
+import { Entity } from "../types/store.types";
 import { setPropertiesAction } from "../property/property.actions";
 import { PropertySchema } from "../normalizr/property.schema";
 import { UserSchema } from "../normalizr/user.schema";
@@ -30,10 +30,12 @@ function* fetchUserProfile(action: SagaEffectAction<{ userId: string }>) {
         const schema = userSchema.getWithPropertiesSchema(propertySchema.getArraySchema());
         const normalizrData = normalize(response, schema);
         const user: UserModel = normalizrData?.entities?.users?.[action.payload.userId];
-        const properties: StoreEntity<PropertyModel> = normalizrData?.entities?.properties!;
+        const properties: Entity<PropertyModel> = normalizrData?.entities?.properties!; 
+        const propertiesIds = Object.keys(properties);
+
 
         yield put(addUserAction(user));
-        yield put(setPropertiesAction(properties));
+        yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
     } catch (e) {
         yield put({type: "USER_PROFILE_FETCH_FAILED", message: e});
     }

@@ -10,16 +10,26 @@ import { Form, Formik } from "formik";
 import { FormikInput } from "./formik-input.component";
 import { ChangeEvent, Dispatch, SetStateAction } from "react";
 import clsx from "clsx";
+import { PropertyImageModel } from "@/common/services/property/property-image.model";
+import Image from 'next/image';
+import { FRONT_IMGS_PATH } from "@/common/constants/front-paths.constants";
+import { StoreEntity } from "@/common/store/types/store.types";
 
 interface IProps<T extends PropertyVariableTypes> {
     data: PropertyActionsForm<T>;
-    images: FileList | null;
-    setImages: Dispatch<SetStateAction<FileList | null>>
+    newImages: FileList | null;
+    setNewImages: Dispatch<SetStateAction<FileList | null>>;
+    propertyImagesStore?: StoreEntity<PropertyImageModel>;
 }
 
-export function PropertyForm<T extends PropertyVariableTypes>({ data, images, setImages }: IProps<T>) {
+export function PropertyForm<T extends PropertyVariableTypes>({ 
+    data, 
+    newImages, 
+    setNewImages,
+    propertyImagesStore
+}: IProps<T>) {
     const onImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setImages(e.target.files);
+        setNewImages(e.target.files);
     }
     return (
         <Formik initialValues={data.variables} onSubmit={data.onSubmit} validationSchema={data.validationSchema}>
@@ -51,22 +61,50 @@ export function PropertyForm<T extends PropertyVariableTypes>({ data, images, se
                 <div className="h-full">
                     <FormikInput optional title="Address line 2" id="addressLine2" name="addressLine2" placeholder="Address line 2" type="text" />
                 </div>
-                <Divider text="Images" />
+                <Divider text="Add images" />
                 <div className="h-full flex text-center">
                     <input onChange={onImagesChange} multiple id="images" className="hidden" type="file" accept="image/*" />
                     <label 
                         htmlFor="images" 
                         className={clsx("w-full py-3 px-4 border-2 rounded-md font-bold cursor-pointer", {
-                            'text-blue-900': !images,
-                            'bg-transparent': !images,
-                            'border-blue-900': !images,
-                            'text-white': images,
-                            'bg-green-900': images,
-                            'border-green-900': images,
+                            'text-blue-900': !newImages,
+                            'bg-transparent': !newImages,
+                            'border-blue-900': !newImages,
+                            'text-white': newImages,
+                            'bg-green-900': newImages,
+                            'border-green-900': newImages,
                         })}
                     >
-                        {images ? 'Images loaded' : 'Load images'}
+                        {newImages ? 'Images loaded' : 'Load images'}
                     </label>
+                </div>
+                {data.type === PropertyTypeForm.EDIT && <Divider text="Current images" />}
+                <div className="flex flex-col gap-10">
+                    {data.type === PropertyTypeForm.EDIT && propertyImagesStore?.allIds.map((imgId, index) => (
+                        <div key={imgId} className="flex flex-col gap-3 items-center">
+                            <Image
+                                className="w-full"
+                                src={
+                                    FRONT_IMGS_PATH
+                                        .property
+                                        .replace(':imgName', propertyImagesStore.byId[imgId].imgName)
+                                } 
+                                alt="currentImg" 
+                                width={300} 
+                                height={200} 
+                            />
+                            <div className="flex gap-5 items-center">
+                                <FormikInput
+                                    className="cursor-pointer"
+                                    name='imgsToDeleteIds' 
+                                    id='imgsToDeleteIds' 
+                                    title="Remove ?"
+                                    type="checkbox"
+                                    value={imgId}
+                                />
+                            </div>
+                        </div>
+                    ))}
                 </div>
                 <Divider />
                 <button

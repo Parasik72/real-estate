@@ -1,21 +1,23 @@
 import { propertyService } from "@/common/services/property/property.service";
 import { call, put, takeEvery } from "redux-saga/effects";
-import { addPropertyAction, setPropertiesAction } from "../property/property.actions";
+import { addPropertyAction, setPropertiesAction, setPropertyImagesAction } from "../property/property.actions";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { SagaEffectAction } from "../types/saga.types";
 import { UserModel } from "@/common/services/user/user.model";
-import { normalize } from "normalizr";
-import { StoreEntity } from "../types/store.types";
+import { normalize, schema } from "normalizr";
+import { Entity } from "../types/store.types";
 import { addUserAction } from "../user/user.actions";
 import { PropertySchema } from "../normalizr/property.schema";
-import { UserSchema } from "../normalizr/user.schema";
 import { AddPropertyDto } from "@/common/services/property/dto/add-property.dto";
+import { EditPropertyDto } from "@/common/services/property/dto/edit-roperty.dto";
+import { PropertyImageModel } from "@/common/services/property/property-image.model";
 
 export enum PropertyEffectActions {
     GET_LAST_OFFERS = 'GET_LAST_OFFERS',
     GET_ALL_OFFERS = 'GET_ALL_OFFERS',
     GET_PROPERTY = 'GET_PROPERTY',
-    ADD_PROPERTY = 'ADD_PROPERTY'
+    ADD_PROPERTY = 'ADD_PROPERTY',
+    EDIT_PROPERTY = 'EDIT_PROPERTY'
 }
 
 function* fetchLastOffers() {
@@ -25,9 +27,10 @@ function* fetchLastOffers() {
 
         const propertySchema = new PropertySchema();
         const normalizrData = normalize(response, propertySchema.getArraySchema());
-        const properties: StoreEntity<PropertyModel> = normalizrData?.entities?.properties!; 
+        const properties: Entity<PropertyModel> = normalizrData?.entities?.properties!; 
+        const propertiesIds = Object.keys(properties);
 
-        yield put(setPropertiesAction(properties));
+        yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
     } catch (e) {
         yield put({type: "LAST_OFFERS_FETCH_FAILED", message: e});
     }
@@ -44,9 +47,10 @@ function* fetchAllOffers() {
 
         const propertySchema = new PropertySchema();
         const normalizrData = normalize(response, propertySchema.getArraySchema());
-        const properties: StoreEntity<PropertyModel> = normalizrData?.entities?.properties!; 
+        const properties: Entity<PropertyModel> = normalizrData?.entities?.properties!; 
+        const propertiesIds = Object.keys(properties);
 
-        yield put(setPropertiesAction(properties));
+        yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
     } catch (e) {
         yield put({type: "ALL_OFFERS_FETCH_FAILED", message: e});
     }
@@ -61,16 +65,24 @@ function* fetchProperty(action: SagaEffectAction<{ propertyId: string }>) {
         const response: PropertyModel & { User: UserModel} = 
             yield call(propertyService.getPropertyById.bind(propertyService, action.payload.propertyId));
 
-        const userSchema = new UserSchema();
-        const propertySchema = new PropertySchema();
-        const normalizrData = 
-            normalize(response, propertySchema.getWithUserSchema(userSchema.getOneSchema()));
+        const userSchema = new schema.Entity('users', {}, { idAttribute: 'userId' });
+        const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
+        const propertySchema = new schema.Entity(
+            'properties', 
+            { User: userSchema, PropertyImages: [propertyImageSchema] }, 
+            { idAttribute: 'propertyId' }
+        )
+
+        const normalizrData = normalize(response, propertySchema);
         const property: PropertyModel = 
             normalizrData.entities?.properties?.[action.payload.propertyId];
         const user: UserModel = normalizrData.entities?.users?.[property.userId];
-        
+        const propertyImages: Entity<PropertyImageModel> = normalizrData.entities?.propertyImages || {};
+        const propertyImagesIds = Object.keys(propertyImages) || [];
+
         yield put(addPropertyAction(property));
         yield put(addUserAction(user));
+        yield put(setPropertyImagesAction({ byId: propertyImages, allIds: propertyImagesIds}));
     } catch (e) {
         yield put({type: "PROPERTY_FETCH_FAILED", message: e});
     }
@@ -98,9 +110,33 @@ function* watchAddProperty() {
     yield takeEvery(PropertyEffectActions.ADD_PROPERTY, addProperty);
 }
 
+function* editProperty(action: SagaEffectAction<{
+    values: EditPropertyDto,
+    propertyId: string,
+    callback: () => void;
+}>) {
+    try {
+        const response: object = 
+            yield call(propertyService.editProperty.bind(
+                propertyService, 
+                action.payload.values, 
+                action.payload.propertyId
+            ));
+        if (!response) return;
+        action.payload.callback();
+    } catch (e) {
+        yield put({type: "EDIT_PROPERTY_FAILED", message: e});
+    }
+}
+
+function* watchEditProperty() {
+    yield takeEvery(PropertyEffectActions.EDIT_PROPERTY, editProperty);
+}
+
 export default [
     watchLastOffers(),
     watchAllOffers(),
     watchProperty(),
-    watchAddProperty()
+    watchAddProperty(),
+    watchEditProperty()
 ];

@@ -10,6 +10,24 @@ export class HttpService {
         return `${'/api'}/${path}`;
     }
 
+    protected toFormData<T extends Object>(body: T) {
+        const formData = new FormData;
+        Object.entries(body).map((value) => {
+            if (value[1] instanceof FileList) {
+                for(let i = 0; i < value[1].length; ++i) {
+                    formData.append(`${value[0]}`, value[1].item(i) || '');
+                }
+            } else if(value[1] instanceof Array) {
+                for(let i = 0; i < value[1].length; ++i) {
+                    formData.append(`${value[0]}[${i}]`, value[1][i]);
+                }
+            } else {
+                formData.append(value[0], value[1]);
+            }
+        });
+        return formData;
+    }
+
     protected async get<ResBody extends Object>(config: HttpRequestConfig<Object>)
     : Promise<ResBody | null> {
         const data = await sendRequest<Object, ResBody>(

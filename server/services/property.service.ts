@@ -65,7 +65,8 @@ export class PropertyService extends BaseContext {
             where: { propertyId }, 
             include: [
                 { model: this.di.User, attributes: { exclude: ['password'] } },
-                { model: this.di.PropertyAddress }
+                { model: this.di.PropertyAddress },
+                { model: this.di.PropertyImage },
             ] 
         }) as Promise<Types.IProperty & { User: IUser } | null>;
     }

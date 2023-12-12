@@ -4,7 +4,10 @@ import { UserState } from "./user.state.interface"
 const defaultState: UserState = {
     authUser: { isAuth: false },
     entities: {
-        users: {}
+        users: {
+            byId: {},
+            allIds: []
+        }
     }
 }
 
@@ -18,7 +21,11 @@ export const userReducer = (state = defaultState, action: UserAction): UserState
                     ...state.entities,
                     users: {
                         ...state.entities.users,
-                        [user.userId]: user
+                        byId: {
+                            ...state.entities.users.byId,
+                            [user.userId]: user
+                        },
+                        allIds: [...state.entities.users.allIds, user.userId]
                     }
                 }
             };

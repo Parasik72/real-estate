@@ -6,7 +6,7 @@ import { PropertyModel } from "@/common/services/property/property.model";
 import { UserModel } from "@/common/services/user/user.model";
 import { RootState } from "@/common/store/root.reducer";
 import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
-import { StoreEntity } from "@/common/store/types/store.types";
+import { Entity } from "@/common/store/types/store.types";
 import { AuthUser } from "@/common/store/user/user.state.interface";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -15,15 +15,15 @@ import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 
 interface IState {
-    users: StoreEntity<UserModel>;
+    users: Entity<UserModel>;
     properties: PropertyModel[];
     authUser: AuthUser;
 }
   
 function mapStateToProps(state: RootState): IState {
-  const properties = state.propertyReducer.entities.properties;
+  const properties = state.propertyReducer.entities.properties.byId;
   return { 
-    users: state.userReducer.entities.users,
+    users: state.userReducer.entities.users.byId,
     properties: properties ? Object.values(properties) : [],
     authUser: state.userReducer.authUser
   };

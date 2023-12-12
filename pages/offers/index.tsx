@@ -14,7 +14,7 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
-    return { properties: Object.values(state.propertyReducer.entities.properties) };
+    return { properties: Object.values(state.propertyReducer.entities.properties.byId) };
 }
 
 interface IDispatch {

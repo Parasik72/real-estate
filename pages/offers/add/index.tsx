@@ -57,8 +57,8 @@ function AddProperty({ addProperty }: IDispatch) {
                         </h2>
                         <PropertyForm 
                             data={addPropertyInitForm(onSubmit)} 
-                            images={images} 
-                            setImages={setImages} 
+                            newImages={images} 
+                            setNewImages={setImages} 
                         />
                     </div>
                 </div>
