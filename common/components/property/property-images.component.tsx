@@ -37,13 +37,15 @@ export const PropertyImages: FC<IProps> = ({ propertyImagesStore }) => {
 
     if (propertyImagesStore.allIds.length === 0) return <div>No images</div>
 
-    const primaryImg = propertyImagesStore.byId[selectedImg].imgName;
+    const primaryImg = propertyImagesStore.byId[selectedImg]?.imgName 
+        || propertyImagesStore.byId[propertyImagesStore.allIds[0]]?.imgName
+        || '';
 
     return (
         <>
             <div className="md:block bg-indigo-50 max-h-96">
                 <Image 
-                    className="w-full h-full object-cover object-center shadow-sm max-h-96" 
+                    className="w-full h-96 object-cover object-center shadow-sm max-h-96" 
                     src={FRONT_IMGS_PATH.property.replace(':imgName', primaryImg)} 
                     width={735} 
                     height={363} 

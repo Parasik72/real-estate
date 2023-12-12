@@ -2,11 +2,12 @@ import { ListOfProperties } from "@/common/components/list-of-properties.compone
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { UserInfo } from "@/common/components/profile/user-info.component";
+import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { UserModel } from "@/common/services/user/user.model";
 import { RootState } from "@/common/store/root.reducer";
 import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
-import { Entity } from "@/common/store/types/store.types";
+import { Entity, StoreEntity } from "@/common/store/types/store.types";
 import { AuthUser } from "@/common/store/user/user.state.interface";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -17,6 +18,7 @@ import { Action, Dispatch } from "redux";
 interface IState {
     users: Entity<UserModel>;
     properties: PropertyModel[];
+    propertyImagesStore: StoreEntity<PropertyImageModel>;
     authUser: AuthUser;
 }
   
@@ -25,7 +27,8 @@ function mapStateToProps(state: RootState): IState {
   return { 
     users: state.userReducer.entities.users.byId,
     properties: properties ? Object.values(properties) : [],
-    authUser: state.userReducer.authUser
+    authUser: state.userReducer.authUser,
+    propertyImagesStore: state.propertyReducer.entities.propertyImages
   };
 }
 
@@ -45,7 +48,9 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDis
   }
 }
 
-function Profile({ users, properties, getProfile, authUser }: IState & IDispatch) {
+function Profile({ 
+    users, properties, authUser, propertyImagesStore, getProfile 
+}: IState & IDispatch) {
     const router = useRouter();
     const userId = router.query.userId as string || '';
     useEffect(() => {
@@ -87,7 +92,7 @@ function Profile({ users, properties, getProfile, authUser }: IState & IDispatch
                         )}
                     </div>
                     <div className="mt-4">
-                        <ListOfProperties properties={properties} />
+                        <ListOfProperties properties={properties} propertyImagesStore={propertyImagesStore} />
                     </div>
                 </PageContainer>
             </div>

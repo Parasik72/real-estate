@@ -18,7 +18,8 @@ export class PropertyService extends BaseContext {
                 propertyStatus: Types.PropertyStatuses.ForSale
             },
             include: [
-                { model: this.di.PropertyAddress }
+                { model: this.di.PropertyAddress },
+                { model: this.di.PropertyImage, limit: 1 }
             ]
         });
     }
@@ -47,7 +48,8 @@ export class PropertyService extends BaseContext {
                 {
                     model: this.di.PropertyAddress,
                     where: propertyAddressWhere
-                }
+                },
+                { model: this.di.PropertyImage, limit: 1 }
             ] 
         });
         return {

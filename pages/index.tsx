@@ -13,14 +13,20 @@ import { connect } from "react-redux";
 import { useEffect } from "react";
 import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
 import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
+import { StoreEntity } from "@/common/store/types/store.types";
+import { PropertyImageModel } from "@/common/services/property/property-image.model";
 
 interface IState {
   properties: PropertyModel[];
+  propertyImagesStore: StoreEntity<PropertyImageModel>;
 }
 
 function mapStateToProps(state: RootState): IState {
   const properties = state.propertyReducer.entities.properties.byId;
-  return { properties: properties ? Object.values(properties) : [] };
+  return { 
+    properties: properties ? Object.values(properties) : [],
+    propertyImagesStore: state.propertyReducer.entities.propertyImages
+  };
 }
 
 interface IDispatch {
@@ -42,7 +48,7 @@ interface IProps extends IState, IDispatch {
   }
 }
 
-function Home({ properties, getLastOffers }: IProps) {
+function Home({ properties, propertyImagesStore, getLastOffers }: IProps) {
   useEffect(() => {
     getLastOffers();
   }, []);
@@ -97,6 +103,7 @@ function Home({ properties, getLastOffers }: IProps) {
               <div key={property.propertyId} className="w-full flex-shrink-0 max-w-250px md:max-w-350px">
                 <PropertyCard 
                   property={property}
+                  propertyImagesStore={propertyImagesStore}
                   className="max-w-250px md:max-w-350px"
                 />
               </div>

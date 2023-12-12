@@ -2,19 +2,25 @@ import { ListOfProperties } from "@/common/components/list-of-properties.compone
 import { FormSearch } from "@/common/components/offers/form-search.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
+import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { RootState } from "@/common/store/root.reducer";
 import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
+import { StoreEntity } from "@/common/store/types/store.types";
 import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 
 interface IState {
     properties: PropertyModel[];
+    propertyImagesStore: StoreEntity<PropertyImageModel>;
 }
 
 function mapStateToProps(state: RootState): IState {
-    return { properties: Object.values(state.propertyReducer.entities.properties.byId) };
+    return { 
+        properties: Object.values(state.propertyReducer.entities.properties.byId),
+        propertyImagesStore: state.propertyReducer.entities.propertyImages
+    };
 }
 
 interface IDispatch {
@@ -29,7 +35,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
     }
 }
 
-function Offers({ properties, getAllOffers }: IState & IDispatch) {
+function Offers({ properties, propertyImagesStore, getAllOffers }: IState & IDispatch) {
     useEffect(() => {
         getAllOffers();
     }, []);
@@ -51,7 +57,7 @@ function Offers({ properties, getAllOffers }: IState & IDispatch) {
                 </PageContainer>
             </div>
             <PageContainer className="py-8">
-                <ListOfProperties properties={properties} />
+                <ListOfProperties properties={properties} propertyImagesStore={propertyImagesStore} />
             </PageContainer>
         </PageWrapper>
     )
