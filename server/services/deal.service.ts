@@ -58,7 +58,10 @@ export class DealService extends BaseContext {
                 dealStatus
             },
             include: [
-                { model: this.di.Property, include: [{ model: this.di.PropertyAddress }] },
+                { 
+                    model: this.di.Property, 
+                    include: [{ model: this.di.PropertyAddress }, { model: this.di.PropertyImage, limit: 1 }] 
+                },
                 { model: this.di.User, as: 'seller', attributes: { exclude: ['password'] } },
                 { model: this.di.User, as: 'buyer', attributes: { exclude: ['password'] } }
             ]

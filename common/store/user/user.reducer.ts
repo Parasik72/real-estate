@@ -43,6 +43,14 @@ export const userReducer = (state = defaultState, action: UserAction): UserState
                     userId: undefined
                 }
             }
+        case UserActions.SET_USERS:
+            return {
+                ...state,
+                entities: {
+                    ...state.entities,
+                    users: action.payload
+                }
+            }
         default: return state;
     }
 }
