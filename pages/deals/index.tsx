@@ -1,11 +1,12 @@
 import ListOfDeals from "@/common/components/deals/list-of-deals.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
-import { DealModel } from "@/common/services/deal/deal.model";
+import { DealModel, DealStatuses } from "@/common/services/deal/deal.model";
 import { RootState } from "@/common/store/root.reducer";
 import { DealEffectActions } from "@/common/store/saga-effects/deal.saga-effects";
 import { StoreEntity } from "@/common/store/types/store.types";
 import { AuthUser } from "@/common/store/user/user.state.interface";
+import { IPagination } from "@/common/types/common.types";
 import { useEffect, useMemo } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
@@ -13,38 +14,69 @@ import { Action, Dispatch } from "redux";
 interface IState {
   dealsStore: StoreEntity<DealModel>;
   authUser: AuthUser;
+  requestedByMePage?: IPagination;
+  requestedForMePage?: IPagination;
+  mySuccessfulPage?: IPagination;
 }
 
 function mapStateToProps(state: RootState): IState {
   return {
     authUser: state.userReducer.authUser,
-    dealsStore: state.dealReducer.entities.deals
+    dealsStore: state.dealReducer.entities.deals,
+    requestedByMePage: state.dealReducer.paginations.requestedByMeDeals,
+    requestedForMePage: state.dealReducer.paginations.requestedForMeDeals,
+    mySuccessfulPage: state.dealReducer.paginations.mySuccessfulDeals,
   };
 }
 
 interface IDispatch {
   getRequestedByMeDeals: () => {
       type: DealEffectActions.GET_REQUESTED_BY_ME_DEALS;
-  }
+  };
+  getRequestedForMeDeals: () => {
+    type: DealEffectActions.GET_REQUESTED_FOR_ME_DEALS;
+  };
+  getMySuccessfulDeals: () => {
+    type: DealEffectActions.GET_MY_SUCCESSFUL_DEALS;
+  };
 }
 
 const mapDispatchToProps = (dispatch: Dispatch<Action<DealEffectActions>>): IDispatch => {
   return {
       getRequestedByMeDeals: () => dispatch({ type: DealEffectActions.GET_REQUESTED_BY_ME_DEALS }),
+      getRequestedForMeDeals: () => dispatch({ type: DealEffectActions.GET_REQUESTED_FOR_ME_DEALS }),
+      getMySuccessfulDeals: () => dispatch({ type: DealEffectActions.GET_MY_SUCCESSFUL_DEALS }),
   }
 }
 
 function Deals({ 
-    getRequestedByMeDeals, 
+    getRequestedByMeDeals,
+    getRequestedForMeDeals,
+    getMySuccessfulDeals,
     dealsStore, 
-    authUser, 
+    authUser,
+    requestedByMePage,
+    requestedForMePage,
+    mySuccessfulPage,
 }: IState & IDispatch) {
     const requestedByMe = useMemo(() => dealsStore.allIds.filter((dealId) => {
         return dealsStore.byId[dealId].buyerUserId === authUser.userId 
-            && !dealsStore.byId[dealId].signDate;
-    }), [dealsStore.allIds, dealsStore.byId, authUser.userId]);
+            && dealsStore.byId[dealId].dealStatus === DealStatuses.Awaiting;
+    }), [requestedByMePage, authUser.userId]);
+    const requestedForMe = useMemo(() => dealsStore.allIds.filter((dealId) => {
+        return dealsStore.byId[dealId].sellerUserId === authUser.userId 
+            && dealsStore.byId[dealId].dealStatus === DealStatuses.Awaiting;
+    }), [requestedForMePage, authUser.userId]);
+    const mySuccessful = useMemo(() => dealsStore.allIds.filter((dealId) => {
+        return (
+            dealsStore.byId[dealId].sellerUserId === authUser.userId
+            ||  dealsStore.byId[dealId].buyerUserId === authUser.userId
+        ) && dealsStore.byId[dealId].dealStatus === DealStatuses.Done;
+    }), [mySuccessfulPage, authUser.userId]);
     useEffect(() => {
         getRequestedByMeDeals();
+        getRequestedForMeDeals();
+        getMySuccessfulDeals();
     }, []);
     return (
         <PageWrapper>
@@ -67,18 +99,25 @@ function Deals({
                             displayCancelBtn
                             dealsEntity={dealsStore.byId}
                             dealsIds={requestedByMe}
+                            pagination={requestedByMePage}
                         />
                     </div>
                 </PageContainer>
             </div>
-            {/* <PageContainer className="py-8">
+            <PageContainer className="py-8">
                 <div className="flex justify-between">
                     <h2 className="text-dark-blue text-3xl lg:text-4xl font-bold">
                         Requested deals for you
                     </h2>
                 </div>
                 <div className="mt-4">
-                    <ListOfDeals displaySignBtn displayCancelBtn />
+                    <ListOfDeals 
+                        displaySignBtn 
+                        displayCancelBtn
+                        dealsEntity={dealsStore.byId}
+                        dealsIds={requestedForMe}
+                        pagination={requestedForMePage}
+                    />
                 </div>
             </PageContainer>
             <div className="py-8 bg-indigo-50 w-full">
@@ -89,12 +128,17 @@ function Deals({
                         </h2>
                     </div>
                     <div className="mt-4">
-                        <ListOfDeals />
+                        <ListOfDeals
+                            isSuccessful
+                            dealsEntity={dealsStore.byId}
+                            dealsIds={mySuccessful}
+                            pagination={mySuccessfulPage}
+                        />
                     </div>
                 </PageContainer>
-            </div> */}
+            </div>
         </PageWrapper>
-    )
+    );
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Deals);

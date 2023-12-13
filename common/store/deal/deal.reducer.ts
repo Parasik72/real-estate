@@ -7,7 +7,8 @@ const defaultState: DealState = {
             byId: {},
             allIds: []
         }
-    }
+    },
+    paginations: {}
 };
 
 export const dealReducer = 
@@ -19,6 +20,51 @@ export const dealReducer =
                     entities: {
                         ...state.entities,
                         deals: action.payload
+                    }
+                }
+            case DealActions.ADD_DEALS: {
+                const allIdsSet = new Set([
+                    ...state.entities.deals.allIds, 
+                    ...action.payload.allIds
+                ]);
+                const allIds =  Array.from(allIdsSet);
+                return {
+                    ...state,
+                    entities: {
+                        ...state.entities,
+                        deals: {
+                            ...state.entities.deals,
+                            byId: {
+                                ...state.entities.deals.byId,
+                                ...action.payload.byId
+                            },
+                            allIds
+                        }
+                    }
+                }
+            }
+            case DealActions.SET_REQ_BY_ME_DEALS_PAGE:
+                return {
+                    ...state,
+                    paginations: {
+                        ...state.paginations,
+                        requestedByMeDeals: action.payload
+                    }
+                }
+            case DealActions.SET_REQ_FOR_ME_DEALS_PAGE:
+                return {
+                    ...state,
+                    paginations: {
+                        ...state.paginations,
+                        requestedForMeDeals: action.payload
+                    }
+                }
+            case DealActions.SET_MY_SUCCESS_DEALS_PAGE:
+                return {
+                    ...state,
+                    paginations: {
+                        ...state.paginations,
+                        mySuccessfulDeals: action.payload
                     }
                 }
             default: return state;

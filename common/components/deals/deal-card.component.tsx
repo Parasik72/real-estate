@@ -25,6 +25,7 @@ interface IProps {
     className?: string;
     displaySignBtn?: boolean;
     displayCancelBtn?: boolean;
+    isSuccessful?: boolean;
 }
 
 function mapStateToProps(state: RootState, ownProps: IProps): IState {
@@ -44,8 +45,10 @@ function DealCard({
     property,
     className,
     displaySignBtn,
-    displayCancelBtn
+    displayCancelBtn,
+    isSuccessful
 }: IState & IProps) {
+    if (!property) return <div>Loading...</div>
     const imgId = useMemo(() => propertyImagesStore.allIds.find((item) => {
       return propertyImagesStore.byId[item].propertyId === property.propertyId;
     }), [propertyImagesStore.allIds, property.propertyId]);
@@ -55,7 +58,13 @@ function DealCard({
     return (
         <Link 
             href={FRONT_PATHS.offerById.replace(':propertyId', deal.propertyId)} 
-            className={clsx("block bg-white shadow-lg rounded-md w-full flex-shrink-0", className)}
+            className={clsx(
+                "block bg-white shadow-lg rounded-md w-full flex-shrink-0",
+                {
+                    'bg-green-100': isSuccessful
+                },
+                className
+            )}
         >
             <Image 
                 className="bg-indigo-50 w-full object-cover object-center rounded-md" 

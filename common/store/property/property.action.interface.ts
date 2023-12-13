@@ -5,7 +5,9 @@ import { PropertyImageModel } from "@/common/services/property/property-image.mo
 export enum PropertyActions {
     SET_PROPERTIES = "SET_PROPERTIES",
     ADD_PROPERTY = "ADD_PROPERTY",
-    SET_PROPERTY_IMAGES = 'SET_PROPERTY_IMAGES'
+    SET_PROPERTY_IMAGES = 'SET_PROPERTY_IMAGES',
+    ADD_PROPERTY_IMAGES = 'ADD_PROPERTY_IMAGES',
+    ADD_PROPERTIES = 'ADD_PROPERTIES',
 };
 export interface SetPropertiesAction {
     type: PropertyActions.SET_PROPERTIES,
@@ -22,6 +24,18 @@ export interface SetPropertyImagesAction {
     payload: StoreEntity<PropertyImageModel>;
 }
 
+export interface AddPropertyImagesAction {
+    type: PropertyActions.ADD_PROPERTY_IMAGES,
+    payload: StoreEntity<PropertyImageModel>;
+}
+
+export interface AddPropertiesAction {
+    type: PropertyActions.ADD_PROPERTIES,
+    payload: StoreEntity<PropertyModel>;
+}
+
 export type PropertyAction = SetPropertiesAction
                            | AddPropertyAction
-                           | SetPropertyImagesAction;
+                           | SetPropertyImagesAction
+                           | AddPropertyImagesAction
+                           | AddPropertiesAction;

@@ -1,3 +1,8 @@
+export enum DealStatuses {
+    Done='Done',
+    Awaiting='Awaiting',
+    Canceled='Canceled',
+}
 export class DealModel {
     constructor(
         public dealId: string,

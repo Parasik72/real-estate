@@ -4,6 +4,7 @@ import { DealModel } from '@/common/services/deal/deal.model';
 import { PropertyModel } from '@/common/services/property/property.model';
 import { RootState } from '@/common/store/root.reducer';
 import { connect } from 'react-redux';
+import { IPagination } from '@/common/types/common.types';
 
 interface IState {
   propertiesStore: StoreEntity<PropertyModel>;
@@ -12,13 +13,16 @@ interface IState {
 interface IProps {
     dealsIds: string[];
     dealsEntity: Entity<DealModel>;
+    pagination?: IPagination;
     displaySignBtn?: boolean;
     displayCancelBtn?: boolean;
+    isSuccessful?: boolean;
 }
 
 function mapStateToProps(state: RootState, ownProps: IProps): IState {
   return {
     propertiesStore: state.propertyReducer.entities.properties,
+    ...ownProps
   };
 }
 
@@ -27,8 +31,12 @@ function ListOfDeals({
     dealsIds,
     dealsEntity,
     displayCancelBtn,
-    displaySignBtn
+    displaySignBtn,
+    isSuccessful,
+    pagination
 }: IState & IProps){
+    if (!dealsIds) return <div>Loading...</div>
+    if (dealsIds.length === 0) return <div>Empty</div>
     return (
         <div className="flex flex-wrap -mx-4">
             {dealsIds.map((dealId) => (
@@ -38,14 +46,17 @@ function ListOfDeals({
                         property={propertiesStore.byId[dealsEntity[dealId].propertyId]}
                         displaySignBtn={displaySignBtn}
                         displayCancelBtn={displayCancelBtn}
+                        isSuccessful={isSuccessful}
                     />
                 </div>
             ))}
-            <div className="w-full flex justify-center">
-                <button className="mt-4 py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold">
-                    Show next
-                </button>
-            </div>
+            {pagination && pagination.page < pagination.totalPages && (
+                <div className="w-full flex justify-center">
+                    <button className="mt-4 py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold">
+                        Show next
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

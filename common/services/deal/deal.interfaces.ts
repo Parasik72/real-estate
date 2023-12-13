@@ -1,9 +1,6 @@
+import { IPagination } from "@/common/types/common.types";
 import { DealModel } from "./deal.model";
 
-export interface DealsPageResponse {
-    page: number;
-    limit: number;
-    offset: number;
-    totalPages: number;
+export interface DealsPageResponse extends IPagination {
     deals: DealModel[];
 }

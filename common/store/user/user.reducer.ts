@@ -51,6 +51,27 @@ export const userReducer = (state = defaultState, action: UserAction): UserState
                     users: action.payload
                 }
             }
+        case UserActions.ADD_USERS: {
+            const allIdsSet = new Set([
+                ...state.entities.users.allIds, 
+                ...action.payload.allIds
+            ]);
+            const allIds =  Array.from(allIdsSet);
+            return {
+                ...state,
+                entities: {
+                    ...state.entities,
+                    users: {
+                        ...state.entities.users,
+                        byId: {
+                            ...state.entities.users.byId,
+                            ...action.payload.byId
+                        },
+                        allIds
+                    }
+                }
+            }
+        }
         default: return state;
     }
 }

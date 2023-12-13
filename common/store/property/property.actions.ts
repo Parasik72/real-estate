@@ -1,6 +1,8 @@
 import { PropertyModel } from "@/common/services/property/property.model";
 import { 
+    AddPropertiesAction,
     AddPropertyAction,
+    AddPropertyImagesAction,
     PropertyActions, 
     SetPropertiesAction,
     SetPropertyImagesAction, 
@@ -16,3 +18,9 @@ export const addPropertyAction = (payload: PropertyModel): AddPropertyAction =>
 
 export const setPropertyImagesAction = (payload: StoreEntity<PropertyImageModel>): SetPropertyImagesAction => 
     ({ type: PropertyActions.SET_PROPERTY_IMAGES, payload });
+
+export const addPropertyImagesAction = (payload: StoreEntity<PropertyImageModel>): AddPropertyImagesAction => 
+    ({ type: PropertyActions.ADD_PROPERTY_IMAGES, payload });
+
+export const addPropertiesAction = (payload: StoreEntity<PropertyModel>): AddPropertiesAction => 
+    ({ type: PropertyActions.ADD_PROPERTIES, payload });

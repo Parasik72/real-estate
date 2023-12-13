@@ -1,3 +1,4 @@
+import { IPagination } from "@/common/types/common.types";
 import { PropertyAddressModel } from "./property-address.model";
 import { PropertyModel } from "./property.model";
 
@@ -17,10 +18,6 @@ export interface GetPropertyResponse {
     updatedAt: BigInt
 }
 
-export interface PropertiesPageResponse {
-    page: number;
-    limit: number;
-    offset: number;
-    totalPages: number;
+export interface PropertiesPageResponse extends IPagination {
     properties: (PropertyModel & { PropertyAddress: PropertyAddressModel; })[];
 }

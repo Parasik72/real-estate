@@ -53,6 +53,48 @@ export const propertyReducer =
                         propertyImages: action.payload
                     }
                 }
+            case PropertyActions.ADD_PROPERTY_IMAGES: {
+                const allIdsSet = new Set([
+                    ...state.entities.propertyImages.allIds, 
+                    ...action.payload.allIds
+                ]);
+                const allIds =  Array.from(allIdsSet);
+                return {
+                    ...state,
+                    entities: {
+                        ...state.entities,
+                        propertyImages: {
+                            ...state.entities.propertyImages,
+                            byId: {
+                                ...state.entities.propertyImages.byId,
+                                ...action.payload.byId
+                            },
+                            allIds
+                        }
+                    }
+                }
+            }
+            case PropertyActions.ADD_PROPERTIES: {
+                const allIdsSet = new Set([
+                    ...state.entities.properties.allIds, 
+                    ...action.payload.allIds
+                ]);
+                const allIds =  Array.from(allIdsSet);
+                return {
+                    ...state,
+                    entities: {
+                        ...state.entities,
+                        properties: {
+                            ...state.entities.properties,
+                            byId: {
+                                ...state.entities.properties.byId,
+                                ...action.payload.byId
+                            },
+                            allIds
+                        }
+                    }
+                }
+            }
             default: return state;
         }
     }

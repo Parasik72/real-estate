@@ -64,10 +64,7 @@ export const PropertyImages: FC<IProps> = ({ propertyImagesStore }) => {
                     {carouselImgs.map((carouselImg) => (
                         <button 
                             key={carouselImg} 
-                            className={clsx("block w-full xl:max-h-24 box-border", {
-                                'border-4': carouselImg === selectedImg,
-                                'border-blue-500': carouselImg === selectedImg,
-                            })}
+                            className="block relative w-full xl:max-h-24 box-border"
                             onClick={() => setSelectedImg(carouselImg)}
                         >
                             <Image 
@@ -81,6 +78,9 @@ export const PropertyImages: FC<IProps> = ({ propertyImagesStore }) => {
                                 height={84} 
                                 alt='carouselImg' 
                             />
+                            <div className={clsx("w-full h-full border-4 border-blue-500 absolute inset-0 left-0 top-0", {
+                                'hidden': propertyImagesStore.byId[carouselImg].imgName !== primaryImg,
+                            })} />
                         </button>
                     ))}
                 </div>
