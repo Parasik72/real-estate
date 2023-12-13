@@ -19,6 +19,7 @@ import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 import { createPropertyValidation } from "../validators/property-schemas/create-property.schema";
 import { updatePropertyValidation } from "../validators/property-schemas/update-property.schema";
 import validate from "../validators/validate";
+import { objectToJSON } from "../functions/json.functions";
 
 export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
@@ -59,7 +60,7 @@ export class PropertyController extends BaseController {
     await propertyService.createPropertyImages(propertyId, files!);
     return { 
       message: 'The property has been created successfully.',
-      propertyId: property.propertyId 
+      property: objectToJSON(property) 
     };
   }
 

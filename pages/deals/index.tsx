@@ -7,7 +7,7 @@ import { DealEffectActions } from "@/common/store/saga-effects/deal.saga-effects
 import { StoreEntity } from "@/common/store/types/store.types";
 import { AuthUser } from "@/common/store/user/user.state.interface";
 import { IPagination } from "@/common/types/common.types";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 
@@ -59,20 +59,20 @@ function Deals({
     requestedForMePage,
     mySuccessfulPage,
 }: IState & IDispatch) {
-    const requestedByMe = useMemo(() => dealsStore.allIds.filter((dealId) => {
+    const requestedByMe = dealsStore.allIds.filter((dealId) => {
         return dealsStore.byId[dealId].buyerUserId === authUser.userId 
             && dealsStore.byId[dealId].dealStatus === DealStatuses.Awaiting;
-    }), [requestedByMePage, authUser.userId]);
-    const requestedForMe = useMemo(() => dealsStore.allIds.filter((dealId) => {
+    });
+    const requestedForMe = dealsStore.allIds.filter((dealId) => {
         return dealsStore.byId[dealId].sellerUserId === authUser.userId 
             && dealsStore.byId[dealId].dealStatus === DealStatuses.Awaiting;
-    }), [requestedForMePage, authUser.userId]);
-    const mySuccessful = useMemo(() => dealsStore.allIds.filter((dealId) => {
+    });
+    const mySuccessful = dealsStore.allIds.filter((dealId) => {
         return (
             dealsStore.byId[dealId].sellerUserId === authUser.userId
             ||  dealsStore.byId[dealId].buyerUserId === authUser.userId
         ) && dealsStore.byId[dealId].dealStatus === DealStatuses.Done;
-    }), [mySuccessfulPage, authUser.userId]);
+    });
     useEffect(() => {
         getRequestedByMeDeals();
         getRequestedForMeDeals();

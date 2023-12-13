@@ -113,10 +113,11 @@ function* addProperty(action: SagaEffectAction<{
     callback: (propertyId: string) => void;
 }>) {
     try {
-        const response: { propertyId: string } = 
+        const response: {property: PropertyModel} = 
             yield call(propertyService.addProperty.bind(propertyService, action.payload.values));
         if (!response) return;
-        action.payload.callback(response.propertyId);
+        yield put(addPropertyAction(response.property));
+        action.payload.callback(response.property.propertyId);
     } catch (e) {
         yield put({type: "ADD_PROPERTY_FAILED", message: e});
     }

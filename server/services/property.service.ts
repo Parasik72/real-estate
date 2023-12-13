@@ -111,7 +111,10 @@ export class PropertyService extends BaseContext {
     }
 
     async changePropertyOwnerById(data: Types.ChangePropertyOwner, propertyId: string) {
-        return this.di.Property.update(data, { where: { propertyId }});
+        return this.di.Property.update(
+            {...data, propertyStatus: Types.PropertyStatuses.Awaiting }, 
+            { where: { propertyId }}
+        );
     }
 
     async createPropertyImages(propertyId: UUID, images: Express.Multer.File[]) {

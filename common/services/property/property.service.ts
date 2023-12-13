@@ -36,8 +36,8 @@ class PropertyService extends HttpService {
         return data;
     }
 
-    async addProperty(dto: AddPropertyDto) {
-        return this.post<FormData, { propertyId: string }>({
+    async addProperty(dto: AddPropertyDto): Promise<{property: PropertyModel} | null> {
+        return this.post<FormData, {property: PropertyModel}>({
             url: BACK_PATHS.addProperty,
             body: this.toFormData(dto)
         });

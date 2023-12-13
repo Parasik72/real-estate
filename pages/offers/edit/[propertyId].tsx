@@ -63,7 +63,8 @@ function EditProperty({ properties, propertyImagesStore, getProperty, editProper
     const property = properties[propertyId];
 
     const onSubmit = (values: EditPropertyVariablesForm) => {
-        if (values.imgsToDeleteIds?.length === propertyImagesStore.allIds.length) return;
+        if (propertyImagesStore.allIds.length > 0 &&
+            values.imgsToDeleteIds?.length === propertyImagesStore.allIds.length) return;
         const data: EditPropertyDto = {...values};
         Object.entries(values).forEach((value) => {
             if (value[1] === property[value[0] as keyof typeof property]) {

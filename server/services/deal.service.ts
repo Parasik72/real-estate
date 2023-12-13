@@ -23,8 +23,12 @@ export class DealService extends BaseContext {
         return this.di.Deal.findByPk(dealId);
     }
 
-    async updateDealById(data: UpdateDeal, dealId: string) {
-        return this.di.Deal.update(data, { where: { dealId } });
+    async updateDealById(data: UpdateDeal, deal: IDeal): Promise<IDeal> {
+        if (data.dealStatus) deal.dealStatus = data.dealStatus;
+        if (data.signDate) deal.signDate = data.signDate;
+        deal.updatedAt = data.updatedAt;
+        deal.save();
+        return deal;
     }
 
     async updateDealsByPropertyIdAndStatusId(

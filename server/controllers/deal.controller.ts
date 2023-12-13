@@ -13,6 +13,7 @@ import USE from "../decorators/use.decorator";
 import { sessions } from "../sessions";
 import { passportInitialize, passportSession } from "../passport";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
+import { objectToJSON } from "../functions/json.functions";
 
 @USE([sessions, passportInitialize, passportSession, isLogedIn])
 export class DealController extends BaseController {
@@ -46,7 +47,7 @@ export class DealController extends BaseController {
         return { message: 'The deal request has been sent successfully.' };
     }
 
-    @POST('/api/deals/sign/:propertyId')
+    @POST('/api/deals/sign/:dealId')
     async signDeal({ query, user }: ControllerConfig<{}, Params.SignDealParams>) {
         const { propertyService, dealService } = this.di;
         const { dealId } = query;
@@ -59,11 +60,11 @@ export class DealController extends BaseController {
             throw new HttpException('You can not sign this deal', 403);
         }
         const time = BigInt(new Date().getTime());
-        await dealService.updateDealById({
+        const updatedDeal = await dealService.updateDealById({
             updatedAt: time,
             signDate: time,
             dealStatus: DealStatuses.Done
-        }, deal.dealId);
+        }, deal);
         await propertyService.changePropertyOwnerById({ 
             userId: deal.buyerUserId,
             updatedAt: time
@@ -72,10 +73,13 @@ export class DealController extends BaseController {
             dealStatus: DealStatuses.Canceled,
             updatedAt: time
         }, deal.propertyId, DealStatuses.Awaiting);
-        return { message: 'The deal has been signed successfully.' }
+        return { 
+            message: 'The deal has been signed successfully.',
+            deal: objectToJSON(updatedDeal)
+        };
     }
 
-    @POST('/api/deals/cancel/:propertyId')
+    @POST('/api/deals/cancel/:dealId')
     async cancelDeal({ query, user }: ControllerConfig<{}, Params.CancelDealParams>) {
         const { dealService } = this.di;
         const { dealId } = query;
@@ -91,7 +95,7 @@ export class DealController extends BaseController {
         await dealService.updateDealById({ 
             dealStatus: DealStatuses.Canceled,
             updatedAt: time
-        }, deal.dealId);
+        }, deal);
         return { message: 'The deal has been canceled successfully.' }
     }
 

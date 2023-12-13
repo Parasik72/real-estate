@@ -12,6 +12,9 @@ import { useMemo } from "react";
 import CardImg from '@/common/images/card-img-1.png';
 import { RootState } from "@/common/store/root.reducer";
 import { connect } from "react-redux";
+import { Action, Dispatch } from "redux";
+import { DealEffectActions } from "@/common/store/saga-effects/deal.saga-effects";
+import { useRouter } from "next/router";
 
 interface IState {
   propertyImagesStore: StoreEntity<PropertyImageModel>;
@@ -37,6 +40,36 @@ function mapStateToProps(state: RootState, ownProps: IProps): IState {
   };
 }
 
+interface IDispatch {
+  signDeal: (dealId: string, callback: () => void) => {
+      type: DealEffectActions.SIGN_DEAL;
+      payload: {
+        dealId: string;
+        callback: () => void;
+      };
+  };
+  cancelDeal: (dealId: string, callback: () => void) => {
+    type: DealEffectActions.CANCEL_DEAL;
+    payload: {
+        dealId: string;
+        callback: () => void;
+    };
+  };
+}
+
+const mapDispatchToProps = (dispatch: Dispatch<Action<DealEffectActions>>): IDispatch => {
+  return {
+    signDeal: (
+        dealId: string, 
+        callback: () => void
+    ) => dispatch({ type: DealEffectActions.SIGN_DEAL, payload: { dealId, callback } }),
+    cancelDeal: (
+        dealId: string, 
+        callback: () => void
+    ) => dispatch({ type: DealEffectActions.CANCEL_DEAL, payload: { dealId, callback } }),
+  }
+}
+
 function DealCard({
     usersStore,
     propertyImagesStore,
@@ -46,20 +79,41 @@ function DealCard({
     className,
     displaySignBtn,
     displayCancelBtn,
-    isSuccessful
-}: IState & IProps) {
+    isSuccessful,
+    signDeal,
+    cancelDeal
+}: IState & IProps & IDispatch) {
     if (!property) return <div>Loading...</div>
+    const router = useRouter();
     const imgId = useMemo(() => propertyImagesStore.allIds.find((item) => {
       return propertyImagesStore.byId[item].propertyId === property.propertyId;
     }), [propertyImagesStore.allIds, property.propertyId]);
     const imgPath = useMemo(() => imgId 
       ? FRONT_IMGS_PATH.property.replace(':imgName', propertyImagesStore.byId[imgId].imgName)
-      : CardImg, [CardImg, FRONT_IMGS_PATH, imgId, propertyImagesStore.byId]) ;
+      : CardImg, [CardImg, FRONT_IMGS_PATH, imgId, propertyImagesStore.byId]);
+    const onSignDeal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        if (!deal?.dealId) return;
+        e.preventDefault();
+        e.stopPropagation();
+        signDeal(
+            deal.dealId, 
+            () => router.push(FRONT_PATHS.offerById.replace(':propertyId', deal.propertyId))
+        );
+    }
+    const onCancelDeal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        if (!deal?.dealId) return;
+        e.preventDefault();
+        e.stopPropagation();
+        cancelDeal(
+            deal.dealId, 
+            () => router.push(FRONT_PATHS.offerById.replace(':propertyId', deal.propertyId))
+        );
+    }
     return (
         <Link 
             href={FRONT_PATHS.offerById.replace(':propertyId', deal.propertyId)} 
             className={clsx(
-                "block bg-white shadow-lg rounded-md w-full flex-shrink-0",
+                "block h-full bg-white shadow-lg rounded-md w-full flex-shrink-0",
                 {
                     'bg-green-100': isSuccessful
                 },
@@ -67,7 +121,7 @@ function DealCard({
             )}
         >
             <Image 
-                className="bg-indigo-50 w-full object-cover object-center rounded-md" 
+                className="bg-indigo-50 h-64 max-h-64 w-full object-cover object-center rounded-md" 
                 src={imgPath} 
                 alt={property.title} 
                 height={249} 
@@ -94,12 +148,12 @@ function DealCard({
                     {deal.buyerUserId === authUser.userId && <span className="font-bold">(YOU)</span>}
                 </h4>
                 {displaySignBtn && (
-                    <button className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">
+                    <button onClick={onSignDeal} className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">
                         Sign the deal
                     </button>
                 )}
                 {displayCancelBtn && (
-                    <button className="px-6 py-2 text-white bg-red-900 rounded-md font-bold">
+                    <button onClick={onCancelDeal} className="px-6 py-2 text-white bg-red-900 rounded-md font-bold">
                         Cancel the deal
                     </button>
                 )}
@@ -108,4 +162,4 @@ function DealCard({
     )
 }
 
-export default connect(mapStateToProps, null)(DealCard);
+export default connect(mapStateToProps, mapDispatchToProps)(DealCard);

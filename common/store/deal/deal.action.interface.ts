@@ -8,6 +8,8 @@ export enum DealActions {
     SET_REQ_BY_ME_DEALS_PAGE = 'SET_REQ_BY_ME_DEALS_PAGE',
     SET_REQ_FOR_ME_DEALS_PAGE = 'SET_REQ_FOR_ME_DEALS_PAGE',
     SET_MY_SUCCESS_DEALS_PAGE = 'SET_MY_SUCCESS_DEALS_PAGE',
+    SIGN_DEAL = 'SIGN_DEAL',
+    CANCEL_DEAL = 'CANCEL_DEAL',
 };
 
 export interface SetDealsAction {
@@ -35,8 +37,20 @@ export interface SetMySuccessDealsAction {
     payload: IPagination;
 }
 
+export interface SignDealAction {
+    type: DealActions.SIGN_DEAL,
+    payload: DealModel;
+}
+
+export interface CancelDealAction {
+    type: DealActions.CANCEL_DEAL,
+    payload: string;
+}
+
 export type DealAction = SetDealsAction 
                        | AddDealsAction
                        | SetReqByMeDealsAction
                        | SetReqForMeDealsAction
-                       | SetMySuccessDealsAction;
+                       | SetMySuccessDealsAction
+                       | SignDealAction
+                       | CancelDealAction;

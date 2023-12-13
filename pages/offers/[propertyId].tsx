@@ -19,6 +19,8 @@ import { AuthUser } from '@/common/store/user/user.state.interface';
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
 import { PropertyImageModel } from '@/common/services/property/property-image.model';
 import { PropertyImages } from '@/common/components/property/property-images.component';
+import { DealEffectActions } from '@/common/store/saga-effects/deal.saga-effects';
+import { PropertyStatuses } from '@/common/types/property.type';
 
 interface IState {
     properties: Entity<PropertyModel>;
@@ -43,12 +45,23 @@ interface IDispatch {
             propertyId: string;
         };
     };
+    sendDeal: (propertyId: string, callback: () => void) => {
+        type: DealEffectActions.SEND_DEAL;
+        payload: {
+            propertyId: string;
+            callback: () => void;
+        };
+    };
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): IDispatch => {
+const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions | DealEffectActions>>): IDispatch => {
   return {
     getProperty: (propertyId: string) => 
-        dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: { propertyId } })
+        dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: { propertyId } }),
+    sendDeal: (propertyId: string, callback: () => void) => dispatch({
+        type: DealEffectActions.SEND_DEAL,
+        payload: { propertyId, callback }
+    })
   }
 }
 
@@ -57,7 +70,8 @@ function Property({
     propertyImagesStore,
     users, 
     authUser, 
-    getProperty 
+    getProperty,
+    sendDeal
 }: IState & IDispatch) {
     const router = useRouter();
     const propertyId = router.query.propertyId as string || '';
@@ -68,6 +82,10 @@ function Property({
     const property = properties[propertyId];
     if (!property || !users[property.userId]) return <div>Loading...</div>;
     const isCurrentUserOwner = authUser.isAuth && property.userId === authUser.userId;
+    
+    const onSendDeal = () => {
+        sendDeal(propertyId, () => router.push(FRONT_PATHS.offers))
+    }
 
     return (
         <PageWrapper>
@@ -112,8 +130,13 @@ function Property({
                                             { property.priceAmount } $
                                         </h3>
                                     </div>
-                                    {authUser.isAuth && !isCurrentUserOwner && (
-                                        <button className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold">
+                                    {authUser.isAuth 
+                                    && property.propertyStatus === PropertyStatuses.ForSale 
+                                    && !isCurrentUserOwner && (
+                                        <button 
+                                            onClick={onSendDeal} 
+                                            className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold"
+                                        >
                                             Send the deal
                                         </button>
                                     )}

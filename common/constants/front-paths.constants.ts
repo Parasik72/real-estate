@@ -1,5 +1,6 @@
 export const FRONT_PATHS = {
     home: '/',
+    offers: '/offers',
     editOfferById: '/offers/edit/:propertyId',
     offerById: '/offers/:propertyId',
     profileById: '/profile/:userId',

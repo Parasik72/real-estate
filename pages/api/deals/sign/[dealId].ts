@@ -3,4 +3,4 @@ import { DealController } from '@/server/controllers/deal.controller';
 
 export default container
   .resolve<DealController>('dealController')
-  .handler('/api/deals/sign/:propertyId');
+  .handler('/api/deals/sign/:dealId');

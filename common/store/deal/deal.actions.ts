@@ -1,10 +1,12 @@
 import { 
     AddDealsAction,
+    CancelDealAction,
     DealActions,
     SetDealsAction,
     SetMySuccessDealsAction,
     SetReqByMeDealsAction,
     SetReqForMeDealsAction,
+    SignDealAction,
 } from "./deal.action.interface";
 import { StoreEntity } from "../types/store.types";
 import { DealModel } from "@/common/services/deal/deal.model";
@@ -24,3 +26,9 @@ export const setReqForMeDealsAction = (payload: IPagination): SetReqForMeDealsAc
 
 export const setMySuccessDealsAction = (payload: IPagination): SetMySuccessDealsAction => 
     ({ type: DealActions.SET_MY_SUCCESS_DEALS_PAGE, payload });
+
+export const signDealAction = (payload: DealModel): SignDealAction => 
+    ({ type: DealActions.SIGN_DEAL, payload });
+
+export const cancelDealAction = (payload: string): CancelDealAction => 
+    ({ type: DealActions.CANCEL_DEAL, payload });

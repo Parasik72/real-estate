@@ -9,5 +9,8 @@ export const BACK_PATHS = {
     addProperty: 'properties',
     editProperty: 'properties/patch/:propertyId',
     getProfileByUserId: 'user/profile/:userId',
-    getDeals: 'deals'
+    getDeals: 'deals',
+    signDeal: 'deals/sign/:dealId',
+    cancelDeal: 'deals/cancel/:dealId',
+    sendDeal: 'deals/send/:propertyId',
 };

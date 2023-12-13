@@ -9,12 +9,23 @@ import { UserModel } from "@/common/services/user/user.model";
 import { DealModel } from "@/common/services/deal/deal.model";
 import { addPropertiesAction, addPropertyImagesAction } from "../property/property.actions";
 import { addUsersAction } from "../user/user.actions";
-import { addDealsAction, setMySuccessDealsAction, setReqByMeDealsAction, setReqForMeDealsAction } from "../deal/deal.actions";
+import { 
+    addDealsAction, 
+    cancelDealAction, 
+    setMySuccessDealsAction, 
+    setReqByMeDealsAction, 
+    setReqForMeDealsAction, 
+    signDealAction 
+} from "../deal/deal.actions";
+import { SagaEffectAction } from "../types/saga.types";
 
 export enum DealEffectActions {
     GET_REQUESTED_BY_ME_DEALS = 'GET_REQUESTED_BY_ME_DEALS',
     GET_REQUESTED_FOR_ME_DEALS = 'GET_REQUESTED_FOR_ME_DEALS',
     GET_MY_SUCCESSFUL_DEALS = 'GET_MY_SUCCESSFUL_DEALS',
+    SIGN_DEAL = 'SIGN_DEAL',
+    CANCEL_DEAL = 'CANCEL_DEAL',
+    SEND_DEAL = 'SEND_DEAL',
 }
 
 const normalizeDeals = (response: DealsPageResponse) => {
@@ -156,8 +167,69 @@ function* watchMySuccessfulDeals() {
     yield takeEvery(DealEffectActions.GET_MY_SUCCESSFUL_DEALS, fetchMySuccessfulDeals);
 }
 
+function* signDeal(action: SagaEffectAction<{
+    dealId: string;
+    callback?: () => void;
+}>) {
+    try {
+        const response: { message: string, deal: DealModel } = 
+            yield call(dealService.signDeal.bind(dealService, action.payload.dealId));
+        if (!response) return;
+        
+        yield put(signDealAction(response.deal));
+        if (action.payload.callback) action.payload?.callback();
+    } catch (e) {
+        yield put({type: "SIGN_DEAL_FAILED", message: e});
+    }
+}
+
+function* watchSignDeal() {
+    yield takeEvery(DealEffectActions.SIGN_DEAL, signDeal);
+}
+
+function* cancelDeal(action: SagaEffectAction<{
+    dealId: string;
+    callback?: () => void;
+}>) {
+    try {
+        const response: { message: string } = 
+            yield call(dealService.cancelDeal.bind(dealService, action.payload.dealId));
+        if (!response) return;
+        
+        yield put(cancelDealAction(action.payload.dealId));
+        if (action.payload.callback) action.payload?.callback();
+    } catch (e) {
+        yield put({type: "CANCEL_DEAL_FAILED", message: e});
+    }
+}
+
+function* watchCancelDeal() {
+    yield takeEvery(DealEffectActions.CANCEL_DEAL, cancelDeal);
+}
+
+function* sendDeal(action: SagaEffectAction<{
+    propertyId: string;
+    callback?: () => void;
+}>) {
+    try {
+        const response: { message: string, deal: DealModel } = 
+            yield call(dealService.sendDeal.bind(dealService, action.payload.propertyId));
+        if (!response) return;
+        if (action.payload.callback) action.payload?.callback();
+    } catch (e) {
+        yield put({type: "SEND_DEAL_FAILED", message: e});
+    }
+}
+
+function* watchSendDeal() {
+    yield takeEvery(DealEffectActions.SEND_DEAL, sendDeal);
+}
+
 export default [
     watchRequestedByMeDeals(),
     watchRequestedForMeDeals(),
-    watchMySuccessfulDeals()
+    watchMySuccessfulDeals(),
+    watchSignDeal(),
+    watchCancelDeal(),
+    watchSendDeal()
 ];

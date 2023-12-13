@@ -67,6 +67,36 @@ export const dealReducer =
                         mySuccessfulDeals: action.payload
                     }
                 }
+            case DealActions.SIGN_DEAL: 
+                return {
+                    ...state,
+                    entities: {
+                        ...state.entities,
+                        deals: {
+                            ...state.entities.deals,
+                            byId: {
+                                ...state.entities.deals.byId,
+                                [action.payload.dealId]: action.payload
+                            }
+                        }
+                    }
+                }
+            case DealActions.CANCEL_DEAL: {
+                const { [action.payload]: value, ...newById } = state.entities.deals.byId;
+                const newAllIds = state.entities.deals.allIds.filter((item) => {
+                    return item !== action.payload;
+                });
+                return {
+                    ...state,
+                    entities: {
+                        ...state.entities,
+                        deals: {
+                            byId: newById,
+                            allIds: newAllIds
+                        }
+                    }
+                }
+            }
             default: return state;
         }
     }
