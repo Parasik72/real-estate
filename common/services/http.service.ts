@@ -1,5 +1,7 @@
 import { normalize, schema } from "normalizr";
 import { sendRequest } from "../functions/http.functions";
+import { call, put } from "redux-saga/effects";
+import { EntityMethod } from "../store/entities.reducer";
 
 interface HttpRequestConfig<ReqBody extends Object> {
     url: string;
@@ -7,7 +9,7 @@ interface HttpRequestConfig<ReqBody extends Object> {
 }
 
 export class HttpService {
-    private _shema: any;
+    private _schema: any;
     private _entityName: string | null = null;
 
     protected initSchema(
@@ -16,10 +18,12 @@ export class HttpService {
         options: any = {},
     ) {
         this._entityName = name;
-        this._shema =
+        this._schema =
             name && name !== 'entity'
                 ? [new schema.Entity(name, definitions, options)]
                 : null;
+        
+        this.get = this.get.bind(this);
     }
 
     private getFullApiUrl(path: string) {
@@ -44,15 +48,10 @@ export class HttpService {
         return formData;
     }
 
-    protected async get<ResBody extends Object>(config: HttpRequestConfig<Object>)
-    : Promise<ResBody | null> {
-        const data = await sendRequest<Object, ResBody>(
-            this.getFullApiUrl(config.url),
-            'GET'
-        );
-        // this.requestResult(data);
-        if (data instanceof Error) return null;
-        return data;
+    protected get = <ResBody extends Object>(config: HttpRequestConfig<Object>) => {
+        return this.requestResult(config, 'GET', EntityMethod.UPDATE);
+        // if (data instanceof Error) return null;
+        // return data;
     }
 
     protected async post<ReqBody extends Object, ResBody extends Object>(config: HttpRequestConfig<ReqBody>)
@@ -88,10 +87,16 @@ export class HttpService {
         return data;
     }
 
-    private *requestResult(response: any) {
-        const schema = this._shema;
-        const s = Array.isArray(response) ? response : [response]
+    private *requestResult(config: HttpRequestConfig<Object>, httpMethod: string, actionMethod: string) {
+        const data: Object =  yield call(sendRequest<Object, any>, this.getFullApiUrl(config.url), httpMethod);
+        const schema = this._schema;
+        const s = Array.isArray(data) ? data : [data];
         const normalizrData = normalize(s, schema);
+
+        yield put({
+            type: actionMethod,
+            payload: normalizrData
+        });
 
 
         // const properties: Entity<PropertyModel> = normalizrData?.entities?.properties || {}; 

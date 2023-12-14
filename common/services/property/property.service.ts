@@ -7,33 +7,34 @@ import { UserModel } from "../user/user.model";
 import { AddPropertyDto } from "./dto/add-property.dto";
 import { EditPropertyDto } from "./dto/edit-roperty.dto";
 import { schema } from "normalizr";
-import { call } from "redux-saga/effects";
+import { call, take } from "redux-saga/effects";
 import { generateQueryString } from "@/common/functions/http.functions";
+import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
 
 class PropertyService extends HttpService {
     constructor() {
         super();
         const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
-        const propertySchema = new schema.Entity(
-            'properties', 
-            { PropertyImages: [propertyImageSchema] }, 
-            { idAttribute: 'propertyId' }
-        )
-        this.initSchema('property', propertySchema);
+        this.initSchema('properties', { PropertyImages: [propertyImageSchema] }, { idAttribute: 'propertyId' });
+
+        this.getLastOffers = this.getLastOffers.bind(this);
     }
 
-    // *getLastOffers() {
-    //     yield call(
-    //         this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>, 
-    //         {url: BACK_PATHS.getLastOffers}
-    //     );
-    // }
-    async getLastOffers()
-    : Promise<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[] | null> {
-        return this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>({
-            url: BACK_PATHS.getLastOffers
-        });
+    public * getLastOffers() {
+        while (true) {
+            const data: Object = yield take(PropertyEffectActions.GET_LAST_OFFERS);
+            yield call(
+                this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>, 
+                {url: BACK_PATHS.getLastOffers}
+            );
+        }
     }
+    // async getLastOffers()
+    // : Promise<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[] | null> {
+    //     return this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>({
+    //         url: BACK_PATHS.getLastOffers
+    //     });
+    // }
 
     async getAllOffers(query: GetAllOffersParams)
     : Promise<PropertiesPageResponse | null> {

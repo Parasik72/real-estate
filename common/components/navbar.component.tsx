@@ -46,7 +46,7 @@ const Navbar = ({ getAuthUser, logout, authUser }: IState & IDispatch) => {
     }, [router.pathname]);
 
     useEffect(() => {
-        getAuthUser();
+        // getAuthUser();
     }, []);
 
     const onLogout = () => {

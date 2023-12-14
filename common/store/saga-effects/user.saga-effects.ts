@@ -117,6 +117,7 @@ export function* watchEditProfile() {
 }
 
 export default [
+    // userService.auth(),
     watchUserProfile(),
     watchAuthUser(),
     watchLogoutUser(),

@@ -29,32 +29,32 @@ export enum PropertyEffectActions {
     GET_USER_PROPERTIES = 'GET_USER_PROPERTIES'
 }
 
-function* fetchLastOffers() {
-    try {
-        const response: PropertyModel[] = 
-            yield call(propertyService.getLastOffers.bind(propertyService));
+// function* fetchLastOffers() {
+//     try {
+//         const response: PropertyModel[] = 
+//             yield call(propertyService.getLastOffers.bind(propertyService));
 
-        const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
-        const propertySchema = new schema.Entity(
-            'properties', 
-            { PropertyImages: [propertyImageSchema] }, 
-            { idAttribute: 'propertyId' }
-        )
-        const normalizrData = normalize(response, [propertySchema]);
-        const properties: Entity<PropertyModel> = normalizrData?.entities?.properties || {}; 
-        const propertyImages: Entity<PropertyImageModel> = normalizrData?.entities?.propertyImages || {}; 
-        const propertiesIds = Object.keys(properties);
-        const propertyImagesIds = Object.keys(propertyImages);
+//         const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
+//         const propertySchema = new schema.Entity(
+//             'properties', 
+//             { PropertyImages: [propertyImageSchema] }, 
+//             { idAttribute: 'propertyId' }
+//         )
+//         const normalizrData = normalize(response, [propertySchema]);
+//         const properties: Entity<PropertyModel> = normalizrData?.entities?.properties || {}; 
+//         const propertyImages: Entity<PropertyImageModel> = normalizrData?.entities?.propertyImages || {}; 
+//         const propertiesIds = Object.keys(properties);
+//         const propertyImagesIds = Object.keys(propertyImages);
 
-        yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
-        yield put(setPropertyImagesAction({ byId: propertyImages, allIds: propertyImagesIds}));
-    } catch (e) {
-        yield put({type: "LAST_OFFERS_FETCH_FAILED", message: e});
-    }
-}
+//         yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
+//         yield put(setPropertyImagesAction({ byId: propertyImages, allIds: propertyImagesIds}));
+//     } catch (e) {
+//         yield put({type: "LAST_OFFERS_FETCH_FAILED", message: e});
+//     }
+// }
 
 function* watchLastOffers() {
-    yield takeEvery(PropertyEffectActions.GET_LAST_OFFERS, fetchLastOffers);
+    yield takeEvery(PropertyEffectActions.GET_LAST_OFFERS, propertyService.getLastOffers);
 }
 
 function* fetchAllOffers(action: SagaEffectAction<GetAllOffersParams>) {
@@ -221,7 +221,7 @@ function* watchEditProperty() {
 }
 
 export default [
-    watchLastOffers(),
+    propertyService.getLastOffers(),
     watchAllOffers(),
     watchProperty(),
     watchAddProperty(),
