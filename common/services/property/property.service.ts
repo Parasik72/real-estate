@@ -7,7 +7,7 @@ import { UserModel } from "../user/user.model";
 import { AddPropertyDto } from "./dto/add-property.dto";
 import { EditPropertyDto } from "./dto/edit-roperty.dto";
 import { schema } from "normalizr";
-import { call, take } from "redux-saga/effects";
+import { takeEvery } from "redux-saga/effects";
 import { generateQueryString } from "@/common/functions/http.functions";
 import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
 
@@ -21,13 +21,11 @@ class PropertyService extends HttpService {
     }
 
     public * getLastOffers() {
-        while (true) {
-            const data: Object = yield take(PropertyEffectActions.GET_LAST_OFFERS);
-            yield call(
-                this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>, 
-                {url: BACK_PATHS.getLastOffers}
-            );
-        }
+        yield takeEvery(
+            PropertyEffectActions.GET_LAST_OFFERS, 
+            this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>, 
+            { url: BACK_PATHS.getLastOffers }
+        );
     }
     // async getLastOffers()
     // : Promise<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[] | null> {

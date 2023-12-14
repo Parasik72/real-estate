@@ -15,13 +15,21 @@ interface IRootReducer {
     entities: EntitiesState;
 }
 
+const initialState = {
+    properties: {},
+    propertyImages: {},
+    users: {},
+    deals: {},
+}
+
 export const rootReducer = combineReducers({
     propertyReducer,
     userReducer,
     dealReducer,
-    aPropertyReducer: (state = { }, action: any) =>
+    aPropertyReducer: (state = initialState, action: any) =>
         entitiesReducer(state, action, Entities.Property),
-    // entities: entitiesReducer
+    aPropertyImageReducer: (state = initialState, action: any) =>
+        entitiesReducer(state, action, Entities.PropertyImage),
 });
 
 export type RootState = IRootReducer;

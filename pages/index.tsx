@@ -24,6 +24,7 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
+  console.log('state', state)
   const properties = state.propertyReducer.entities.properties.byId;
   return { 
     properties: properties ? Object.values(properties) : [],

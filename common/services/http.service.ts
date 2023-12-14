@@ -8,6 +8,13 @@ interface HttpRequestConfig<ReqBody extends Object> {
     body?: ReqBody;
 }
 
+enum HttpMethods {
+    GET = 'GET',
+    POST = 'POST',
+    PATCH = 'PATCH',
+    DELETE = 'DELETE',
+}
+
 export class HttpService {
     private _schema: any;
     private _entityName: string | null = null;
@@ -49,9 +56,7 @@ export class HttpService {
     }
 
     protected get = <ResBody extends Object>(config: HttpRequestConfig<Object>) => {
-        return this.requestResult(config, 'GET', EntityMethod.UPDATE);
-        // if (data instanceof Error) return null;
-        // return data;
+        return this.requestResult<{}, ResBody>(config, HttpMethods.GET, EntityMethod.UPDATE);
     }
 
     protected async post<ReqBody extends Object, ResBody extends Object>(config: HttpRequestConfig<ReqBody>)
@@ -87,26 +92,14 @@ export class HttpService {
         return data;
     }
 
-    private *requestResult(config: HttpRequestConfig<Object>, httpMethod: string, actionMethod: string) {
-        const data: Object =  yield call(sendRequest<Object, any>, this.getFullApiUrl(config.url), httpMethod);
-        const schema = this._schema;
-        const s = Array.isArray(data) ? data : [data];
-        const normalizrData = normalize(s, schema);
-
+    private *requestResult<ReqBody extends Object, ResBody extends Object>
+    (config: HttpRequestConfig<ReqBody>, httpMethod: string, actionMethod: string) {
+        const data: ResBody = yield call(sendRequest<ReqBody, ResBody>, this.getFullApiUrl(config.url), httpMethod);
+        const normalizrData = normalize(Array.isArray(data) ? data : [data], this._schema);
         yield put({
             type: actionMethod,
             payload: normalizrData
         });
-
-
-        // const properties: Entity<PropertyModel> = normalizrData?.entities?.properties || {}; 
-        // const propertyImages: Entity<PropertyImageModel> = normalizrData?.entities?.propertyImages || {}; 
-        // const propertiesIds = Object.keys(properties);
-        // const propertyImagesIds = Object.keys(propertyImages);
-
-        // yield put(,normalizrData);
-        // yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
-        // yield put(setPropertyImagesAction({ byId: propertyImages, allIds: propertyImagesIds}));
-
+        return data;
     }
 }
