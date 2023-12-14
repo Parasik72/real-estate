@@ -72,6 +72,20 @@ export const userReducer = (state = defaultState, action: UserAction): UserState
                 }
             }
         }
+        case UserActions.UPDATE_USER:
+            return {
+                ...state,
+                entities: {
+                    ...state.entities,
+                    users: {
+                        ...state.entities.users,
+                        byId: {
+                            ...state.entities.users.byId,
+                            [action.payload.userId]: action.payload
+                        }
+                    }
+                }
+            }
         default: return state;
     }
 }

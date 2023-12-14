@@ -1,9 +1,6 @@
+import { imageValidationExp, minimumZeroExp, moreThanZeroExp } from "@/server/constants/reg-expretions.constants";
 import { PropertyStatuses, PropertyTypes } from "@/server/types/properties.types";
 import { JSONSchemaType } from "ajv";
-
-const moreThanZero = /^[1-9][0-9]*$/
-const minimumZero = /^[0-9]*$/
-const imageValidation = /image\//
 
 const propertyStatusEnum = [PropertyStatuses.Awaiting, PropertyStatuses.ForSale];
 const propertyTypeEnum = [PropertyTypes.Apartment, PropertyTypes.House, PropertyTypes.Villa];
@@ -67,19 +64,19 @@ export const createPropertyValidation
         },
         area: {
             type: 'string',
-            pattern: moreThanZero.source
+            pattern: moreThanZeroExp.source
         },
         bathRooms: {
             type: 'string',
-            pattern: minimumZero.source
+            pattern: minimumZeroExp.source
         },
         bedRooms: {
             type: 'string',
-            pattern: minimumZero.source
+            pattern: minimumZeroExp.source
         },
         priceAmount: {
             type: 'string',
-            pattern: moreThanZero.source
+            pattern: moreThanZeroExp.source
         },
         files: {
             type: 'array',
@@ -89,7 +86,7 @@ export const createPropertyValidation
                 properties: {
                     mimetype: {
                         type: 'string',
-                        pattern: imageValidation.source
+                        pattern: imageValidationExp.source
                     }
                 }
             }

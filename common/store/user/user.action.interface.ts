@@ -8,6 +8,7 @@ export enum UserActions {
     UNSET_AUTH_USER = 'UNSET_AUTH_USER',
     SET_USERS = 'SET_USERS',
     ADD_USERS = 'ADD_USERS',
+    UPDATE_USER = 'UPDATE_USER',
 };
 
 export interface AddUserAction {
@@ -34,8 +35,14 @@ export interface AddUsersAction {
     payload: StoreEntity<UserModel>;
 }
 
+export interface UpdateUserAction {
+    type: UserActions.UPDATE_USER;
+    payload: UserModel;
+}
+
 export type UserAction = AddUserAction
                        | SetAuthUserAction
                        | UnsetAuthUserAction
                        | SetUsersAction
-                       | AddUsersAction;
+                       | AddUsersAction
+                       | UpdateUserAction;

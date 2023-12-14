@@ -1,3 +1,4 @@
+import { phoneRegExp } from "../constants/reg-expretions.constants";
 import { SignInVariablesForm, SignUpVariablesForm } from "../types/auth.types";
 import * as Yup from 'yup';
  
@@ -10,8 +11,6 @@ export const signInSchemaForm = Yup.object<SignInVariablesForm>().shape({
     .max(50, 'Too long')
     .required('Required')
 });
-
-const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/
 
 export const signUpSchemaForm = Yup.object<SignUpVariablesForm>().shape({
   email: Yup.string()

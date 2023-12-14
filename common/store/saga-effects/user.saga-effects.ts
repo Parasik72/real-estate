@@ -7,6 +7,7 @@ import { normalize, schema } from "normalizr";
 import { addUserAction, setAuthUserAction, unsetAuthUserAction } from "../user/user.actions";
 import { AuthUser } from "../user/user.state.interface";
 import { SignInVariablesForm, SignUpVariablesForm } from "@/common/types/auth.types";
+import { EditProfileVariablesForm } from "@/common/types/profile.type";
 
 export enum UserEffectActions {
     GET_USER_PROFILE = 'GET_USER_PROFILE',
@@ -14,6 +15,7 @@ export enum UserEffectActions {
     LOG_OUT = 'LOG_OUT',
     SIGN_IN = 'SIGN_IN',
     SIGN_UP = 'SIGN_UP',
+    EDIT_PROFILE = 'EDIT_PROFILE',
 }
 
 function* fetchUserProfile(action: SagaEffectAction<{ userId: string }>) {
@@ -96,10 +98,29 @@ export function* watchSignUp() {
     yield takeEvery(UserEffectActions.SIGN_UP, signUp);
 }
 
+function* editProfile(action: SagaEffectAction<{
+    values: EditProfileVariablesForm,
+    callback: () => void
+}>) {
+    try {
+        const response: { message: string } = 
+            yield call(userService.editProfile.bind(userService, action.payload.values));
+        if (!response) return;
+        action.payload.callback(); 
+    } catch (e) {
+        yield put({type: "EDIT_PROFILE_FAILED", message: e});
+    }
+}
+
+export function* watchEditProfile() {
+    yield takeEvery(UserEffectActions.EDIT_PROFILE, editProfile);
+}
+
 export default [
     watchUserProfile(),
     watchAuthUser(),
     watchLogoutUser(),
     watchSignIn(),
-    watchSignUp()
+    watchSignUp(),
+    watchEditProfile()
 ];

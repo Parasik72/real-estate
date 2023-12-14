@@ -1,4 +1,4 @@
-import { IUser } from "../types/user.types";
+import { IUser, UpdateUserProfile } from "../types/user.types";
 import BaseContext from "../context/base-context";
 import { InferCreationAttributes } from "sequelize";
 
@@ -20,5 +20,11 @@ export class UserService extends BaseContext {
 
     async createUser(data: InferCreationAttributes<IUser>): Promise<IUser> {
         return this.di.User.create(data);
+    }
+
+    async editProfile(userId: string, data: UpdateUserProfile) {
+        return this.di.User.update(data, {
+            where: { userId }
+        });
     }
 }

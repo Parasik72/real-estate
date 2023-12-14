@@ -15,6 +15,8 @@ import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga
 import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
 import { StoreEntity } from "@/common/store/types/store.types";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
+import Link from "next/link";
+import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 
 interface IState {
   properties: PropertyModel[];
@@ -80,9 +82,12 @@ function Home({ properties, propertyImagesStore, getLastOffers }: IProps) {
               Fulfill your career dreams, enjoy all the achievements of the city center and luxury housing to the fullest.
             </p>
             <div className="flex items-end">
-              <button className="py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold">
+              <Link 
+                href={FRONT_PATHS.offers}
+                className="block py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold"
+              >
                 Show all offers
-              </button>
+              </Link>
             </div>
           </div>
           <div className="mt-16 sm:mt-4 flex gap-5 justify-center items-center">

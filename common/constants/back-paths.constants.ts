@@ -3,6 +3,7 @@ export const BACK_PATHS = {
     signUp: 'user/sign-up',
     auth: 'user/auth',
     logout: 'user/log-out',
+    editProfile: 'user/edit-profile',
     getPropertyById: 'properties/get/:propertyId',
     getUserProperties: 'properties/user/:userId',
     getAllOffers: 'properties/offers',

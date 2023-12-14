@@ -13,3 +13,10 @@ export interface IUser extends Model {
 }
 
 export type UserProfile = IUser & { Properties: PropertyWithAddress[] };
+
+export interface UpdateUserProfile {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  updatedAt: BigInt;
+}

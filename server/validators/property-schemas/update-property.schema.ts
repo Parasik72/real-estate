@@ -1,9 +1,6 @@
+import { imageValidationExp, minimumZeroExp, moreThanZeroExp } from "@/server/constants/reg-expretions.constants";
 import { PropertyStatuses, PropertyTypes } from "@/server/types/properties.types";
 import { JSONSchemaType } from "ajv";
-
-const moreThanZero = /^[1-9][0-9]*$/
-const minimumZero = /^[0-9]*$/
-const imageValidation = /image\//
 
 const propertyStatusEnum = [PropertyStatuses.Awaiting, PropertyStatuses.ForSale];
 const propertyTypeEnum = [PropertyTypes.Apartment, PropertyTypes.House, PropertyTypes.Villa];
@@ -75,22 +72,22 @@ export const updatePropertyValidation: JSONSchemaType<{
         area: {
             type: 'string',
             nullable: true,
-            pattern: moreThanZero.source
+            pattern: moreThanZeroExp.source
         },
         bathRooms: {
             type: 'string',
             nullable: true,
-            pattern: minimumZero.source
+            pattern: minimumZeroExp.source
         },
         bedRooms: {
             type: 'string',
             nullable: true,
-            pattern: minimumZero.source
+            pattern: minimumZeroExp.source
         },
         priceAmount: {
             type: 'string',
             nullable: true,
-            pattern: moreThanZero.source
+            pattern: moreThanZeroExp.source
         },
         imgsToDeleteIds: {
             type: 'array',
@@ -109,7 +106,7 @@ export const updatePropertyValidation: JSONSchemaType<{
                 properties: {
                     mimetype: {
                         type: 'string',
-                        pattern: imageValidation.source
+                        pattern: imageValidationExp.source
                     }
                 }
             }

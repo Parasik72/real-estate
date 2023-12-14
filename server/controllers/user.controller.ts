@@ -16,6 +16,9 @@ import validate from "../validators/validate";
 import { signUpValidation } from "../validators/user-schemas/sign-up.schema";
 import { signInValidation } from "../validators/user-schemas/sign-in.schema";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
+import { EditProfileDto } from "../dto/user/edit-profile.dto";
+import PATCH from "../decorators/patch.decorator";
+import { editProfileValidation } from "../validators/user-schemas/edit-profile.schema";
 
 export class UserController extends BaseController {
     @SSR('/user/profile/:userId')
@@ -71,5 +74,17 @@ export class UserController extends BaseController {
         if (!req.logout) throw new HttpException('Unauthorized', 401);
         req.logout();
         return { message: 'Successful log out!' };
+    }
+
+    @USE([sessions, passportInitialize, passportSession, isLogedIn])
+    @USE(validate(editProfileValidation))
+    @PATCH('/api/user/edit-profile')
+    async editProfile({ body, user }: ControllerConfig<EditProfileDto>) {
+        const time = BigInt(new Date().getTime());
+        await this.di.userService.editProfile(user?.userId!, {
+            ...body,
+            updatedAt: time
+        });
+        return { message: 'The user has been updated successfully!' };
     }
 }
