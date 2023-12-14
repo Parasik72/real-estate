@@ -34,6 +34,11 @@ export class PropertyController extends BaseController {
     return this.di.propertyService.getAllOffers(query);
   }
 
+  @GET('/api/properties/user/:userId')
+  async getUserProperties({ query }: ControllerConfig<{}, Params.GetUserProperties>) {
+    return this.di.propertyService.getUserProperties(query.userId, query.page, query.limit);
+  }
+
   @USE([sessions, passportInitialize, passportSession, multer().any(), validate(createPropertyValidation)])
   @POST('/api/properties')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {

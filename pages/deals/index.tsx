@@ -30,22 +30,25 @@ function mapStateToProps(state: RootState): IState {
 }
 
 interface IDispatch {
-  getRequestedByMeDeals: () => {
+  getRequestedByMeDeals: (payload: number) => {
       type: DealEffectActions.GET_REQUESTED_BY_ME_DEALS;
   };
-  getRequestedForMeDeals: () => {
+  getRequestedForMeDeals: (payload: number) => {
     type: DealEffectActions.GET_REQUESTED_FOR_ME_DEALS;
   };
-  getMySuccessfulDeals: () => {
+  getMySuccessfulDeals: (payload: number) => {
     type: DealEffectActions.GET_MY_SUCCESSFUL_DEALS;
   };
 }
 
 const mapDispatchToProps = (dispatch: Dispatch<Action<DealEffectActions>>): IDispatch => {
   return {
-      getRequestedByMeDeals: () => dispatch({ type: DealEffectActions.GET_REQUESTED_BY_ME_DEALS }),
-      getRequestedForMeDeals: () => dispatch({ type: DealEffectActions.GET_REQUESTED_FOR_ME_DEALS }),
-      getMySuccessfulDeals: () => dispatch({ type: DealEffectActions.GET_MY_SUCCESSFUL_DEALS }),
+      getRequestedByMeDeals: (payload: number) => 
+        dispatch({ type: DealEffectActions.GET_REQUESTED_BY_ME_DEALS, payload }),
+      getRequestedForMeDeals: (payload: number) => 
+        dispatch({ type: DealEffectActions.GET_REQUESTED_FOR_ME_DEALS, payload }),
+      getMySuccessfulDeals: (payload: number) => 
+        dispatch({ type: DealEffectActions.GET_MY_SUCCESSFUL_DEALS, payload }),
   }
 }
 
@@ -74,9 +77,9 @@ function Deals({
         ) && dealsStore.byId[dealId].dealStatus === DealStatuses.Done;
     });
     useEffect(() => {
-        getRequestedByMeDeals();
-        getRequestedForMeDeals();
-        getMySuccessfulDeals();
+        getRequestedByMeDeals(1);
+        getRequestedForMeDeals(1);
+        getMySuccessfulDeals(1);
     }, []);
     return (
         <PageWrapper>
@@ -100,6 +103,7 @@ function Deals({
                             dealsEntity={dealsStore.byId}
                             dealsIds={requestedByMe}
                             pagination={requestedByMePage}
+                            onShowNext={(nextPage) => getRequestedByMeDeals(nextPage)}
                         />
                     </div>
                 </PageContainer>
@@ -117,6 +121,7 @@ function Deals({
                         dealsEntity={dealsStore.byId}
                         dealsIds={requestedForMe}
                         pagination={requestedForMePage}
+                        onShowNext={(nextPage) => getRequestedForMeDeals(nextPage)}
                     />
                 </div>
             </PageContainer>
@@ -133,6 +138,7 @@ function Deals({
                             dealsEntity={dealsStore.byId}
                             dealsIds={mySuccessful}
                             pagination={mySuccessfulPage}
+                            onShowNext={(nextPage) => getMySuccessfulDeals(nextPage)}
                         />
                     </div>
                 </PageContainer>

@@ -4,6 +4,7 @@ export const BACK_PATHS = {
     auth: 'user/auth',
     logout: 'user/log-out',
     getPropertyById: 'properties/get/:propertyId',
+    getUserProperties: 'properties/user/:userId',
     getAllOffers: 'properties/offers',
     getLastOffers: 'properties/last-offers',
     addProperty: 'properties',

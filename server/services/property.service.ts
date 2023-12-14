@@ -2,7 +2,12 @@ import * as Types from "../types/properties.types";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
 import { PROPERTY_IMGS_PATH } from "../constants/path.constants";
-import { OFFERS_LIMIT_DEFAULT, OFFERS_PAGE_DEFAULT } from "../constants/property.constants";
+import { 
+    OFFERS_LIMIT_DEFAULT, 
+    OFFERS_PAGE_DEFAULT, 
+    PROPERTIES_LIMIT_DEFAULT, 
+    PROPERTIES_PAGE_DEFAULT 
+} from "../constants/property.constants";
 import { GetAllPropertiesParams } from "../params/property.params";
 import { allOffersPAWhereOptions, allOffersWhereOptions } from "../functions/property.functions";
 import BaseContext from "../context/base-context";
@@ -57,6 +62,32 @@ export class PropertyService extends BaseContext {
             limit,
             offset,
             totalPages: Math.ceil(totalCount / limit),
+            properties
+        };
+    }
+
+    async getUserProperties(userId: string, page?: string, limit?: string) {
+        const currentPage = Number(page || PROPERTIES_PAGE_DEFAULT);
+        const currentLimit = Number(limit || PROPERTIES_LIMIT_DEFAULT);
+        const offset = (currentPage - 1) * currentLimit;
+        const totalCount = await this.di.Property.count({
+            where: { userId }
+        });
+        const properties = await this.di.Property.findAll({
+            order: [['updatedAt', 'DESC']],
+            offset,
+            limit: currentLimit,
+            where: { userId },
+            include: [
+                { model: this.di.PropertyAddress },
+                { model: this.di.PropertyImage, limit: 1 }
+            ] 
+        });
+        return {
+            page: currentPage,
+            limit: currentLimit,
+            offset,
+            totalPages: Math.ceil(totalCount / currentLimit),
             properties
         };
     }

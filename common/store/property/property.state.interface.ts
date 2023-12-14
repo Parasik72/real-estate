@@ -10,5 +10,6 @@ export interface PropertyState {
     },
     paginations: {
         allOffers?: IPagination;
+        userProperties?: IPagination;
     }
 }

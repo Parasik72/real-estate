@@ -10,6 +10,7 @@ export enum PropertyActions {
     ADD_PROPERTY_IMAGES = 'ADD_PROPERTY_IMAGES',
     ADD_PROPERTIES = 'ADD_PROPERTIES',
     SET_ALL_OFFERS_PAGE = 'SET_ALL_OFFERS_PAGE',
+    SET_USER_PROPERTIES_PAGE = 'SET_USER_PROPERTIES_PAGE',
 };
 export interface SetPropertiesAction {
     type: PropertyActions.SET_PROPERTIES,
@@ -41,9 +42,15 @@ export interface SetAllOffersPageAction {
     payload: IPagination;
 }
 
+export interface SetUserPropertiesPageAction {
+    type: PropertyActions.SET_USER_PROPERTIES_PAGE,
+    payload: IPagination;
+}
+
 export type PropertyAction = SetPropertiesAction
                            | AddPropertyAction
                            | SetPropertyImagesAction
                            | AddPropertyImagesAction
                            | AddPropertiesAction
-                           | SetAllOffersPageAction;
+                           | SetAllOffersPageAction
+                           | SetUserPropertiesPageAction;

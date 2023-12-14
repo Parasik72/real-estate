@@ -22,3 +22,9 @@ export type GetAllPropertiesParams = {
 export type UpdatePropertyParams = {
     propertyId: string;
 }
+
+export type GetUserProperties = {
+    userId: string;
+    page?: string;
+    limit?: string;
+}

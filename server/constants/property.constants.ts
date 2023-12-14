@@ -1,2 +1,4 @@
 export const OFFERS_PAGE_DEFAULT = 1;
 export const OFFERS_LIMIT_DEFAULT = 12;
+export const PROPERTIES_PAGE_DEFAULT = 1;
+export const PROPERTIES_LIMIT_DEFAULT = 6;

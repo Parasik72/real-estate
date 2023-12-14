@@ -62,10 +62,10 @@ const normalizeDeals = (response: DealsPageResponse) => {
     };
 }
 
-function* fetchRequestedByMeDeals() {
+function* fetchRequestedByMeDeals(action: SagaEffectAction<number>) {
     try {
         const response: DealsPageResponse = 
-            yield call(dealService.getRequestedByMeDeals.bind(dealService));
+            yield call(dealService.getRequestedByMeDeals.bind(dealService, action.payload));
         
         const {
             deals,
@@ -97,10 +97,10 @@ function* watchRequestedByMeDeals() {
     yield takeEvery(DealEffectActions.GET_REQUESTED_BY_ME_DEALS, fetchRequestedByMeDeals);
 }
 
-function* fetchRequestedForMeDeals() {
+function* fetchRequestedForMeDeals(action: SagaEffectAction<number>) {
     try {
         const response: DealsPageResponse = 
-            yield call(dealService.getRequestedForMeDeals.bind(dealService));
+            yield call(dealService.getRequestedForMeDeals.bind(dealService, action.payload));
         
         const {
             deals,
@@ -132,10 +132,10 @@ function* watchRequestedForMeDeals() {
     yield takeEvery(DealEffectActions.GET_REQUESTED_FOR_ME_DEALS, fetchRequestedForMeDeals);
 }
 
-function* fetchMySuccessfulDeals() {
+function* fetchMySuccessfulDeals(action: SagaEffectAction<number>) {
     try {
         const response: DealsPageResponse = 
-            yield call(dealService.getMySuccessfulDeals.bind(dealService));
+            yield call(dealService.getMySuccessfulDeals.bind(dealService, action.payload));
         
         const {
             deals,

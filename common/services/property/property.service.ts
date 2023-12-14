@@ -43,6 +43,15 @@ class PropertyService extends HttpService {
         });
     }
 
+    async getUserProperties(userId: string, page?: number, limit?: number)
+    : Promise<PropertiesPageResponse | null> {
+        const queryStr = generateQueryString({ page, limit });
+        return this.get<PropertiesPageResponse>({
+            url: `${BACK_PATHS.getUserProperties
+                .replace(':userId', userId)}${queryStr ? queryStr : ''}`
+        });
+    }
+
     async getPropertyById(id: string)
     : Promise<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel} | null> {
         return this.get<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel}>({

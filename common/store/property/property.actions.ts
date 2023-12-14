@@ -6,7 +6,8 @@ import {
     PropertyActions, 
     SetAllOffersPageAction, 
     SetPropertiesAction,
-    SetPropertyImagesAction, 
+    SetPropertyImagesAction,
+    SetUserPropertiesPageAction, 
 } from "./property.action.interface";
 import { StoreEntity } from "../types/store.types";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
@@ -29,3 +30,6 @@ export const addPropertiesAction = (payload: StoreEntity<PropertyModel>): AddPro
 
 export const setAllOffersPageAction = (payload: IPagination): SetAllOffersPageAction => 
     ({ type: PropertyActions.SET_ALL_OFFERS_PAGE, payload });
+
+export const setUserPropertiesPageAction = (payload: IPagination): SetUserPropertiesPageAction => 
+    ({ type: PropertyActions.SET_USER_PROPERTIES_PAGE, payload });

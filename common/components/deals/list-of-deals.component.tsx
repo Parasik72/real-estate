@@ -17,6 +17,7 @@ interface IProps {
     displaySignBtn?: boolean;
     displayCancelBtn?: boolean;
     isSuccessful?: boolean;
+    onShowNext?: (nextPage: number) => void;
 }
 
 function mapStateToProps(state: RootState, ownProps: IProps): IState {
@@ -33,7 +34,8 @@ function ListOfDeals({
     displayCancelBtn,
     displaySignBtn,
     isSuccessful,
-    pagination
+    pagination,
+    onShowNext
 }: IState & IProps){
     if (!dealsIds) return <div>Loading...</div>
     if (dealsIds.length === 0) return <div>Empty</div>
@@ -50,9 +52,12 @@ function ListOfDeals({
                     />
                 </div>
             ))}
-            {pagination && pagination.page < pagination.totalPages && (
+            {pagination && onShowNext && pagination.page < pagination.totalPages && (
                 <div className="w-full flex justify-center">
-                    <button className="mt-4 py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold">
+                    <button
+                        onClick={() => onShowNext(pagination.page + 1)} 
+                        className="mt-4 py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold"
+                    >
                         Show next
                     </button>
                 </div>

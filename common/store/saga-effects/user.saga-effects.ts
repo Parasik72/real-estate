@@ -3,12 +3,8 @@ import { SagaEffectAction } from "../types/saga.types";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { call, put, takeEvery } from "redux-saga/effects";
 import { userService } from "@/common/services/user/user.service";
-import { normalize } from "normalizr";
+import { normalize, schema } from "normalizr";
 import { addUserAction, setAuthUserAction, unsetAuthUserAction } from "../user/user.actions";
-import { Entity } from "../types/store.types";
-import { setPropertiesAction } from "../property/property.actions";
-import { PropertySchema } from "../normalizr/property.schema";
-import { UserSchema } from "../normalizr/user.schema";
 import { AuthUser } from "../user/user.state.interface";
 import { SignInVariablesForm, SignUpVariablesForm } from "@/common/types/auth.types";
 
@@ -25,17 +21,11 @@ function* fetchUserProfile(action: SagaEffectAction<{ userId: string }>) {
         const response: UserModel & { Properties: PropertyModel[] } = 
             yield call(userService.getProfileByUserId.bind(userService, action.payload.userId));
 
-        const propertySchema = new PropertySchema();
-        const userSchema = new UserSchema();
-        const schema = userSchema.getWithPropertiesSchema(propertySchema.getArraySchema());
-        const normalizrData = normalize(response, schema);
+        const userSchema = new schema.Entity('users', {}, {idAttribute: 'userId'});
+        const normalizrData = normalize(response, userSchema);
         const user: UserModel = normalizrData?.entities?.users?.[action.payload.userId];
-        const properties: Entity<PropertyModel> = normalizrData?.entities?.properties!; 
-        const propertiesIds = Object.keys(properties);
-
 
         yield put(addUserAction(user));
-        yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
     } catch (e) {
         yield put({type: "USER_PROFILE_FETCH_FAILED", message: e});
     }

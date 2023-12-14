@@ -1,4 +1,4 @@
-import { IUser, UserProfile } from "../types/user.types";
+import { IUser } from "../types/user.types";
 import BaseContext from "../context/base-context";
 import { InferCreationAttributes } from "sequelize";
 
@@ -11,13 +11,11 @@ export class UserService extends BaseContext {
         return this.di.User.findByPk(userId);
     }
 
-    async getUserProfileById(userId: string): Promise<UserProfile | null>  {
+    async getUserProfileById(userId: string)
+    : Promise<IUser | null>  {
         return this.di.User.findByPk(userId, {
-            attributes: { exclude: ['password'] },
-            include: [
-                { model: this.di.Property, include: [{ model: this.di.PropertyAddress }] }
-            ]
-        }) as Promise<UserProfile | null>;
+            attributes: { exclude: ['password'] }
+        }) as Promise<IUser | null>;
     }
 
     async createUser(data: InferCreationAttributes<IUser>): Promise<IUser> {

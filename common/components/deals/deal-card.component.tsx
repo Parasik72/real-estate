@@ -113,8 +113,9 @@ function DealCard({
         <Link 
             href={FRONT_PATHS.offerById.replace(':propertyId', deal.propertyId)} 
             className={clsx(
-                "block h-full bg-white shadow-lg rounded-md w-full flex-shrink-0",
+                "block h-full shadow-lg rounded-md w-full flex-shrink-0",
                 {
+                    'bg-white': !isSuccessful,
                     'bg-green-100': isSuccessful
                 },
                 className

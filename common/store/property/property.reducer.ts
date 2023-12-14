@@ -104,6 +104,14 @@ export const propertyReducer =
                         allOffers: action.payload
                     }
                 }
+            case PropertyActions.SET_USER_PROPERTIES_PAGE:
+                return {
+                    ...state,
+                    paginations: {
+                        ...state.paginations,
+                        userProperties: action.payload
+                    }
+                }
             default: return state;
         }
     }

@@ -32,7 +32,7 @@ export const PropertyCard: FC<IProps> = ({
     >
       <div className="max-h-64">
         <Image 
-          className="bg-indigo-50 h-64 max-h-64 w-full object-cover object-center rounded-md" 
+          className="bg-indigo-100 h-64 max-h-64 w-full object-cover object-center rounded-md" 
           src={imgPath} 
           alt={property.title} 
           height={249} 
