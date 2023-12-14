@@ -5,7 +5,7 @@ export type GetPropertyByIdParams = {
 export type GetAllPropertiesParams = {
     page?: string;
     limit?: string;
-    propertyTypeId?: string;
+    propertyType?: string;
     keyword?: string;
     bedsNum?: string;
     bathsNum?: string;

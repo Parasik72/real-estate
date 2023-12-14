@@ -11,6 +11,7 @@ export enum PropertyStatuses {
 }
 
 export enum PropertyTypes {
+    Any='Any',
     House='House',
     Apartment='Apartment',
     Villa='Villa'

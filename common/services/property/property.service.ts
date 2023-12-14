@@ -1,39 +1,54 @@
 import { BACK_PATHS } from "@/common/constants/back-paths.constants";
 import { HttpService } from "../http.service";
 import { PropertyModel } from "./property.model";
-import { PropertiesPageResponse } from "./property-http.types";
+import { GetAllOffersParams, PropertiesPageResponse } from "./property-http.types";
 import { PropertyAddressModel } from "./property-address.model";
 import { UserModel } from "../user/user.model";
 import { AddPropertyDto } from "./dto/add-property.dto";
 import { EditPropertyDto } from "./dto/edit-roperty.dto";
+import { schema } from "normalizr";
+import { call } from "redux-saga/effects";
+import { generateQueryString } from "@/common/functions/http.functions";
 
 class PropertyService extends HttpService {
-    async getLastOffers()
-    : Promise<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[] | null> {
-        const data = await this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>({
-            url: BACK_PATHS.getLastOffers
-        });
-        if (!data) return null;
-        return data;
+    constructor() {
+        super();
+        const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
+        const propertySchema = new schema.Entity(
+            'properties', 
+            { PropertyImages: [propertyImageSchema] }, 
+            { idAttribute: 'propertyId' }
+        )
+        this.initSchema('property', propertySchema);
     }
 
-    async getAllOffers()
+    // *getLastOffers() {
+    //     yield call(
+    //         this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>, 
+    //         {url: BACK_PATHS.getLastOffers}
+    //     );
+    // }
+    async getLastOffers()
     : Promise<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[] | null> {
-        const data = await this.get<PropertiesPageResponse>({
-            url: BACK_PATHS.getAllOffers
+        return this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>({
+            url: BACK_PATHS.getLastOffers
         });
-        if (!data) return null;
-        return data.properties;
+    }
+
+    async getAllOffers(query: GetAllOffersParams)
+    : Promise<PropertiesPageResponse | null> {
+        const queryStr = generateQueryString(query);
+        return this.get<PropertiesPageResponse>({
+            url: `${BACK_PATHS.getAllOffers}${queryStr ? queryStr : ''}`
+        });
     }
 
     async getPropertyById(id: string)
     : Promise<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel} | null> {
-        const data = await this.get<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel}>({
+        return this.get<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel}>({
             url: BACK_PATHS.getPropertyById
                 .replace(':propertyId', id)
         });
-        if (!data) return null;
-        return data;
     }
 
     async addProperty(dto: AddPropertyDto): Promise<{property: PropertyModel} | null> {

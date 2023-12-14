@@ -18,3 +18,13 @@ export async function sendRequest<ReqBody extends Object, ResBody extends Object
         return error as Error;
     }
 }
+
+export const generateQueryString = <T extends Object>(queryObj: T) => {
+    const entries = Object.entries(queryObj);
+    if (entries.length === 0) return null;
+    let query = '?';
+    entries.forEach((value, index) => {
+        query += `${value[0]}=${value[1]}${index !== entries.length - 1 ? '&' : ''}`;
+    });
+    return query;
+}

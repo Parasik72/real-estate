@@ -1,15 +1,23 @@
+import { FC } from "react";
 import { Divider } from "../divider.component"
 import { Input } from "../form/input.component"
 import { Select } from "../form/select.component"
 import { SearchIcon } from "@/common/icons/search.icon"
+import { PropertyTypes } from "@/common/types/property.type";
 
-export const FormSearch = () => {
+interface IProps {
+    onSearch: () => void;
+}
+
+export const FormSearch: FC<IProps> = ({ onSearch }) => {
     return (
-        <form action="">
+        <div>
             <div className="flex flex-col justify-center items-center">
                 <div className="w-full flex flex-col lg:w-auto md:flex-row lg:inline-flex gap-4 rounded-md bg-indigo-50 relative z-10">
-                    <Select title="Property Type" name="Property Type" className="w-full text-blue-950 border-blue-900 lg:w-56">
-                        <option value="">Property Type</option>
+                    <Select title="Property Type" name="propertyType" className="w-full text-blue-950 border-blue-900 lg:w-56">
+                        {Object.values(PropertyTypes).map((item) => (
+                            <option key={item} value={item}>{item}</option>
+                        ))}
                     </Select>
                     <div className="relative lg:max-w-xl md:w-full">
                         <Input name="keyword" placeholder="Enter a keyword" type="text" />
@@ -18,7 +26,12 @@ export const FormSearch = () => {
                         <div className="absolute inset-y-0 left-0 flex items-center pl-5">
                             <SearchIcon />
                         </div>
-                        <button className="py-4 w-full lg:w-auto px-11 pl-13 bg-blue-900 text-white rounded-md font-bold">Search</button>
+                        <button
+                            onClick={onSearch} 
+                            className="py-4 w-full lg:w-auto px-11 pl-13 bg-blue-900 text-white rounded-md font-bold"
+                        >
+                            Search
+                        </button>
                     </div>
                 </div>
                 <Divider className="py-7" text="Advanced filters" />
@@ -61,6 +74,6 @@ export const FormSearch = () => {
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
     )
 }

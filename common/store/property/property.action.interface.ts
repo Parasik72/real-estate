@@ -1,6 +1,7 @@
 import { PropertyModel } from "@/common/services/property/property.model";
 import { StoreEntity } from "../types/store.types";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
+import { IPagination } from "@/common/types/common.types";
 
 export enum PropertyActions {
     SET_PROPERTIES = "SET_PROPERTIES",
@@ -8,6 +9,7 @@ export enum PropertyActions {
     SET_PROPERTY_IMAGES = 'SET_PROPERTY_IMAGES',
     ADD_PROPERTY_IMAGES = 'ADD_PROPERTY_IMAGES',
     ADD_PROPERTIES = 'ADD_PROPERTIES',
+    SET_ALL_OFFERS_PAGE = 'SET_ALL_OFFERS_PAGE',
 };
 export interface SetPropertiesAction {
     type: PropertyActions.SET_PROPERTIES,
@@ -34,8 +36,14 @@ export interface AddPropertiesAction {
     payload: StoreEntity<PropertyModel>;
 }
 
+export interface SetAllOffersPageAction {
+    type: PropertyActions.SET_ALL_OFFERS_PAGE,
+    payload: IPagination;
+}
+
 export type PropertyAction = SetPropertiesAction
                            | AddPropertyAction
                            | SetPropertyImagesAction
                            | AddPropertyImagesAction
-                           | AddPropertiesAction;
+                           | AddPropertiesAction
+                           | SetAllOffersPageAction;

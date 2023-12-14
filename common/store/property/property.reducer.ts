@@ -11,7 +11,8 @@ const defaultState: PropertyState = {
             byId: {},
             allIds: []
         }
-    }
+    },
+    paginations: {}
 };
 
 export const propertyReducer = 
@@ -95,6 +96,14 @@ export const propertyReducer =
                     }
                 }
             }
+            case PropertyActions.SET_ALL_OFFERS_PAGE:
+                return {
+                    ...state,
+                    paginations: {
+                        ...state.paginations,
+                        allOffers: action.payload
+                    }
+                }
             default: return state;
         }
     }

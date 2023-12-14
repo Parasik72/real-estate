@@ -4,11 +4,13 @@ import {
     AddPropertyAction,
     AddPropertyImagesAction,
     PropertyActions, 
+    SetAllOffersPageAction, 
     SetPropertiesAction,
     SetPropertyImagesAction, 
 } from "./property.action.interface";
 import { StoreEntity } from "../types/store.types";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
+import { IPagination } from "@/common/types/common.types";
 
 export const setPropertiesAction = (payload: StoreEntity<PropertyModel>): SetPropertiesAction => 
     ({ type: PropertyActions.SET_PROPERTIES, payload });
@@ -24,3 +26,6 @@ export const addPropertyImagesAction = (payload: StoreEntity<PropertyImageModel>
 
 export const addPropertiesAction = (payload: StoreEntity<PropertyModel>): AddPropertiesAction => 
     ({ type: PropertyActions.ADD_PROPERTIES, payload });
+
+export const setAllOffersPageAction = (payload: IPagination): SetAllOffersPageAction => 
+    ({ type: PropertyActions.SET_ALL_OFFERS_PAGE, payload });

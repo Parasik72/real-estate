@@ -1,3 +1,4 @@
+import { normalize, schema } from "normalizr";
 import { sendRequest } from "../functions/http.functions";
 
 interface HttpRequestConfig<ReqBody extends Object> {
@@ -6,6 +7,21 @@ interface HttpRequestConfig<ReqBody extends Object> {
 }
 
 export class HttpService {
+    private _shema: any;
+    private _entityName: string | null = null;
+
+    protected initSchema(
+        name: string | null = null,
+        definitions: any = {},
+        options: any = {},
+    ) {
+        this._entityName = name;
+        this._shema =
+            name && name !== 'entity'
+                ? [new schema.Entity(name, definitions, options)]
+                : null;
+    }
+
     private getFullApiUrl(path: string) {
         return `${'/api'}/${path}`;
     }
@@ -34,6 +50,7 @@ export class HttpService {
             this.getFullApiUrl(config.url),
             'GET'
         );
+        // this.requestResult(data);
         if (data instanceof Error) return null;
         return data;
     }
@@ -69,5 +86,22 @@ export class HttpService {
         );
         if (data instanceof Error) return null;
         return data;
+    }
+
+    private *requestResult(response: any) {
+        const schema = this._shema;
+        const s = Array.isArray(response) ? response : [response]
+        const normalizrData = normalize(s, schema);
+
+
+        // const properties: Entity<PropertyModel> = normalizrData?.entities?.properties || {}; 
+        // const propertyImages: Entity<PropertyImageModel> = normalizrData?.entities?.propertyImages || {}; 
+        // const propertiesIds = Object.keys(properties);
+        // const propertyImagesIds = Object.keys(propertyImages);
+
+        // yield put(,normalizrData);
+        // yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
+        // yield put(setPropertyImagesAction({ byId: propertyImages, allIds: propertyImagesIds}));
+
     }
 }

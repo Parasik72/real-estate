@@ -1,16 +1,23 @@
 import { propertyService } from "@/common/services/property/property.service";
 import { call, put, takeEvery } from "redux-saga/effects";
-import { addPropertyAction, setPropertiesAction, setPropertyImagesAction } from "../property/property.actions";
+import { 
+    addPropertiesAction, 
+    addPropertyAction, 
+    addPropertyImagesAction, 
+    setAllOffersPageAction, 
+    setPropertiesAction, 
+    setPropertyImagesAction 
+} from "../property/property.actions";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { SagaEffectAction } from "../types/saga.types";
 import { UserModel } from "@/common/services/user/user.model";
 import { normalize, schema } from "normalizr";
 import { Entity } from "../types/store.types";
 import { addUserAction } from "../user/user.actions";
-import { PropertySchema } from "../normalizr/property.schema";
 import { AddPropertyDto } from "@/common/services/property/dto/add-property.dto";
 import { EditPropertyDto } from "@/common/services/property/dto/edit-roperty.dto";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
+import { GetAllOffersParams, PropertiesPageResponse } from "@/common/services/property/property-http.types";
 
 export enum PropertyEffectActions {
     GET_LAST_OFFERS = 'GET_LAST_OFFERS',
@@ -48,25 +55,41 @@ function* watchLastOffers() {
     yield takeEvery(PropertyEffectActions.GET_LAST_OFFERS, fetchLastOffers);
 }
 
-function* fetchAllOffers() {
+// function* watchLastOffers() {
+//     yield takeEvery(PropertyEffectActions.GET_LAST_OFFERS, propertyService.getLastOffers);
+// }
+
+function* fetchAllOffers(action: SagaEffectAction<GetAllOffersParams>) {
     try {
-        const response: PropertyModel[] = 
-            yield call(propertyService.getAllOffers.bind(propertyService));
+        const response: PropertiesPageResponse = 
+            yield call(propertyService.getAllOffers.bind(propertyService, action.payload));
 
             const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
             const propertySchema = new schema.Entity(
                 'properties', 
                 { PropertyImages: [propertyImageSchema] }, 
                 { idAttribute: 'propertyId' }
-            )
-            const normalizrData = normalize(response, [propertySchema]);
+            );
+            const normalizrData = normalize(response.properties, [propertySchema]);
             const properties: Entity<PropertyModel> = normalizrData?.entities?.properties || {}; 
             const propertyImages: Entity<PropertyImageModel> = normalizrData?.entities?.propertyImages || {}; 
             const propertiesIds = Object.keys(properties);
             const propertyImagesIds = Object.keys(propertyImages);
     
-            yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
-            yield put(setPropertyImagesAction({ byId: propertyImages, allIds: propertyImagesIds}));
+            if (action.payload?.page === 1) {
+                yield put(setPropertiesAction({byId: properties, allIds: propertiesIds}));
+                yield put(setPropertyImagesAction({ byId: propertyImages, allIds: propertyImagesIds}));
+            } else {
+                yield put(addPropertiesAction({byId: properties, allIds: propertiesIds}));
+                yield put(addPropertyImagesAction({byId: propertyImages, allIds: propertyImagesIds}));
+            }
+            
+            yield put(setAllOffersPageAction({
+                limit: response.limit,
+                offset: response.offset,
+                page: response.page,
+                totalPages: response.totalPages
+            }));
     } catch (e) {
         yield put({type: "ALL_OFFERS_FETCH_FAILED", message: e});
     }
@@ -87,7 +110,7 @@ function* fetchProperty(action: SagaEffectAction<{ propertyId: string }>) {
             'properties', 
             { User: userSchema, PropertyImages: [propertyImageSchema] }, 
             { idAttribute: 'propertyId' }
-        )
+        );
 
         const normalizrData = normalize(response, propertySchema);
         const property: PropertyModel = 

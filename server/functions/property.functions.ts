@@ -4,7 +4,7 @@ import { IProperty, PropertyStatuses } from "../types/properties.types";
 
 export const allOffersWhereOptions = 
 (params: GetAllPropertiesParams): WhereOptions<IProperty> => ({
-    ...(params.propertyTypeId && { propertyTypeId: params.propertyTypeId}),
+    ...(params.propertyType && params.propertyType !== 'Any' && { propertyType: params.propertyType}),
     ...(params.bedsNum && { bedRooms: params.bedsNum}),
     ...(params.bathsNum && { bathRooms: params.bathsNum}),
     ...((params.minArea || params.maxArea) && { 

@@ -18,6 +18,23 @@ export interface GetPropertyResponse {
     updatedAt: BigInt
 }
 
+export type GetAllOffersParams = {
+    page?: number;
+    limit?: number;
+    propertyType?: string;
+    keyword?: string;
+    bedsNum?: number;
+    bathsNum?: number;
+    minArea?: number;
+    maxArea?: number;
+    country?: string;
+    city?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    minPrice?: number;
+    maxPrice?: number;
+}
+
 export interface PropertiesPageResponse extends IPagination {
     properties: (PropertyModel & { PropertyAddress: PropertyAddressModel; })[];
 }
