@@ -62,11 +62,13 @@ export class PropertyService extends BaseContext {
             limit,
             offset,
             totalPages: Math.ceil(totalCount / limit),
-            properties
+            properties,
+            paginationName: Types.PropertyPaginationNames.AllOffers
         };
     }
 
-    async getUserProperties(userId: string, page?: string, limit?: string) {
+    async getUserProperties(userId: string, page?: string, limit?: string)
+    : Promise<Types.PropertiesPage> {
         const currentPage = Number(page || PROPERTIES_PAGE_DEFAULT);
         const currentLimit = Number(limit || PROPERTIES_LIMIT_DEFAULT);
         const offset = (currentPage - 1) * currentLimit;
@@ -88,7 +90,8 @@ export class PropertyService extends BaseContext {
             limit: currentLimit,
             offset,
             totalPages: Math.ceil(totalCount / currentLimit),
-            properties
+            properties,
+            paginationName: Types.PropertyPaginationNames.UserProperties
         };
     }
 

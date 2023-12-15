@@ -5,34 +5,34 @@ import { useEffect, useState } from "react"
 import clsx from "clsx"
 import { CrossIcon } from "../icons/cross.icon"
 import { useRouter } from "next/router"
-import { AuthUser } from "../store/user/user.state.interface"
 import { RootState } from "../store/root.reducer"
-import { UserEffectActions } from "../store/saga-effects/user.saga-effects"
 import { Action, Dispatch } from "redux"
 import { connect } from "react-redux"
 import { FRONT_PATHS } from "../constants/front-paths.constants"
+import { AuthUserEffectActions } from "../services/auth-user/auth-user.service"
+import { AuthUser } from "../types/auth.types"
 
 interface IState {
   authUser: AuthUser;
 }
 
 function mapStateToProps(state: RootState): IState {
-  return { authUser: state.userReducer.authUser };
+  return { authUser: state.authUser };
 }
 
 interface IDispatch {
   getAuthUser: () => {
-    type: UserEffectActions.GET_AUTH_USER;
+    type: AuthUserEffectActions.GET_AUTH_USER;
   };
   logout: () => {
-    type: UserEffectActions.LOG_OUT;
+    type: AuthUserEffectActions.LOG_OUT;
   }
 }
  
-const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDispatch => {
+const mapDispatchToProps = (dispatch: Dispatch<Action<AuthUserEffectActions>>): IDispatch => {
   return {
-    getAuthUser: () => dispatch({ type: UserEffectActions.GET_AUTH_USER }),
-    logout: () => dispatch({ type: UserEffectActions.LOG_OUT })
+    getAuthUser: () => dispatch({ type: AuthUserEffectActions.GET_AUTH_USER }),
+    logout: () => dispatch({ type: AuthUserEffectActions.LOG_OUT })
   }
 }
 
@@ -46,7 +46,7 @@ const Navbar = ({ getAuthUser, logout, authUser }: IState & IDispatch) => {
     }, [router.pathname]);
 
     useEffect(() => {
-        // getAuthUser();
+        getAuthUser();
     }, []);
 
     const onLogout = () => {
@@ -71,9 +71,9 @@ const Navbar = ({ getAuthUser, logout, authUser }: IState & IDispatch) => {
                         'hidden': !isMenuOpen
                     })}>
                         <div className="flex flex-col md:flex-row md:items-center gap-5 lg:ml-12">
-                            <Link href="#topoffers" className="text-gray-800">Last offers</Link>
+                            <Link href="/topoffers" className="text-gray-800">Last offers</Link>
                             <Link href="/offers" className="text-gray-800">Search in offers</Link>
-                            <Link href="#topoffers" className="text-gray-800">About us</Link>
+                            <Link href="/topoffers" className="text-gray-800">About us</Link>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center gap-5">
                             {authUser.isAuth ? (

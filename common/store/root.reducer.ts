@@ -1,35 +1,37 @@
 import { combineReducers } from "redux";
-import { propertyReducer } from "./property/property.reducer";
-import { PropertyState } from "./property/property.state.interface";
-import { userReducer } from "./user/user.reducer";
-import { UserState } from "./user/user.state.interface";
-import { DealState } from "./deal/deal.state.interface";
-import { dealReducer } from "./deal/deal.reducer";
-import { EntitiesState, entitiesReducer } from "./entities.reducer";
-import { Entities } from "./entities.enum";
+import { entitiesReducer } from "./entities/entities.reducer";
+import { AuthUserState, authUserReducer } from "./auth-user/auth-user.reducer";
+import { Entities } from "./entities/entities.enum";
+import { Entity } from "./types/store.types";
+import { PropertyModel } from "../services/property/property.model";
+import { PropertyImageModel } from "../services/property/property-image.model";
+import { UserModel } from "../services/user/user.model";
+import { DealModel } from "../services/deal/deal.model";
+import { paginationsReducer } from "./paginations/paginations.reducer";
+import { Paginations } from "./paginations/paginations.enum";
+import { IPagination } from "../types/common.types";
 
 interface IRootReducer {
-    propertyReducer: PropertyState;
-    userReducer: UserState;
-    dealReducer: DealState;
-    entities: EntitiesState;
-}
-
-const initialState = {
-    properties: {},
-    propertyImages: {},
-    users: {},
-    deals: {},
+    entities: {
+        [Entities.Property]: Entity<PropertyModel>,
+        [Entities.PropertyImage]: Entity<PropertyImageModel>,
+        [Entities.User]: Entity<UserModel>,
+        [Entities.Deal]: Entity<DealModel>,
+    };
+    paginations: {
+        [Paginations.AllOffers]?: IPagination;
+        [Paginations.MySuccessfulDeals]?: IPagination;
+        [Paginations.RequestedByMeDeals]?: IPagination;
+        [Paginations.RequestedForMeDeals]?: IPagination;
+        [Paginations.UserProperties]?: IPagination;
+    }
+    authUser: AuthUserState;
 }
 
 export const rootReducer = combineReducers({
-    propertyReducer,
-    userReducer,
-    dealReducer,
-    aPropertyReducer: (state = initialState, action: any) =>
-        entitiesReducer(state, action, Entities.Property),
-    aPropertyImageReducer: (state = initialState, action: any) =>
-        entitiesReducer(state, action, Entities.PropertyImage),
+    entities: entitiesReducer,
+    authUser: authUserReducer,
+    paginations: paginationsReducer
 });
 
 export type RootState = IRootReducer;

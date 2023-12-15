@@ -11,24 +11,25 @@ import { RootState } from "@/common/store/root.reducer";
 import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
 import { useEffect } from "react";
-import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
-import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
-import { StoreEntity } from "@/common/store/types/store.types";
+import { Entity } from "@/common/store/types/store.types";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import Link from "next/link";
 import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
+import { Entities } from "@/common/store/entities/entities.enum";
+import { UserEffectActions } from "@/common/services/user/user.service";
+import { PropertyEffectActions } from "@/common/services/property/property.service";
 
 interface IState {
   properties: PropertyModel[];
-  propertyImagesStore: StoreEntity<PropertyImageModel>;
+  propertyImages: Entity<PropertyImageModel>;
 }
 
 function mapStateToProps(state: RootState): IState {
-  console.log('state', state)
-  const properties = state.propertyReducer.entities.properties.byId;
+  const properties = state.entities[Entities.Property] as Entity<PropertyModel>;
+  const propertyImages = state.entities[Entities.PropertyImage] as Entity<PropertyImageModel>;
   return { 
     properties: properties ? Object.values(properties) : [],
-    propertyImagesStore: state.propertyReducer.entities.propertyImages
+    propertyImages
   };
 }
 
@@ -51,7 +52,7 @@ interface IProps extends IState, IDispatch {
   }
 }
 
-function Home({ properties, propertyImagesStore, getLastOffers }: IProps) {
+function Home({ properties, propertyImages, getLastOffers }: IProps) {
   useEffect(() => {
     getLastOffers();
   }, []);
@@ -109,7 +110,7 @@ function Home({ properties, propertyImagesStore, getLastOffers }: IProps) {
               <div key={property.propertyId} className="w-full flex-shrink-0 max-w-250px md:max-w-350px">
                 <PropertyCard 
                   property={property}
-                  propertyImagesStore={propertyImagesStore}
+                  propertyImages={propertyImages}
                   className="max-w-250px md:max-w-350px"
                 />
               </div>

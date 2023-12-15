@@ -34,11 +34,17 @@ export interface IPropertyImage extends Model {
     propertyId: UUID;
 }
 
+export enum PropertyPaginationNames {
+    AllOffers = 'allOffers',
+    UserProperties = 'userProperties',
+}
+
 export interface PropertiesPage {
     page: number;
     limit: number;
     offset: number;
     totalPages: number;
+    paginationName: PropertyPaginationNames;
     properties: IProperty[];
 }
 

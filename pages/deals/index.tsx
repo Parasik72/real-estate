@@ -2,17 +2,17 @@ import ListOfDeals from "@/common/components/deals/list-of-deals.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { DealModel, DealStatuses } from "@/common/services/deal/deal.model";
+import { DealEffectActions } from "@/common/services/deal/deal.service";
 import { RootState } from "@/common/store/root.reducer";
-import { DealEffectActions } from "@/common/store/saga-effects/deal.saga-effects";
-import { StoreEntity } from "@/common/store/types/store.types";
-import { AuthUser } from "@/common/store/user/user.state.interface";
+import { Entity } from "@/common/store/types/store.types";
+import { AuthUser } from "@/common/types/auth.types";
 import { IPagination } from "@/common/types/common.types";
 import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 
 interface IState {
-  dealsStore: StoreEntity<DealModel>;
+  deals: Entity<DealModel>;
   authUser: AuthUser;
   requestedByMePage?: IPagination;
   requestedForMePage?: IPagination;
@@ -21,11 +21,11 @@ interface IState {
 
 function mapStateToProps(state: RootState): IState {
   return {
-    authUser: state.userReducer.authUser,
-    dealsStore: state.dealReducer.entities.deals,
-    requestedByMePage: state.dealReducer.paginations.requestedByMeDeals,
-    requestedForMePage: state.dealReducer.paginations.requestedForMeDeals,
-    mySuccessfulPage: state.dealReducer.paginations.mySuccessfulDeals,
+    authUser: state.authUser,
+    deals: state.entities.deals,
+    requestedByMePage: state.paginations.requestedByMeDeals,
+    requestedForMePage: state.paginations.requestedForMeDeals,
+    mySuccessfulPage: state.paginations.mySuccessfulDeals,
   };
 }
 
@@ -48,7 +48,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<DealEffectActions>>): IDis
       getRequestedForMeDeals: (payload: number) => 
         dispatch({ type: DealEffectActions.GET_REQUESTED_FOR_ME_DEALS, payload }),
       getMySuccessfulDeals: (payload: number) => 
-        dispatch({ type: DealEffectActions.GET_MY_SUCCESSFUL_DEALS, payload }),
+        dispatch({ type: DealEffectActions.GET_MY_SUCCESSFUL_DEALS, payload })
   }
 }
 
@@ -56,25 +56,26 @@ function Deals({
     getRequestedByMeDeals,
     getRequestedForMeDeals,
     getMySuccessfulDeals,
-    dealsStore, 
+    deals, 
     authUser,
     requestedByMePage,
     requestedForMePage,
     mySuccessfulPage,
 }: IState & IDispatch) {
-    const requestedByMe = dealsStore.allIds.filter((dealId) => {
-        return dealsStore.byId[dealId].buyerUserId === authUser.userId 
-            && dealsStore.byId[dealId].dealStatus === DealStatuses.Awaiting;
+    const dealsIds = Object.keys(deals);
+    const requestedByMe = dealsIds.filter((dealId) => {
+        return deals[dealId].buyerUserId === authUser.userId 
+            && deals[dealId].dealStatus === DealStatuses.Awaiting;
     });
-    const requestedForMe = dealsStore.allIds.filter((dealId) => {
-        return dealsStore.byId[dealId].sellerUserId === authUser.userId 
-            && dealsStore.byId[dealId].dealStatus === DealStatuses.Awaiting;
+    const requestedForMe = dealsIds.filter((dealId) => {
+        return deals[dealId].sellerUserId === authUser.userId 
+            && deals[dealId].dealStatus === DealStatuses.Awaiting;
     });
-    const mySuccessful = dealsStore.allIds.filter((dealId) => {
+    const mySuccessful = dealsIds.filter((dealId) => {
         return (
-            dealsStore.byId[dealId].sellerUserId === authUser.userId
-            ||  dealsStore.byId[dealId].buyerUserId === authUser.userId
-        ) && dealsStore.byId[dealId].dealStatus === DealStatuses.Done;
+            deals[dealId].sellerUserId === authUser.userId
+            ||  deals[dealId].buyerUserId === authUser.userId
+        ) && deals[dealId].dealStatus === DealStatuses.Done;
     });
     useEffect(() => {
         getRequestedByMeDeals(1);
@@ -100,7 +101,7 @@ function Deals({
                     <div className="mt-4">
                         <ListOfDeals 
                             displayCancelBtn
-                            dealsEntity={dealsStore.byId}
+                            dealsEntity={deals}
                             dealsIds={requestedByMe}
                             pagination={requestedByMePage}
                             onShowNext={(nextPage) => getRequestedByMeDeals(nextPage)}
@@ -118,7 +119,7 @@ function Deals({
                     <ListOfDeals 
                         displaySignBtn 
                         displayCancelBtn
-                        dealsEntity={dealsStore.byId}
+                        dealsEntity={deals}
                         dealsIds={requestedForMe}
                         pagination={requestedForMePage}
                         onShowNext={(nextPage) => getRequestedForMeDeals(nextPage)}
@@ -135,7 +136,7 @@ function Deals({
                     <div className="mt-4">
                         <ListOfDeals
                             isSuccessful
-                            dealsEntity={dealsStore.byId}
+                            dealsEntity={deals}
                             dealsIds={mySuccessful}
                             pagination={mySuccessfulPage}
                             onShowNext={(nextPage) => getMySuccessfulDeals(nextPage)}

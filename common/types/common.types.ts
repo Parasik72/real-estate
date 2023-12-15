@@ -1,4 +1,5 @@
 export interface IPagination {
+    paginationName: string;
     page: number;
     limit: number;
     offset: number;

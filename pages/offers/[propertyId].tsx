@@ -13,37 +13,35 @@ import { Action, Dispatch } from 'redux';
 import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
-import { PropertyEffectActions } from '@/common/store/saga-effects/property.saga-effects';
-import { Entity, StoreEntity } from '@/common/store/types/store.types';
-import { AuthUser } from '@/common/store/user/user.state.interface';
+import { Entity } from '@/common/store/types/store.types';
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
 import { PropertyImageModel } from '@/common/services/property/property-image.model';
 import { PropertyImages } from '@/common/components/property/property-images.component';
-import { DealEffectActions } from '@/common/store/saga-effects/deal.saga-effects';
 import { PropertyStatuses } from '@/common/types/property.type';
+import { AuthUser } from '@/common/types/auth.types';
+import { PropertyEffectActions } from '@/common/services/property/property.service';
+import { DealEffectActions } from '@/common/services/deal/deal.service';
 
 interface IState {
     properties: Entity<PropertyModel>;
-    propertyImagesStore: StoreEntity<PropertyImageModel>;
+    propertyImages: Entity<PropertyImageModel>;
     users: Entity<UserModel>;
     authUser: AuthUser;
 }
   
 function mapStateToProps(state: RootState): IState {
   return { 
-    properties: state.propertyReducer.entities.properties.byId || {},
-    propertyImagesStore: state.propertyReducer.entities.propertyImages,
-    users: state.userReducer.entities.users.byId || {},
-    authUser: state.userReducer.authUser
+    properties: state.entities.properties,
+    propertyImages: state.entities.propertyImages,
+    users: state.entities.users,
+    authUser: state.authUser
   }
 }
 
 interface IDispatch {
     getProperty: (propertyId: string) => {
         type: PropertyEffectActions.GET_PROPERTY;
-        payload: {
-            propertyId: string;
-        };
+        payload: string;
     };
     sendDeal: (propertyId: string, callback: () => void) => {
         type: DealEffectActions.SEND_DEAL;
@@ -57,7 +55,7 @@ interface IDispatch {
 const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions | DealEffectActions>>): IDispatch => {
   return {
     getProperty: (propertyId: string) => 
-        dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: { propertyId } }),
+        dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: propertyId  }),
     sendDeal: (propertyId: string, callback: () => void) => dispatch({
         type: DealEffectActions.SEND_DEAL,
         payload: { propertyId, callback }
@@ -67,7 +65,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions | De
 
 function Property({ 
     properties,
-    propertyImagesStore,
+    propertyImages,
     users, 
     authUser, 
     getProperty,
@@ -96,7 +94,7 @@ function Property({
                 <div className="flex flex-col lg:flex-row gap-10 mt-10">
                     <div className="w-full">
                         <div>
-                            <PropertyImages propertyImagesStore={propertyImagesStore} />
+                            <PropertyImages propertyImages={propertyImages} />
                             <div className="flex flex-col gap-5 md:px-20 mt-5">
                                 <div className="flex flex-col md:flex-row justify-between gap-4">
                                     <div className="flex items-center gap-5">

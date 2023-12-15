@@ -7,70 +7,130 @@ import { UserModel } from "../user/user.model";
 import { AddPropertyDto } from "./dto/add-property.dto";
 import { EditPropertyDto } from "./dto/edit-roperty.dto";
 import { schema } from "normalizr";
-import { takeEvery } from "redux-saga/effects";
+import { call, take, takeEvery } from "redux-saga/effects";
 import { generateQueryString } from "@/common/functions/http.functions";
-import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
+import { ReducerMethods } from "@/common/store/reducer.methods";
+import { SagaEffectAction } from "@/common/store/types/saga.types";
+import { Entities } from "@/common/store/entities/entities.enum";
+
+export enum PropertyEffectActions {
+    GET_LAST_OFFERS = 'GET_LAST_OFFERS',
+    GET_ALL_OFFERS = 'GET_ALL_OFFERS',
+    GET_PROPERTY = 'GET_PROPERTY',
+    ADD_PROPERTY = 'ADD_PROPERTY',
+    EDIT_PROPERTY = 'EDIT_PROPERTY',
+    GET_USER_PROPERTIES = 'GET_USER_PROPERTIES'
+}
 
 class PropertyService extends HttpService {
     constructor() {
         super();
         const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
-        this.initSchema('properties', { PropertyImages: [propertyImageSchema] }, { idAttribute: 'propertyId' });
-
-        this.getLastOffers = this.getLastOffers.bind(this);
+        const userSchema = new schema.Entity('users', {}, { idAttribute: 'userId' });
+        this.initSchema(
+            'properties',
+            { PropertyImages: [propertyImageSchema], User: userSchema }, 
+            { idAttribute: 'propertyId' }
+        );
     }
 
-    public * getLastOffers() {
+    public *getLastOffers() {
         yield takeEvery(
             PropertyEffectActions.GET_LAST_OFFERS, 
             this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>, 
-            { url: BACK_PATHS.getLastOffers }
+            { 
+                url: BACK_PATHS.getLastOffers,
+                cleanEntities: [Entities.Property, Entities.PropertyImage] 
+            },
+            ReducerMethods.UPDATE
         );
     }
-    // async getLastOffers()
-    // : Promise<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[] | null> {
-    //     return this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>({
-    //         url: BACK_PATHS.getLastOffers
-    //     });
-    // }
 
-    async getAllOffers(query: GetAllOffersParams)
-    : Promise<PropertiesPageResponse | null> {
-        const queryStr = generateQueryString(query);
-        return this.get<PropertiesPageResponse>({
-            url: `${BACK_PATHS.getAllOffers}${queryStr ? queryStr : ''}`
-        });
+    public *getAllOffers() {
+        while (true) {
+            const action: SagaEffectAction<GetAllOffersParams> = yield take(PropertyEffectActions.GET_ALL_OFFERS);
+            const queryStr = generateQueryString(action.payload);
+            yield call(
+                this.get<PropertiesPageResponse>, 
+                { 
+                    url: `${BACK_PATHS.getAllOffers}${queryStr}`,
+                    cleanEntities: action.payload.page === 1 
+                        ? [Entities.Property, Entities.PropertyImage] 
+                        : []
+                },
+                ReducerMethods.UPDATE
+            );
+        }
     }
 
-    async getUserProperties(userId: string, page?: number, limit?: number)
-    : Promise<PropertiesPageResponse | null> {
-        const queryStr = generateQueryString({ page, limit });
-        return this.get<PropertiesPageResponse>({
-            url: `${BACK_PATHS.getUserProperties
-                .replace(':userId', userId)}${queryStr ? queryStr : ''}`
-        });
+    public *getUserProperties() {
+        while (true) {
+            const action: SagaEffectAction<{
+                userId: string, page?: number, limit?: number
+            }> = yield take(PropertyEffectActions.GET_USER_PROPERTIES);
+            const queryStr = generateQueryString({ page: action.payload.page, limit: action.payload.limit });
+            yield call(
+                this.get<PropertiesPageResponse>, 
+                { 
+                    url: `${BACK_PATHS.getUserProperties
+                        .replace(':userId', action.payload.userId)}${queryStr}`,
+                    cleanEntities: action.payload.page === 1 
+                        ? [Entities.Property, Entities.PropertyImage] 
+                        : []
+                },
+                ReducerMethods.UPDATE
+            );
+        }
     }
 
-    async getPropertyById(id: string)
-    : Promise<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel} | null> {
-        return this.get<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel}>({
-            url: BACK_PATHS.getPropertyById
-                .replace(':propertyId', id)
-        });
+    public *getPropertyById() {
+        while (true) {
+            const action: SagaEffectAction<string> = yield take(PropertyEffectActions.GET_PROPERTY);
+            yield call (
+                this.get<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel}>, 
+                { 
+                    url: BACK_PATHS.getPropertyById.replace(':propertyId', action.payload),
+                    cleanEntities: [Entities.PropertyImage]
+                },
+                ReducerMethods.UPDATE
+            );
+        }
     }
 
-    async addProperty(dto: AddPropertyDto): Promise<{property: PropertyModel} | null> {
-        return this.post<FormData, {property: PropertyModel}>({
-            url: BACK_PATHS.addProperty,
-            body: this.toFormData(dto)
-        });
+    public *addProperty() {
+        while (true) {
+            const action: SagaEffectAction<{
+                values: AddPropertyDto,
+                callback: (propertyId: string) => void
+            }> = yield take(PropertyEffectActions.ADD_PROPERTY);
+            const res: { property: PropertyModel } = yield call(
+                this.post<FormData, {property: PropertyModel}>, 
+                { url: BACK_PATHS.addProperty,
+                    body: this.toFormData(action.payload.values) 
+                },
+                ReducerMethods.UPDATE
+            );
+            if (res instanceof Error) continue;
+            action.payload.callback(res.property.propertyId);
+        }
     }
 
-    async editProperty(dto: EditPropertyDto, propertyId: string) {
-        return this.patch<FormData, { message: string }>({
-            url: BACK_PATHS.editProperty.replace(':propertyId', propertyId),
-            body: this.toFormData(dto)
-        });
+    public *editProperty() {
+        while (true) {
+            const action: SagaEffectAction<{
+                values: EditPropertyDto, propertyId: string, callback: () => void
+            }> = yield take(PropertyEffectActions.EDIT_PROPERTY);
+            const res: Object = yield call(
+                this.patch<FormData, { message: string }>, 
+                { 
+                    url: BACK_PATHS.editProperty.replace(':propertyId', action.payload.propertyId),
+                    body: this.toFormData(action.payload.values)
+                },
+                ReducerMethods.UPDATE
+            );
+            if (res instanceof Error) continue;
+            action.payload.callback();
+        }
     }
 }
 

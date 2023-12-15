@@ -3,7 +3,7 @@ import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { signInInitialDataForm } from "@/common/functions/auth.functions";
-import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
+import { AuthUserEffectActions } from "@/common/services/auth-user/auth-user.service";
 import { SignInVariablesForm } from "@/common/types/auth.types";
 import { useRouter } from "next/router";
 import { connect } from "react-redux";
@@ -14,16 +14,16 @@ interface IDispatch {
         values: SignInVariablesForm,
         callback: () => void
     }) => {
-      type: UserEffectActions.SIGN_IN;
+      type: AuthUserEffectActions.SIGN_IN;
   }
 }
  
-const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDispatch => {
+const mapDispatchToProps = (dispatch: Dispatch<Action<AuthUserEffectActions>>): IDispatch => {
   return {
     signIn: (data: {
         values: SignInVariablesForm,
         callback: () => void
-    }) => dispatch({ type: UserEffectActions.SIGN_IN, payload: data })
+    }) => dispatch({ type: AuthUserEffectActions.SIGN_IN, payload: data })
   }
 }
 

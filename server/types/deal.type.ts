@@ -32,10 +32,17 @@ export interface UpdateDeal {
     updatedAt: BigInt;
 }
 
+export enum DealPaginationNames {
+    RequestedByMeDeals = 'requestedByMeDeals',
+    RequestedForMeDeals = 'requestedForMeDeals',
+    MySuccessfulDeals = 'mySuccessfulDeals'
+}
+
 export interface DealsPage {
     page: number;
     limit: number;
     offset: number;
     totalPages: number;
+    paginationName: DealPaginationNames;
     deals: IDeal[];
 }

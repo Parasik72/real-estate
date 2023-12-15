@@ -30,3 +30,8 @@ export interface SignUpActionForm<T extends Object> extends DataForm<T>  {
 export type AuthVariableTypes = SignInVariablesForm | SignUpVariablesForm;
 
 export type AuthActionsForm<T extends AuthVariableTypes> = SignInActionForm<T> | SignUpActionForm<T>;
+
+export interface AuthUser {
+    isAuth: boolean;
+    userId?: string;
+}

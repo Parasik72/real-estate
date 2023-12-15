@@ -1,12 +1,5 @@
-import { normalize, schema } from "normalizr";
-import { sendRequest } from "../functions/http.functions";
-import { call, put } from "redux-saga/effects";
-import { EntityMethod } from "../store/entities.reducer";
-
-interface HttpRequestConfig<ReqBody extends Object> {
-    url: string;
-    body?: ReqBody;
-}
+import { ReducerMethods } from "../store/reducer.methods";
+import { BaseService, HttpRequestConfig } from "./base.service";
 
 enum HttpMethods {
     GET = 'GET',
@@ -14,23 +7,14 @@ enum HttpMethods {
     PATCH = 'PATCH',
     DELETE = 'DELETE',
 }
-
-export class HttpService {
-    private _schema: any;
-    private _entityName: string | null = null;
-
-    protected initSchema(
-        name: string | null = null,
-        definitions: any = {},
-        options: any = {},
-    ) {
-        this._entityName = name;
-        this._schema =
-            name && name !== 'entity'
-                ? [new schema.Entity(name, definitions, options)]
-                : null;
-        
+export class HttpService extends BaseService {
+    constructor() {
+        super();
         this.get = this.get.bind(this);
+        this.post = this.post.bind(this);
+        this.patch = this.patch.bind(this);
+        this.delete = this.delete.bind(this);
+        this.toFormData = this.toFormData.bind(this);
     }
 
     private getFullApiUrl(path: string) {
@@ -55,51 +39,39 @@ export class HttpService {
         return formData;
     }
 
-    protected get = <ResBody extends Object>(config: HttpRequestConfig<Object>) => {
-        return this.requestResult<{}, ResBody>(config, HttpMethods.GET, EntityMethod.UPDATE);
-    }
-
-    protected async post<ReqBody extends Object, ResBody extends Object>(config: HttpRequestConfig<ReqBody>)
-    : Promise<ResBody | null>  {
-        const data = await sendRequest<ReqBody, ResBody>(
-            this.getFullApiUrl(config.url),
-            'POST',
-            config.body
+    protected get = <ResBody extends Object>
+    (config: HttpRequestConfig<Object>, reducerMethod: ReducerMethods) => {
+        return this.requestResult<{}, ResBody>(
+            {...config, url: this.getFullApiUrl(config.url)}, 
+            HttpMethods.GET, 
+            reducerMethod
         );
-        if (data instanceof Error) return null;
-        return data;
     }
 
-    protected async patch<ReqBody extends Object, ResBody extends Object>(config: HttpRequestConfig<ReqBody>)
-    : Promise<ResBody | null>  {
-        const data = await sendRequest<ReqBody, ResBody>(
-            this.getFullApiUrl(config.url),
-            'PATCH',
-            config.body
+    protected post = <ReqBody extends Object, ResBody extends Object>
+    (config: HttpRequestConfig<ReqBody>, reducerMethod: ReducerMethods) => {
+        return this.requestResult<ReqBody, ResBody>(
+            {...config, url: this.getFullApiUrl(config.url)}, 
+            HttpMethods.POST, 
+            reducerMethod
         );
-        if (data instanceof Error) return null;
-        return data;
     }
 
-    protected async delete<ReqBody extends Object, ResBody extends Object>(config: HttpRequestConfig<ReqBody>)
-    : Promise<ResBody | null>  {
-        const data = await sendRequest<ReqBody, ResBody>(
-            this.getFullApiUrl(config.url),
-            'DELETE',
-            config.body
+    protected patch = <ReqBody extends Object, ResBody extends Object>
+    (config: HttpRequestConfig<ReqBody>, reducerMethod: ReducerMethods) => {
+        return this.requestResult<ReqBody, ResBody>(
+            {...config, url: this.getFullApiUrl(config.url)},
+            HttpMethods.PATCH, 
+            reducerMethod
         );
-        if (data instanceof Error) return null;
-        return data;
     }
 
-    private *requestResult<ReqBody extends Object, ResBody extends Object>
-    (config: HttpRequestConfig<ReqBody>, httpMethod: string, actionMethod: string) {
-        const data: ResBody = yield call(sendRequest<ReqBody, ResBody>, this.getFullApiUrl(config.url), httpMethod);
-        const normalizrData = normalize(Array.isArray(data) ? data : [data], this._schema);
-        yield put({
-            type: actionMethod,
-            payload: normalizrData
-        });
-        return data;
+    protected delete = <ReqBody extends Object, ResBody extends Object>
+    (config: HttpRequestConfig<ReqBody>, reducerMethod: ReducerMethods) => {
+        return this.requestResult<ReqBody, ResBody>(
+            {...config, url: this.getFullApiUrl(config.url)}, 
+            HttpMethods.DELETE, 
+            reducerMethod
+        );
     }
 }

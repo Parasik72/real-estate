@@ -5,43 +5,41 @@ import { UserInfo } from "@/common/components/profile/user-info.component";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { UserModel } from "@/common/services/user/user.model";
+import { UserEffectActions } from "@/common/services/user/user.service";
 import { RootState } from "@/common/store/root.reducer";
-import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
-import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
-import { Entity, StoreEntity } from "@/common/store/types/store.types";
-import { AuthUser } from "@/common/store/user/user.state.interface";
+import { Entity } from "@/common/store/types/store.types";
+import { AuthUser } from "@/common/types/auth.types";
 import { IPagination } from "@/common/types/common.types";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
+import { PropertyEffectActions } from "@/common/services/property/property.service";
 
 interface IState {
     users: Entity<UserModel>;
     properties: PropertyModel[];
-    propertyImagesStore: StoreEntity<PropertyImageModel>;
+    propertyImages: Entity<PropertyImageModel>;
     authUser: AuthUser;
     userPropertiesPage?: IPagination;
 }
   
 function mapStateToProps(state: RootState): IState {
-  const properties = state.propertyReducer.entities.properties.byId;
+  const properties = state.entities.properties;
   return { 
-    users: state.userReducer.entities.users.byId,
+    users: state.entities.users,
     properties: properties ? Object.values(properties) : [],
-    authUser: state.userReducer.authUser,
-    propertyImagesStore: state.propertyReducer.entities.propertyImages,
-    userPropertiesPage: state.propertyReducer.paginations.userProperties
+    authUser: state.authUser,
+    propertyImages: state.entities.propertyImages,
+    userPropertiesPage: state.paginations.userProperties
   };
 }
 
 interface IDispatch {
     getProfile: (userId: string) => {
         type: UserEffectActions;
-        payload: {
-            userId: string;
-        };
+        payload: string;
     };
     getUserProperties: (userId: string, page?: number, limit?: number) => {
         type: PropertyEffectActions.GET_USER_PROPERTIES;
@@ -56,7 +54,7 @@ interface IDispatch {
 const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions | PropertyEffectActions>>): IDispatch => {
   return {
     getProfile: (userId: string) => 
-        dispatch({ type: UserEffectActions.GET_USER_PROFILE, payload: { userId } }),
+        dispatch({ type: UserEffectActions.GET_USER_PROFILE, payload: userId }),
     getUserProperties: (userId: string, page?: number, limit?: number) =>
         dispatch({ type: PropertyEffectActions.GET_USER_PROPERTIES, payload: { userId, page, limit } }),
   }
@@ -66,7 +64,7 @@ function Profile({
     users, 
     properties, 
     authUser, 
-    propertyImagesStore,
+    propertyImages,
     userPropertiesPage,
     getProfile, 
     getUserProperties
@@ -115,7 +113,7 @@ function Profile({
                     <div className="mt-4">
                         <ListOfProperties 
                             properties={properties} 
-                            propertyImagesStore={propertyImagesStore}
+                            propertyImages={propertyImages}
                             pagination={userPropertiesPage}
                             onShowNext={(nextPage: number) => getUserProperties(userId, nextPage)}
                         />

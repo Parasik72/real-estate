@@ -4,7 +4,7 @@ import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { addPropertyInitForm } from "@/common/functions/property.functions";
 import { AddPropertyDto } from "@/common/services/property/dto/add-property.dto";
-import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
+import { PropertyEffectActions } from "@/common/services/property/property.service";
 import { AddPropertyVariablesForm } from "@/common/types/property.type";
 import { useRouter } from "next/router";
 import { useState } from "react";

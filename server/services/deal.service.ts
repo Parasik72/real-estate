@@ -1,4 +1,4 @@
-import { DealRequestedBy, DealStatuses, DealsPage, IDeal, UpdateDeal } from "../types/deal.type";
+import { DealPaginationNames, DealRequestedBy, DealStatuses, DealsPage, IDeal, UpdateDeal } from "../types/deal.type";
 import { dealRequestedByFindMap } from "../functions/deal.functions";
 import BaseContext from "../context/base-context";
 import { InferCreationAttributes } from "sequelize";
@@ -75,7 +75,12 @@ export class DealService extends BaseContext {
             limit,
             offset,
             totalPages: Math.ceil(totalCount / limit),
-            deals
+            deals,
+            paginationName: requestedBy === DealRequestedBy.Buyer 
+                ? DealPaginationNames.RequestedByMeDeals
+                : requestedBy === DealRequestedBy.Seller
+                ? DealPaginationNames.RequestedForMeDeals
+                : DealPaginationNames.MySuccessfulDeals
         };
     }
 }

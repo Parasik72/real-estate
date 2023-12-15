@@ -13,20 +13,20 @@ import clsx from "clsx";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import Image from 'next/image';
 import { FRONT_IMGS_PATH } from "@/common/constants/front-paths.constants";
-import { StoreEntity } from "@/common/store/types/store.types";
+import { Entity } from "@/common/store/types/store.types";
 
 interface IProps<T extends PropertyVariableTypes> {
     data: PropertyActionsForm<T>;
     newImages: FileList | null;
     setNewImages: Dispatch<SetStateAction<FileList | null>>;
-    propertyImagesStore?: StoreEntity<PropertyImageModel>;
+    propertyImages?: Entity<PropertyImageModel>;
 }
 
 export function PropertyForm<T extends PropertyVariableTypes>({ 
     data, 
     newImages, 
     setNewImages,
-    propertyImagesStore
+    propertyImages
 }: IProps<T>) {
     const onImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
         setNewImages(e.target.files);
@@ -80,14 +80,16 @@ export function PropertyForm<T extends PropertyVariableTypes>({
                 </div>
                 {data.type === PropertyTypeForm.EDIT && <Divider text="Current images" />}
                 <div className="flex flex-col gap-10">
-                    {data.type === PropertyTypeForm.EDIT && propertyImagesStore?.allIds.map((imgId, index) => (
+                    {data.type === PropertyTypeForm.EDIT 
+                    && propertyImages 
+                    && Object.keys(propertyImages).map((imgId, index) => (
                         <div key={imgId} className="flex flex-col gap-3 items-center">
                             <Image
                                 className="w-full"
                                 src={
                                     FRONT_IMGS_PATH
                                         .property
-                                        .replace(':imgName', propertyImagesStore.byId[imgId].imgName)
+                                        .replace(':imgName', propertyImages[imgId].imgName)
                                 } 
                                 alt="currentImg" 
                                 width={300} 

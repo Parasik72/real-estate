@@ -4,27 +4,28 @@ import Link from "next/link";
 import { FC, useMemo } from "react";
 import { PropertyModel } from "../services/property/property.model";
 import CardImg from '../../common/images/card-img-1.png';
-import { StoreEntity } from "../store/types/store.types";
+import { Entity } from "../store/types/store.types";
 import { PropertyImageModel } from "../services/property/property-image.model";
 import { FRONT_IMGS_PATH } from "../constants/front-paths.constants";
 
 interface IProps {
   property: PropertyModel;
-  propertyImagesStore: StoreEntity<PropertyImageModel>;
+  propertyImages: Entity<PropertyImageModel>;
   className?: string;
 }
 
 export const PropertyCard: FC<IProps> = ({
   property,
-  propertyImagesStore,
+  propertyImages,
   className
 }) => {
-  const imgId = useMemo(() => propertyImagesStore.allIds.find((item) => {
-    return propertyImagesStore.byId[item].propertyId === property.propertyId;
-  }), [propertyImagesStore.allIds, property.propertyId]);
+  const propertyImagesIds = Object.keys(propertyImages);
+  const imgId = useMemo(() => propertyImagesIds.find((item) => {
+    return propertyImages[item].propertyId === property.propertyId;
+  }), [propertyImagesIds, property.propertyId]);
   const imgPath = useMemo(() => imgId 
-    ? FRONT_IMGS_PATH.property.replace(':imgName', propertyImagesStore.byId[imgId].imgName)
-    : CardImg, [CardImg, FRONT_IMGS_PATH, imgId, propertyImagesStore.byId]) ;
+    ? FRONT_IMGS_PATH.property.replace(':imgName', propertyImages[imgId].imgName)
+    : CardImg, [CardImg, FRONT_IMGS_PATH, imgId, propertyImages]);
   return (
     <Link 
       href={`/offers/${property.propertyId}`} 

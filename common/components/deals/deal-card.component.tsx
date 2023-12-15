@@ -3,8 +3,7 @@ import { DealModel } from "@/common/services/deal/deal.model";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import { PropertyModel } from "@/common/services/property/property.model";
 import { UserModel } from "@/common/services/user/user.model";
-import { StoreEntity } from "@/common/store/types/store.types";
-import { AuthUser } from "@/common/store/user/user.state.interface";
+import { Entity } from "@/common/store/types/store.types";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,12 +12,13 @@ import CardImg from '@/common/images/card-img-1.png';
 import { RootState } from "@/common/store/root.reducer";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
-import { DealEffectActions } from "@/common/store/saga-effects/deal.saga-effects";
 import { useRouter } from "next/router";
+import { AuthUser } from "@/common/types/auth.types";
+import { DealEffectActions } from "@/common/services/deal/deal.service";
 
 interface IState {
-  propertyImagesStore: StoreEntity<PropertyImageModel>;
-  usersStore: StoreEntity<UserModel>;
+  propertyImages: Entity<PropertyImageModel>;
+  users: Entity<UserModel>;
   authUser: AuthUser;
 }
 
@@ -33,9 +33,9 @@ interface IProps {
 
 function mapStateToProps(state: RootState, ownProps: IProps): IState {
   return {
-    authUser: state.userReducer.authUser,
-    propertyImagesStore: state.propertyReducer.entities.propertyImages,
-    usersStore: state.userReducer.entities.users,
+    authUser: state.authUser,
+    propertyImages: state.entities.propertyImages,
+    users: state.entities.users,
     ...ownProps
   };
 }
@@ -71,8 +71,8 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<DealEffectActions>>): IDis
 }
 
 function DealCard({
-    usersStore,
-    propertyImagesStore,
+    users,
+    propertyImages,
     authUser,
     deal,
     property,
@@ -85,12 +85,13 @@ function DealCard({
 }: IState & IProps & IDispatch) {
     if (!property) return <div>Loading...</div>
     const router = useRouter();
-    const imgId = useMemo(() => propertyImagesStore.allIds.find((item) => {
-      return propertyImagesStore.byId[item].propertyId === property.propertyId;
-    }), [propertyImagesStore.allIds, property.propertyId]);
+    const propertyImagesIds = Object.keys(propertyImages);
+    const imgId = useMemo(() => propertyImagesIds.find((item) => {
+      return propertyImages[item].propertyId === property.propertyId;
+    }), [propertyImagesIds, property.propertyId]);
     const imgPath = useMemo(() => imgId 
-      ? FRONT_IMGS_PATH.property.replace(':imgName', propertyImagesStore.byId[imgId].imgName)
-      : CardImg, [CardImg, FRONT_IMGS_PATH, imgId, propertyImagesStore.byId]);
+      ? FRONT_IMGS_PATH.property.replace(':imgName', propertyImages[imgId].imgName)
+      : CardImg, [CardImg, FRONT_IMGS_PATH, imgId, propertyImages]);
     const onSignDeal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         if (!deal?.dealId) return;
         e.preventDefault();
@@ -140,12 +141,12 @@ function DealCard({
                 </div>
                 <h4 className="text-dark-blue">
                     <span className="font-bold">Seller: </span>
-                    <span>{usersStore.byId[deal.sellerUserId].email}</span>
+                    <span>{users[deal.sellerUserId].email}</span>
                     {deal.sellerUserId === authUser.userId && <span className="font-bold">(YOU)</span>}
                 </h4>
                 <h4 className="text-dark-blue">
                     <span className="font-bold">Buyer: </span>
-                    <span>{usersStore.byId[deal.buyerUserId].email}</span>
+                    <span>{users[deal.buyerUserId].email}</span>
                     {deal.buyerUserId === authUser.userId && <span className="font-bold">(YOU)</span>}
                 </h4>
                 {displaySignBtn && (

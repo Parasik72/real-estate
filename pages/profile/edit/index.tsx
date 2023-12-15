@@ -4,10 +4,10 @@ import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { editProfileInitialDataForm } from "@/common/functions/user.functions";
 import { UserModel } from "@/common/services/user/user.model";
+import { UserEffectActions } from "@/common/services/user/user.service";
 import { RootState } from "@/common/store/root.reducer";
-import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
 import { Entity } from "@/common/store/types/store.types";
-import { AuthUser } from "@/common/store/user/user.state.interface";
+import { AuthUser } from "@/common/types/auth.types";
 import { EditProfileVariablesForm } from "@/common/types/profile.type";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -21,17 +21,15 @@ interface IState {
   
 function mapStateToProps(state: RootState): IState {
   return { 
-    users: state.userReducer.entities.users.byId,
-    authUser: state.userReducer.authUser
+    users: state.entities.users,
+    authUser: state.authUser
   }
 }
 
 interface IDispatch {
     getProfile: (userId: string) => {
         type: UserEffectActions;
-        payload: {
-            userId: string;
-        };
+        payload: string;
     };
     editProfile: (values: EditProfileVariablesForm, callback: () => void) => {
         type: UserEffectActions.EDIT_PROFILE;
@@ -45,7 +43,7 @@ interface IDispatch {
 const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDispatch => {
   return {
     getProfile: (userId: string) => 
-        dispatch({ type: UserEffectActions.GET_USER_PROFILE, payload: { userId } }),
+        dispatch({ type: UserEffectActions.GET_USER_PROFILE, payload: userId }),
     editProfile: (
         values: EditProfileVariablesForm,
         callback: () => void

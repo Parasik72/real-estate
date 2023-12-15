@@ -3,42 +3,43 @@ import Image from 'next/image';
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import { FC, useMemo, useState } from "react";
 import { FRONT_IMGS_PATH } from "@/common/constants/front-paths.constants";
-import { StoreEntity } from "@/common/store/types/store.types";
+import { Entity } from "@/common/store/types/store.types";
 import clsx from "clsx";
 
 interface IProps {
-    propertyImagesStore: StoreEntity<PropertyImageModel>;
+    propertyImages: Entity<PropertyImageModel>;
 }
 
-export const PropertyImages: FC<IProps> = ({ propertyImagesStore }) => {
-    const [selectedImg, setSelectedImg] = useState(propertyImagesStore.allIds[0]);
+export const PropertyImages: FC<IProps> = ({ propertyImages }) => {
+    const propertyImagesIds = Object.keys(propertyImages);
+    const [selectedImg, setSelectedImg] = useState(propertyImagesIds[0]);
     const [imgOffset, setImgOffset] = useState(0);
     const leftArrowDisabled = imgOffset === 0;
-    const rightArrowDisabled = imgOffset + 3 >= propertyImagesStore.allIds.length;
-    const leftArrowMobileDisabled = propertyImagesStore.allIds[0] === selectedImg;
+    const rightArrowDisabled = imgOffset + 3 >= propertyImagesIds.length;
+    const leftArrowMobileDisabled = propertyImagesIds[0] === selectedImg;
     const rightArrowMobileDisabled = 
-        propertyImagesStore.allIds[propertyImagesStore.allIds.length - 1] === selectedImg;
+        propertyImagesIds[propertyImagesIds.length - 1] === selectedImg;
     const carouselImgs = useMemo(
-        () => [...propertyImagesStore.allIds].splice(imgOffset, 3), 
-        [propertyImagesStore.allIds, imgOffset]
+        () => [...propertyImagesIds].splice(imgOffset, 3), 
+        [propertyImagesIds, imgOffset]
     );
 
     const leftArrowClick = () => setImgOffset(prev => prev - 1);
     const rightArrowClick = () => setImgOffset(prev => prev + 1);
     const leftArrowMobileClick = () => {
-        const index = propertyImagesStore.allIds.findIndex((item) => item === selectedImg) - 1;
-        setSelectedImg(propertyImagesStore.allIds[index]);
+        const index = propertyImagesIds.findIndex((item) => item === selectedImg) - 1;
+        setSelectedImg(propertyImagesIds[index]);
     };
         
     const rightArrowMobileClick = () => {
-        const index = propertyImagesStore.allIds.findIndex((item) => item === selectedImg) + 1;
-        setSelectedImg(propertyImagesStore.allIds[index]);
+        const index = propertyImagesIds.findIndex((item) => item === selectedImg) + 1;
+        setSelectedImg(propertyImagesIds[index]);
     }; 
 
-    if (propertyImagesStore.allIds.length === 0) return <div>No images</div>
+    if (propertyImagesIds.length === 0) return <div>No images</div>
 
-    const primaryImg = propertyImagesStore.byId[selectedImg]?.imgName 
-        || propertyImagesStore.byId[propertyImagesStore.allIds[0]]?.imgName
+    const primaryImg = propertyImages[selectedImg]?.imgName 
+        || propertyImages[propertyImagesIds[0]]?.imgName
         || '';
 
     return (
@@ -72,14 +73,14 @@ export const PropertyImages: FC<IProps> = ({ propertyImagesStore }) => {
                                 src={
                                     FRONT_IMGS_PATH
                                     .property
-                                    .replace(':imgName', propertyImagesStore.byId[carouselImg].imgName)
+                                    .replace(':imgName', propertyImages[carouselImg].imgName)
                                 } 
                                 width={191} 
                                 height={84} 
                                 alt='carouselImg' 
                             />
                             <div className={clsx("w-full h-full border-4 border-blue-500 absolute inset-0 left-0 top-0", {
-                                'hidden': propertyImagesStore.byId[carouselImg].imgName !== primaryImg,
+                                'hidden': propertyImages[carouselImg].imgName !== primaryImg,
                             })} />
                         </button>
                     ))}

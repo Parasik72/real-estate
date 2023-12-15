@@ -5,9 +5,9 @@ import { PageWrapper } from "@/common/components/page-wrapper.component";
 import { GetAllOffersParams } from "@/common/services/property/property-http.types";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import { PropertyModel } from "@/common/services/property/property.model";
+import { PropertyEffectActions } from "@/common/services/property/property.service";
 import { RootState } from "@/common/store/root.reducer";
-import { PropertyEffectActions } from "@/common/store/saga-effects/property.saga-effects";
-import { StoreEntity } from "@/common/store/types/store.types";
+import { Entity } from "@/common/store/types/store.types";
 import { IPagination } from "@/common/types/common.types";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -16,15 +16,15 @@ import { Action, Dispatch } from "redux";
 
 interface IState {
     properties: PropertyModel[];
-    propertyImagesStore: StoreEntity<PropertyImageModel>;
+    propertyImages: Entity<PropertyImageModel>;
     allOffersPage?: IPagination;
 }
 
 function mapStateToProps(state: RootState): IState {
     return { 
-        properties: Object.values(state.propertyReducer.entities.properties.byId),
-        propertyImagesStore: state.propertyReducer.entities.propertyImages,
-        allOffersPage: state.propertyReducer.paginations.allOffers
+        properties: Object.values(state.entities.properties),
+        propertyImages: state.entities.propertyImages,
+        allOffersPage: state.paginations.allOffers
     };
 }
 
@@ -44,7 +44,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
 
 function Offers({ 
     properties, 
-    propertyImagesStore,
+    propertyImages,
     allOffersPage,
     getAllOffers 
 }: IState & IDispatch) {
@@ -56,8 +56,9 @@ function Offers({
         });
     }
     useEffect(() => {
+        if (!router.isReady) return;
         getFirstPage();
-    }, []);
+    }, [router.isReady]);
     return (
         <PageWrapper>
             <PageContainer className="py-8">
@@ -78,7 +79,7 @@ function Offers({
             <PageContainer className="py-8">
                 <ListOfProperties 
                     properties={properties} 
-                    propertyImagesStore={propertyImagesStore}
+                    propertyImages={propertyImages}
                     pagination={allOffersPage}
                     onShowNext={(nextPage: number) => getAllOffers({
                         page: nextPage,
