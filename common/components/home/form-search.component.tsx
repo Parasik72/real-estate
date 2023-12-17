@@ -31,17 +31,18 @@ export const FormSearch: FC<IProps> = ({ className }) => {
           </div>
           <Input name="country" placeholder="Search of country" className="pl-10" type="text" />
         </div>
-        <div className="relative">
+        <Link 
+          href={`${FRONT_PATHS.offers}${queryString ? queryString : ''}`}
+          className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-5">
             <SearchIcon />
           </div>
-          <Link
-           href={`${FRONT_PATHS.offers}${queryString ? queryString : ''}`}
+          <span
            className="block py-4 w-full lg:w-auto px-11 pl-13 bg-blue-900 text-white rounded-md font-bold"
           >
             Search
-          </Link>
-        </div>
+          </span>
+        </Link>
       </div>
     </div>
   )

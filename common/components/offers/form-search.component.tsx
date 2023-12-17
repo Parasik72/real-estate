@@ -22,17 +22,16 @@ export const FormSearch: FC<IProps> = ({ onSearch }) => {
                     <div className="relative lg:max-w-xl md:w-full">
                         <Input name="keyword" placeholder="Enter a keyword" type="text" />
                     </div>
-                    <div className="relative">
+                    <button onClick={onSearch} className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-5">
                             <SearchIcon />
                         </div>
-                        <button
-                            onClick={onSearch} 
+                        <span
                             className="py-4 w-full lg:w-auto px-11 pl-13 bg-blue-900 text-white rounded-md font-bold"
                         >
                             Search
-                        </button>
-                    </div>
+                        </span>
+                    </button>
                 </div>
                 <Divider className="py-7" text="Advanced filters" />
                 <div className="w-full flex flex-col">

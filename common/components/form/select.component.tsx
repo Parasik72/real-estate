@@ -30,7 +30,7 @@ export const Select: FC<IProps> = ({
         if (!router.isReady) return;
         setValue(router.query[name] 
             ? router.query[name] as string
-            : ''
+            : title || ''
         );
     }, [router.isReady]);
     return (

@@ -15,7 +15,7 @@ export class UserService extends BaseContext {
     : Promise<IUser | null>  {
         return this.di.User.findByPk(userId, {
             attributes: { exclude: ['password'] }
-        }) as Promise<IUser | null>;
+        });
     }
 
     async createUser(data: InferCreationAttributes<IUser>): Promise<IUser> {
