@@ -15,9 +15,14 @@ import { Entity } from "@/common/store/types/store.types";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import Link from "next/link";
 import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
-import { Entities } from "@/common/store/entities/entities.enum";
 import { UserEffectActions } from "@/common/services/user/user.service";
 import { PropertyEffectActions } from "@/common/services/property/property.service";
+import apiContainer from "@/server/container";
+import { INextPageContextExtended } from "@/server/types/http.types";
+import { PropertyController } from "@/server/controllers/property.controller";
+import container from "@/common/container/container";
+import { ReduxStore } from "@/common/store/redux.store";
+import { GetServerSideProps } from "next";
 
 interface IState {
   properties: PropertyModel[];
@@ -25,8 +30,9 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
-  const properties = state.entities[Entities.Property] as Entity<PropertyModel>;
-  const propertyImages = state.entities[Entities.PropertyImage] as Entity<PropertyImageModel>;
+  const properties = state.entities.properties
+  const propertyImages = state.entities.propertyImages;
+  console.log('users', state.entities.users)
   return { 
     properties: properties ? Object.values(properties) : [],
     propertyImages
@@ -39,7 +45,9 @@ interface IDispatch {
   };
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions | UserEffectActions>>): IDispatch => {
+const mapDispatchToProps = (
+  dispatch: Dispatch<Action<PropertyEffectActions | UserEffectActions>>
+): IDispatch => {
   return {
     getLastOffers: () => dispatch({ type: PropertyEffectActions.GET_LAST_OFFERS }),
   }
@@ -51,6 +59,18 @@ interface IProps extends IState, IDispatch {
     isAuth: boolean;
   }
 }
+
+export const getServerSideProps: GetServerSideProps = 
+  container.resolve<ReduxStore>('reduxStore').wrapper.getServerSideProps(
+    (store) => (context: any): any => {
+      return apiContainer.resolve<PropertyController>('propertyController')
+        .handlerSSR({
+          ...context, 
+          routePath: '/properties/last-offers',
+          dispatch: store.dispatch
+        });
+    }
+  );
 
 function Home({ properties, propertyImages, getLastOffers }: IProps) {
   useEffect(() => {

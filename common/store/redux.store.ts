@@ -1,4 +1,4 @@
-import { Dispatch, Store, applyMiddleware, compose } from "redux";
+import { AnyAction, Dispatch, Store, applyMiddleware, compose } from "redux";
 import BaseContext from "../context/base-context";
 import IContextContainer from "../context/icontext-container";
 import { Entities } from "./entities/entities.enum";
@@ -15,6 +15,7 @@ import { all } from "redux-saga/effects";
 import createSagaMiddleware from "redux-saga";
 import { EnhancedStore, configureStore } from "@reduxjs/toolkit";
 import { rootReducer } from "./root.reducer";
+import { createWrapper } from "next-redux-wrapper";
 
 interface IRootReducer {
     entities: {
@@ -36,11 +37,13 @@ interface IRootReducer {
 export class ReduxStore extends BaseContext {
     private _store: EnhancedStore<IRootReducer>;
     private _sagas: ReturnType<typeof BaseService.sagas>;
+    private _wrapper: ReturnType<typeof createWrapper>;
 
     constructor(ctx: IContextContainer) {
         super(ctx);
         this.rootSaga = this.rootSaga.bind(this);
         this._sagas = BaseService.sagas(ctx);
+        this._wrapper = {} as any;
         const isDebug =
             process.env.NODE_ENV as string === 'local' ||
             process.env.DEBUG_PROD === 'true';
@@ -51,6 +54,10 @@ export class ReduxStore extends BaseContext {
 
     public get store(): Store<IRootReducer> {
         return this._store;
+    }
+
+    public get wrapper() {
+        return this._wrapper;
     }
 
     public state = (): IRootReducer => {
@@ -73,6 +80,7 @@ export class ReduxStore extends BaseContext {
                 getDefaultMiddleware({ serializableCheck: false }).concat([sagaMiddleware]),
         });
         sagaMiddleware.run(this.rootSaga);
+        this._wrapper = createWrapper<EnhancedStore<any, AnyAction>>(() => store);
         return store;
     }
 
@@ -98,6 +106,9 @@ export class ReduxStore extends BaseContext {
         });
 
         sagaMiddleware.run(this.rootSaga);
+        this._wrapper = createWrapper<EnhancedStore<any, AnyAction>>(() => store, {
+            debug: true,
+        });
         return store;
     };
 }

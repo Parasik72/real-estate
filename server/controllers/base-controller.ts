@@ -90,8 +90,13 @@ export class BaseController extends BaseContext {
                     req,
                     res
                 } as ControllerConfig);
+                context.dispatch({
+                    type: 'UPDATE',
+                    payload: { entities: { users: { 'test-user': { name: 'test-user' }  } } }
+                });
                 return {
-                    props: { data: JSON.parse(JSON.stringify(data)) }
+                    props: {}
+                    // props: { data: JSON.parse(JSON.stringify(data)) }
                 };
             }).run(context.req, context.res);
         } catch (error) {
