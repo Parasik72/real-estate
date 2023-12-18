@@ -1,24 +1,27 @@
+import Router from 'next/router';
 import { BACK_PATHS } from "@/common/constants/back-paths.constants";
 import { HttpService } from "../http.service";
 import { DealsPageResponse } from "./deal.interfaces";
 import { DealModel } from "./deal.model";
 import { schema } from "normalizr";
-import { call, put, take } from "redux-saga/effects";
+import { call } from "redux-saga/effects";
 import { ReducerMethods } from "@/common/store/reducer.methods";
-import { SagaEffectAction } from "@/common/store/types/saga.types";
+import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
+import IContextContainer from '@/common/context/icontext-container';
+import action from '@/common/decorators/action.decorator';
 
 export enum DealEffectActions {
-    GET_REQUESTED_BY_ME_DEALS = 'GET_REQUESTED_BY_ME_DEALS',
-    GET_REQUESTED_FOR_ME_DEALS = 'GET_REQUESTED_FOR_ME_DEALS',
-    GET_MY_SUCCESSFUL_DEALS = 'GET_MY_SUCCESSFUL_DEALS',
-    SIGN_DEAL = 'SIGN_DEAL',
-    CANCEL_DEAL = 'CANCEL_DEAL',
-    SEND_DEAL = 'SEND_DEAL',
+    GET_REQUESTED_BY_ME_DEALS = 'deals_getRequestedByMeDeals',
+    GET_REQUESTED_FOR_ME_DEALS = 'deals_getRequestedForMeDeals',
+    GET_MY_SUCCESSFUL_DEALS = 'deals_getMySuccessfulDeals',
+    SIGN_DEAL = 'deals_signDeal',
+    CANCEL_DEAL = 'deals_cancelDeal',
+    SEND_DEAL = 'deals_sendDeal',
 }
 
-class DealService extends HttpService {
-    constructor() {
-        super();
+export class DealService extends HttpService {
+    constructor(ctx: IContextContainer) {
+        super(ctx);
         const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
         const propertySchema = new schema.Entity(
             'properties', 
@@ -33,86 +36,69 @@ class DealService extends HttpService {
         );
     }
     
-    public *getRequestedByMeDeals() {
-        while (true) {
-            const action: SagaEffectAction<number> = yield take(DealEffectActions.GET_REQUESTED_BY_ME_DEALS);
-            yield call(
-                this.get<DealsPageResponse>, 
-                { url: `${BACK_PATHS.getDeals}?page=${action.payload}&requestedBy=Buyer` },
-                ReducerMethods.UPDATE
-            );
-        }
+    @action()
+    public *getRequestedByMeDeals(payload: number) {
+        yield call(
+            this.get<DealsPageResponse>, 
+            { url: `${BACK_PATHS.getDeals}?page=${payload}&requestedBy=Buyer` },
+            ReducerMethods.UPDATE
+        );
     }
 
-    public *getRequestedForMeDeals() {
-        while (true) {
-            const action: SagaEffectAction<number> = yield take(DealEffectActions.GET_REQUESTED_FOR_ME_DEALS);
-            yield call(
-                this.get<DealsPageResponse>, 
-                { url: `${BACK_PATHS.getDeals}?page=${action.payload}&requestedBy=Seller` },
-                ReducerMethods.UPDATE
-            );
-        }
+    @action()
+    public *getRequestedForMeDeals(payload: number) {
+        yield call(
+            this.get<DealsPageResponse>, 
+            { url: `${BACK_PATHS.getDeals}?page=${payload}&requestedBy=Seller` },
+            ReducerMethods.UPDATE
+        );
     }
 
-    public *getMySuccessfulDeals() {
-        while (true) {
-            const action: SagaEffectAction<number> = yield take(DealEffectActions.GET_MY_SUCCESSFUL_DEALS);
-            yield call(
-                this.get<DealsPageResponse>, 
-                { url: `${BACK_PATHS.getDeals}?page=${action.payload}&dealStatusName=Done` },
-                ReducerMethods.UPDATE
-            );
-        }
+    @action()
+    public *getMySuccessfulDeals(payload: number) {
+        yield call(
+            this.get<DealsPageResponse>, 
+            { url: `${BACK_PATHS.getDeals}?page=${payload}&dealStatusName=Done` },
+            ReducerMethods.UPDATE
+        );
     }
 
-    public *signDeal() {
-        while (true) {
-            const action: SagaEffectAction<{
-                dealId: string;
-                callback: () => void;
-            }> = yield take(DealEffectActions.SIGN_DEAL);
-            const res: Object = yield call(
-                this.post<{}, { message: string, deal: DealModel }>, 
-                { url: BACK_PATHS.signDeal.replace(':dealId', action.payload.dealId) },
-                ReducerMethods.UPDATE
-            );
-            if (res instanceof Error) continue;
-            action.payload.callback();
-        }
+    @action()
+    public *signDeal(payload: {
+        dealId: string;
+    }) {
+        const res: Object = yield call(
+            this.post<{}, { message: string, deal: DealModel }>, 
+            { url: BACK_PATHS.signDeal.replace(':dealId', payload.dealId) },
+            ReducerMethods.UPDATE
+        );
+        if (res instanceof Error) return;
+        Router.push(FRONT_PATHS.offers);
     }
 
-    public *cancelDeal() {
-        while (true) {
-            const action: SagaEffectAction< {
-                dealId: string;
-                callback: () => void;
-            }> = yield take(DealEffectActions.CANCEL_DEAL);
-            const res: Object = yield call(
-                this.post<{}, { message: string }>, 
-                { url: BACK_PATHS.cancelDeal.replace(':dealId', action.payload.dealId) },
-                ReducerMethods.DELETE
-            );
-            if (res instanceof Error) continue;
-            action.payload.callback();
-        }
+    @action()
+    public *cancelDeal(payload: {
+        dealId: string;
+    }) {
+        const res: Object = yield call(
+            this.post<{}, { message: string }>, 
+            { url: BACK_PATHS.cancelDeal.replace(':dealId', payload.dealId) },
+            ReducerMethods.DELETE
+        );
+        if (res instanceof Error) return;
+        Router.push(FRONT_PATHS.offers);
     }
 
-    public *sendDeal() {
-        while (true) {
-            const action: SagaEffectAction<{
-                propertyId: string;
-                callback: () => void;
-            }> = yield take(DealEffectActions.SEND_DEAL);
-            const res: Object = yield call(
-                this.post<{}, { message: string }>, 
-                { url: BACK_PATHS.sendDeal.replace(':propertyId', action.payload.propertyId) },
-                ReducerMethods.UPDATE
-            );
-            if (res instanceof Error) continue;
-            action.payload.callback();
-        }
+    @action()
+    public *sendDeal(payload: {
+        propertyId: string;
+    }) {
+        const res: Object = yield call(
+            this.post<{}, { message: string }>, 
+            { url: BACK_PATHS.sendDeal.replace(':propertyId', payload.propertyId) },
+            ReducerMethods.UPDATE
+        );
+        if (res instanceof Error) return;
+        Router.push(FRONT_PATHS.offers);
     }
 }
-
-export const dealService = new DealService;

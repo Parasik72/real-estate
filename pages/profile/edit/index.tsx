@@ -1,7 +1,6 @@
 import { ProfileForm } from "@/common/components/form/profile-form.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
-import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { editProfileInitialDataForm } from "@/common/functions/user.functions";
 import { UserModel } from "@/common/services/user/user.model";
 import { UserEffectActions } from "@/common/services/user/user.service";
@@ -9,7 +8,6 @@ import { RootState } from "@/common/store/root.reducer";
 import { Entity } from "@/common/store/types/store.types";
 import { AuthUser } from "@/common/types/auth.types";
 import { EditProfileVariablesForm } from "@/common/types/profile.type";
-import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
@@ -31,11 +29,10 @@ interface IDispatch {
         type: UserEffectActions;
         payload: string;
     };
-    editProfile: (values: EditProfileVariablesForm, callback: () => void) => {
+    editProfile: (values: EditProfileVariablesForm) => {
         type: UserEffectActions.EDIT_PROFILE;
         payload: {
             values: EditProfileVariablesForm;
-            callback: () => void;
         };
     };
 }
@@ -45,20 +42,15 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDis
     getProfile: (userId: string) => 
         dispatch({ type: UserEffectActions.GET_USER_PROFILE, payload: userId }),
     editProfile: (
-        values: EditProfileVariablesForm,
-        callback: () => void
+        values: EditProfileVariablesForm
     ) =>
-        dispatch({ type: UserEffectActions.EDIT_PROFILE, payload: { values, callback } }),    
+        dispatch({ type: UserEffectActions.EDIT_PROFILE, payload: { values } }),    
   }
 }
 
 function EditProfile({ authUser, users, getProfile, editProfile }: IState & IDispatch) {
-    const router = useRouter();
     const onSubmit = (values: EditProfileVariablesForm) => {
-        editProfile(
-            values, 
-            () => router.push(FRONT_PATHS.profileById.replace(':userId', authUser?.userId || ''))
-        );
+        editProfile(values);
     }
     useEffect(() => {
         if (!authUser.userId) return;

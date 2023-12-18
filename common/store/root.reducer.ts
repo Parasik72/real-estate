@@ -28,10 +28,10 @@ interface IRootReducer {
     authUser: AuthUserState;
 }
 
-export const rootReducer = combineReducers({
-    entities: entitiesReducer,
-    authUser: authUserReducer,
-    paginations: paginationsReducer
+export const rootReducer = combineReducers<IRootReducer>({
+    entities: entitiesReducer as any,
+    authUser: authUserReducer as any,
+    paginations: paginationsReducer as any
 });
 
 export type RootState = IRootReducer;

@@ -1,8 +1,13 @@
 import { Schema, normalize, schema } from "normalizr";
 import { IPagination } from "../types/common.types";
-import { call, put } from "redux-saga/effects";
+import { call, fork, put, take } from "redux-saga/effects";
 import { ReducerMethods } from "../store/reducer.methods";
 import { Entity } from "../store/types/store.types";
+import BaseContext from "../context/base-context";
+import IContextContainer from "../context/icontext-container";
+import { sagaAction } from "../functions/saga.functions";
+import { SagaEffectAction } from "../store/types/saga.types";
+import 'reflect-metadata';
 
 export interface HttpRequestConfig<ReqBody extends Object> {
     url: string;
@@ -10,11 +15,44 @@ export interface HttpRequestConfig<ReqBody extends Object> {
     cleanEntities?: string[];
 }
 
-const paginationKeys: Array<keyof IPagination> = ['limit', 'offset', 'page', 'totalPages'];
+const paginationKeys: Array<keyof IPagination> = 
+    ['limit', 'offset', 'page', 'totalPages', 'paginationName'];
 
-export class BaseService {
+export interface ISagaMethod {
+    className: string;
+    methodName: string;
+}
+
+export class BaseService extends BaseContext {
     private _schema: schema.Entity[] = [];
     private _entityName: string = '';
+    private _actions: { [key: string]: Object } = {};
+
+    constructor(ctx: IContextContainer) {
+        super(ctx);
+    }
+
+    public static sagas(di: IContextContainer) {
+        const objects: ISagaMethod[] = Reflect.getMetadata('sagas', BaseService) || [];
+        return objects.map(obj => {
+            const classInstance = di[obj.className as keyof typeof di] as BaseService;
+            const actionName = classInstance.entityName + '_' + obj.methodName;
+            const method = (classInstance[obj.methodName as keyof typeof classInstance] as any).bind(classInstance);
+            classInstance._actions[obj.methodName] = (data?: any) =>
+                sagaAction(actionName, data);
+            const saga = function* () {
+                while (true) {
+                    const data: SagaEffectAction<Object> = yield take(actionName);
+                    yield call(method, data.payload);
+                }
+            };
+            return fork(saga);
+        });
+    }
+
+    public get entityName(): String {
+        return this._entityName;
+    }
 
     protected initSchema(
         name: string,

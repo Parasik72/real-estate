@@ -1,39 +1,33 @@
 import { AuthForm } from "@/common/components/form/auth-form.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
-import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { signUpInitialDataForm } from "@/common/functions/auth.functions";
-import { UserEffectActions } from "@/common/store/saga-effects/user.saga-effects";
+import { AuthUserEffectActions } from "@/common/services/auth-user/auth-user.service";
 import { SignUpVariablesForm } from "@/common/types/auth.types";
-import { useRouter } from "next/router";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 
 interface IDispatch {
   signUp: (data: {
-        values: SignUpVariablesForm,
-        callback: () => void
+        values: SignUpVariablesForm
     }) => {
-      type: UserEffectActions.SIGN_UP;
+      type: AuthUserEffectActions.SIGN_UP;
   }
 }
  
-const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDispatch => {
+const mapDispatchToProps = (dispatch: Dispatch<Action<AuthUserEffectActions>>): IDispatch => {
   return {
     signUp: (data: {
-        values: SignUpVariablesForm,
-        callback: () => void
-    }) => dispatch({ type: UserEffectActions.SIGN_UP, payload: data })
+        values: SignUpVariablesForm
+    }) => dispatch({ type: AuthUserEffectActions.SIGN_UP, payload: data })
   }
 }
 
 function SignUp({ signUp }: IDispatch) {
-    const router = useRouter();
     const onSubmit = (values: SignUpVariablesForm) => {
         signUp({
-            values: {...values, phone: values.phone.toString()},
-            callback: () => router.push(FRONT_PATHS.signIn)
-        })
+            values: {...values, phone: values.phone.toString()}
+        });
     };
     return (
         <PageWrapper className="py-8 h-full">
@@ -48,7 +42,7 @@ function SignUp({ signUp }: IDispatch) {
                 </div>
             </PageContainer>
         </PageWrapper>
-    )
+    );
 }
 
 export default connect(null, mapDispatchToProps)(SignUp);

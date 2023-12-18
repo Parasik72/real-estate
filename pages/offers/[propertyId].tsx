@@ -43,11 +43,10 @@ interface IDispatch {
         type: PropertyEffectActions.GET_PROPERTY;
         payload: string;
     };
-    sendDeal: (propertyId: string, callback: () => void) => {
+    sendDeal: (propertyId: string) => {
         type: DealEffectActions.SEND_DEAL;
         payload: {
             propertyId: string;
-            callback: () => void;
         };
     };
 }
@@ -56,9 +55,9 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions | De
   return {
     getProperty: (propertyId: string) => 
         dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: propertyId  }),
-    sendDeal: (propertyId: string, callback: () => void) => dispatch({
+    sendDeal: (propertyId: string) => dispatch({
         type: DealEffectActions.SEND_DEAL,
-        payload: { propertyId, callback }
+        payload: { propertyId }
     })
   }
 }
@@ -82,7 +81,7 @@ function Property({
     const isCurrentUserOwner = authUser.isAuth && property.userId === authUser.userId;
     
     const onSendDeal = () => {
-        sendDeal(propertyId, () => router.push(FRONT_PATHS.offers))
+        sendDeal(propertyId);
     }
 
     return (

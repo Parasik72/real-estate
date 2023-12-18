@@ -1,18 +1,15 @@
 import { AuthForm } from "@/common/components/form/auth-form.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
-import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { signInInitialDataForm } from "@/common/functions/auth.functions";
 import { AuthUserEffectActions } from "@/common/services/auth-user/auth-user.service";
 import { SignInVariablesForm } from "@/common/types/auth.types";
-import { useRouter } from "next/router";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 
 interface IDispatch {
   signIn: (data: {
-        values: SignInVariablesForm,
-        callback: () => void
+        values: SignInVariablesForm
     }) => {
       type: AuthUserEffectActions.SIGN_IN;
   }
@@ -21,19 +18,14 @@ interface IDispatch {
 const mapDispatchToProps = (dispatch: Dispatch<Action<AuthUserEffectActions>>): IDispatch => {
   return {
     signIn: (data: {
-        values: SignInVariablesForm,
-        callback: () => void
+        values: SignInVariablesForm
     }) => dispatch({ type: AuthUserEffectActions.SIGN_IN, payload: data })
   }
 }
 
 function SignIn({ signIn }: IDispatch) {
-    const router = useRouter();
     const onSubmit = (values: SignInVariablesForm) => {
-        signIn({
-            values,
-            callback: () => router.push(FRONT_PATHS.home)
-        });
+        signIn({values});
     }
     return (
         <PageWrapper className="py-8 h-full">

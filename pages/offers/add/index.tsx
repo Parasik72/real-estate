@@ -1,20 +1,17 @@
 import { PropertyForm } from "@/common/components/form/property-form.component";
 import { PageContainer } from "@/common/components/page-container.component";
 import { PageWrapper } from "@/common/components/page-wrapper.component";
-import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { addPropertyInitForm } from "@/common/functions/property.functions";
 import { AddPropertyDto } from "@/common/services/property/dto/add-property.dto";
 import { PropertyEffectActions } from "@/common/services/property/property.service";
 import { AddPropertyVariablesForm } from "@/common/types/property.type";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 
 interface IDispatch {
     addProperty: (payload: {
-        values: AddPropertyDto,
-        callback: (propertyId: string) => void
+        values: AddPropertyDto
     }) => {
         type: PropertyEffectActions.ADD_PROPERTY;
     };
@@ -23,14 +20,12 @@ interface IDispatch {
 const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): IDispatch => {
     return {
         addProperty: (payload: {
-            values: AddPropertyDto,
-            callback: (propertyId: string) => void
+            values: AddPropertyDto
         }) => dispatch({ type: PropertyEffectActions.ADD_PROPERTY, payload })
     }
 }
 
 function AddProperty({ addProperty }: IDispatch) {
-    const router = useRouter();
     const [images, setImages] = useState<FileList | null>(null)
 
     const onSubmit = (values: AddPropertyVariablesForm) => {
@@ -41,9 +36,6 @@ function AddProperty({ addProperty }: IDispatch) {
                 ...values, 
                 images, 
                 addressLine2: addressLine2 ? addressLine2 : null
-            },
-            callback: (propertyId: string) => {
-                router.push(FRONT_PATHS.offerById.replace(':propertyId', propertyId));
             }
         });
     }

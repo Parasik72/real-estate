@@ -10,9 +10,7 @@ import { useEffect, useState } from "react";
 import { RootState } from '@/common/store/root.reducer';
 import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
-import { PropertyAddressModel } from "@/common/services/property/property-address.model";
 import { EditPropertyDto } from "@/common/services/property/dto/edit-roperty.dto";
-import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import { PropertyEffectActions } from "@/common/services/property/property.service";
 
@@ -33,12 +31,18 @@ interface IDispatch {
         type: PropertyEffectActions.GET_PROPERTY;
         payload: string;
     };
-    editProperty: (propertyId: string, values: EditPropertyDto, callback: () => void) => {
+    editProperty: (payload: {
+        property: PropertyModel, 
+        values: EditPropertyDto,
+        propertyImagesIds: string[],
+        newImages: FileList | null
+    }) => {
         type: PropertyEffectActions.EDIT_PROPERTY;
         payload: {
-            propertyId: string;
-            values: EditPropertyDto;
-            callback: () => void;
+            property: PropertyModel, 
+            values: EditPropertyDto,
+            propertyImagesIds: string[],
+            newImages: FileList | null
         };
     };
 }
@@ -47,10 +51,13 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
   return {
     getProperty: (propertyId: string) => 
         dispatch({ type: PropertyEffectActions.GET_PROPERTY, payload: propertyId }),
-    editProperty: (
-        propertyId: string, values: EditPropertyDto, callback: () => void
-    ) =>
-        dispatch({ type: PropertyEffectActions.EDIT_PROPERTY, payload: { propertyId, values, callback } })
+    editProperty: (payload: {
+        property: PropertyModel, 
+        values: EditPropertyDto,
+        propertyImagesIds: string[],
+        newImages: FileList | null
+    }) =>
+        dispatch({ type: PropertyEffectActions.EDIT_PROPERTY, payload })
   }
 }
 
@@ -61,31 +68,12 @@ function EditProperty({ properties, propertyImages, getProperty, editProperty }:
     const property = properties[propertyId];
 
     const onSubmit = (values: EditPropertyVariablesForm) => {
-        const propertyImagesIds = Object.keys(propertyImages);
-        if (propertyImagesIds.length > 0 &&
-            values.imgsToDeleteIds?.length === propertyImagesIds.length) return;
-        const data: EditPropertyDto = {...values};
-        Object.entries(values).forEach((value) => {
-            if (value[1] === property[value[0] as keyof typeof property]) {
-                delete data[value[0] as keyof typeof data];
-            } else if (property?.PropertyAddress
-                && value[1] as any === property!.PropertyAddress[value[0] as keyof PropertyAddressModel]) {
-                    delete data[value[0] as keyof typeof data];
-            } else if (Array.isArray(value[1]) && value[1].length === 0) {
-                delete data[value[0] as keyof typeof data];
-            }
+        editProperty({
+            newImages,
+            property,
+            propertyImagesIds: Object.keys(propertyImages) || [],
+            values
         });
-        if (newImages) data['images'] = newImages;
-        else delete data['images'];
-        const callback = () => router.push(FRONT_PATHS.offerById.replace(':propertyId', propertyId));
-        if (Object.values(data).length !== 0) {
-            return editProperty(
-                propertyId, 
-                data, 
-                callback
-            );
-        }
-        callback();
     }
 
     useEffect(() => {

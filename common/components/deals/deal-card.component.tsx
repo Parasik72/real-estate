@@ -12,7 +12,6 @@ import CardImg from '@/common/images/card-img-1.png';
 import { RootState } from "@/common/store/root.reducer";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
-import { useRouter } from "next/router";
 import { AuthUser } from "@/common/types/auth.types";
 import { DealEffectActions } from "@/common/services/deal/deal.service";
 
@@ -41,18 +40,16 @@ function mapStateToProps(state: RootState, ownProps: IProps): IState {
 }
 
 interface IDispatch {
-  signDeal: (dealId: string, callback: () => void) => {
+  signDeal: (dealId: string) => {
       type: DealEffectActions.SIGN_DEAL;
       payload: {
         dealId: string;
-        callback: () => void;
       };
   };
-  cancelDeal: (dealId: string, callback: () => void) => {
+  cancelDeal: (dealId: string) => {
     type: DealEffectActions.CANCEL_DEAL;
     payload: {
         dealId: string;
-        callback: () => void;
     };
   };
 }
@@ -60,13 +57,11 @@ interface IDispatch {
 const mapDispatchToProps = (dispatch: Dispatch<Action<DealEffectActions>>): IDispatch => {
   return {
     signDeal: (
-        dealId: string, 
-        callback: () => void
-    ) => dispatch({ type: DealEffectActions.SIGN_DEAL, payload: { dealId, callback } }),
+        dealId: string
+    ) => dispatch({ type: DealEffectActions.SIGN_DEAL, payload: { dealId } }),
     cancelDeal: (
-        dealId: string, 
-        callback: () => void
-    ) => dispatch({ type: DealEffectActions.CANCEL_DEAL, payload: { dealId, callback } }),
+        dealId: string,
+    ) => dispatch({ type: DealEffectActions.CANCEL_DEAL, payload: { dealId } }),
   }
 }
 
@@ -84,7 +79,6 @@ function DealCard({
     cancelDeal
 }: IState & IProps & IDispatch) {
     if (!property) return <div>Loading...</div>
-    const router = useRouter();
     const propertyImagesIds = Object.keys(propertyImages);
     const imgId = useMemo(() => propertyImagesIds.find((item) => {
       return propertyImages[item].propertyId === property.propertyId;
@@ -96,19 +90,13 @@ function DealCard({
         if (!deal?.dealId) return;
         e.preventDefault();
         e.stopPropagation();
-        signDeal(
-            deal.dealId, 
-            () => router.push(FRONT_PATHS.offerById.replace(':propertyId', deal.propertyId))
-        );
+        signDeal(deal.dealId);
     }
     const onCancelDeal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         if (!deal?.dealId) return;
         e.preventDefault();
         e.stopPropagation();
-        cancelDeal(
-            deal.dealId, 
-            () => router.push(FRONT_PATHS.offerById.replace(':propertyId', deal.propertyId))
-        );
+        cancelDeal(deal.dealId);
     }
     return (
         <Link 

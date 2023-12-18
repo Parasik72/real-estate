@@ -1,3 +1,4 @@
+import IContextContainer from "../context/icontext-container";
 import { ReducerMethods } from "../store/reducer.methods";
 import { BaseService, HttpRequestConfig } from "./base.service";
 
@@ -8,8 +9,8 @@ enum HttpMethods {
     DELETE = 'DELETE',
 }
 export class HttpService extends BaseService {
-    constructor() {
-        super();
+    constructor(ctx: IContextContainer) {
+        super(ctx);
         this.get = this.get.bind(this);
         this.post = this.post.bind(this);
         this.patch = this.patch.bind(this);
