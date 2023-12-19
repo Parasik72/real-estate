@@ -4,4 +4,8 @@ export interface IPagination {
     limit: number;
     offset: number;
     totalPages: number;
+    // pages: {
+    //     [n]: { ids: number[] }
+    // }
+    
 }

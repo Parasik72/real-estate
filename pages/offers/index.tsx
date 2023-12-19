@@ -10,9 +10,11 @@ import { RootState } from "@/common/store/root.reducer";
 import { Entity } from "@/common/store/types/store.types";
 import { IPagination } from "@/common/types/common.types";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
+import apiContainer from "@/server/container";
+import container from "@/common/container/container";
+import { ReduxStore } from "@/common/store/redux.store";
 
 interface IState {
     properties: PropertyModel[];
@@ -21,7 +23,7 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
-    return { 
+  return { 
         properties: Object.values(state.entities.properties),
         propertyImages: state.entities.propertyImages,
         allOffersPage: state.paginations.allOffers
@@ -42,6 +44,14 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
     }
 }
 
+export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
+  .getServerSideProps(
+    apiContainer, 
+    '/properties/offers', 
+    'propertyController',
+    'PropertyService'
+  );
+
 function Offers({ 
     properties, 
     propertyImages,
@@ -55,10 +65,6 @@ function Offers({
             ...router.query
         });
     }
-    useEffect(() => {
-        if (!router.isReady) return;
-        getFirstPage();
-    }, [router.isReady]);
     return (
         <PageWrapper>
             <PageContainer className="py-8">

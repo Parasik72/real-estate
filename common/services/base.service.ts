@@ -1,5 +1,4 @@
-import { Schema, normalize, schema } from "normalizr";
-import { IPagination } from "../types/common.types";
+import { Schema, schema } from "normalizr";
 import { call, fork, put, take } from "redux-saga/effects";
 import { ReducerMethods } from "../store/reducer.methods";
 import { Entity } from "../store/types/store.types";
@@ -7,16 +6,13 @@ import BaseContext from "../context/base-context";
 import IContextContainer from "../context/icontext-container";
 import { sagaAction } from "../functions/saga.functions";
 import { SagaEffectAction } from "../store/types/saga.types";
+import { normalizeReqBody } from "../functions/http.functions";
 import 'reflect-metadata';
-
 export interface HttpRequestConfig<ReqBody extends Object> {
     url: string;
     body?: ReqBody;
     cleanEntities?: string[];
 }
-
-const paginationKeys: Array<keyof IPagination> = 
-    ['limit', 'offset', 'page', 'totalPages', 'paginationName'];
 
 export interface ISagaMethod {
     className: string;
@@ -50,8 +46,12 @@ export class BaseService extends BaseContext {
         });
     }
 
-    public get entityName(): String {
+    public get entityName(): string {
         return this._entityName;
+    }
+
+    public get entitySchema(): schema.Entity[] {
+        return this._schema;
     }
 
     protected initSchema(
@@ -65,18 +65,6 @@ export class BaseService extends BaseContext {
                 ? [new schema.Entity(name, definitions, options)]
                 : [];
         this.sendRequest = this.sendRequest.bind(this);
-    }
-
-    private isPaginationBody<TBody extends Object>(body: TBody) {
-        return paginationKeys.every((key) => body.hasOwnProperty(key));
-    }
-
-    private extractPaginationAndData<TBody extends Object>(body: TBody) {
-        const { 
-            [this._entityName as keyof typeof body]: extData, 
-            ...extPagination 
-        } = body;
-        return {extPagination: extPagination as any as IPagination, extData };
     }
 
     private generatePayloadForClean(entities: string[]) {
@@ -96,19 +84,10 @@ export class BaseService extends BaseContext {
             });
         }
         let data: object | Error = yield call(this.sendRequest<ReqBody, ResBody>, config.url, httpMethod, config.body);
-        if (this.isPaginationBody(data)) {
-            const { extData, extPagination } = this.extractPaginationAndData(data);
-            yield put({
-                type: actionMethod,
-                payload: { entities: { [extPagination.paginationName]: extPagination } }
-            });
-            data = extData;
+        const actions = normalizeReqBody(data, this._entityName, this._schema, actionMethod);
+        for(const action of actions) {
+            yield put(action);
         }
-        const normalizrData = normalize(Array.isArray(data) ? data : [data], this._schema);
-        yield put({
-            type: actionMethod,
-            payload: normalizrData
-        });
         return data as ResBody;
     }
 

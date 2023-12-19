@@ -85,19 +85,12 @@ export class BaseController extends BaseContext {
             return router.get(async (req: any, res) => {
                 const data = await callback({
                     body: {},
-                    query: req.query,
+                    query: context.query || {},
                     user: req.user,
                     req,
                     res
                 } as ControllerConfig);
-                context.dispatch({
-                    type: 'UPDATE',
-                    payload: { entities: { users: { 'test-user': { name: 'test-user' }  } } }
-                });
-                return {
-                    props: {}
-                    // props: { data: JSON.parse(JSON.stringify(data)) }
-                };
+                return { props: { data: JSON.parse(JSON.stringify(data)) } };
             }).run(context.req, context.res);
         } catch (error) {
             return { 

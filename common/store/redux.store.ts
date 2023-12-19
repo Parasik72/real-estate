@@ -16,6 +16,10 @@ import createSagaMiddleware from "redux-saga";
 import { EnhancedStore, configureStore } from "@reduxjs/toolkit";
 import { rootReducer } from "./root.reducer";
 import { createWrapper } from "next-redux-wrapper";
+import { AwilixContainer } from "awilix";
+import { BaseController } from "@/server/controllers/base-controller";
+import { ReducerMethods } from "./reducer.methods";
+import { normalizeReqBody } from "../functions/http.functions";
 
 interface IRootReducer {
     entities: {
@@ -111,4 +115,36 @@ export class ReduxStore extends BaseContext {
         });
         return store;
     };
+
+    public getServerSideProps(
+        apiContainer: AwilixContainer,
+        routePath: string,
+        controllerName: string | string[],
+        serviceName: string | string[],
+    ) {
+        return this._wrapper.getServerSideProps(
+          (store) => async (context: any) => {
+            const controllerNames = Array.isArray(controllerName) ? controllerName : [controllerName];
+            const servicesNames = Array.isArray(serviceName) ? serviceName : [serviceName];
+            let actions: { type: string, payload: Object }[] = []
+            for (let i = 0; i < controllerNames.length; ++i) {
+                const controller = apiContainer.resolve(controllerNames[i]) as BaseController;
+                const res: any = await controller.handlerSSR({ ...context, routePath });
+                if (!res || !res.props || !res.props.data) continue;
+                
+                const service = this.di[servicesNames[i] as keyof typeof this.di] as BaseService;
+                const acts = normalizeReqBody(
+                    res.props.data, 
+                    service.entityName, 
+                    service.entitySchema, 
+                    ReducerMethods.UPDATE
+                );
+                actions.push(...acts);
+            }
+            actions.forEach(action => {
+                store.dispatch(action);
+            });
+            return { props: { data: { } } };
+        });
+    }
 }

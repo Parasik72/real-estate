@@ -34,6 +34,7 @@ export class PropertyController extends BaseController {
     return this.di.propertyService.getAllOffers(query);
   }
 
+  @SSR('/user/profile')
   @GET('/api/properties/user/:userId')
   async getUserProperties({ query }: ControllerConfig<{}, Params.GetUserProperties>) {
     return this.di.propertyService.getUserProperties(query.userId, query.page, query.limit);

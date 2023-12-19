@@ -10,7 +10,6 @@ import { PropertyModel } from "@/common/services/property/property.model";
 import { RootState } from "@/common/store/root.reducer";
 import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
-import { useEffect } from "react";
 import { Entity } from "@/common/store/types/store.types";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import Link from "next/link";
@@ -18,11 +17,8 @@ import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { UserEffectActions } from "@/common/services/user/user.service";
 import { PropertyEffectActions } from "@/common/services/property/property.service";
 import apiContainer from "@/server/container";
-import { INextPageContextExtended } from "@/server/types/http.types";
-import { PropertyController } from "@/server/controllers/property.controller";
 import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
-import { GetServerSideProps } from "next";
 
 interface IState {
   properties: PropertyModel[];
@@ -30,9 +26,8 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
-  const properties = state.entities.properties
+  const properties = state.entities.properties;
   const propertyImages = state.entities.propertyImages;
-  console.log('users', state.entities.users)
   return { 
     properties: properties ? Object.values(properties) : [],
     propertyImages
@@ -40,17 +35,13 @@ function mapStateToProps(state: RootState): IState {
 }
 
 interface IDispatch {
-  getLastOffers: () => {
-    type: PropertyEffectActions;
-  };
+  
 }
 
 const mapDispatchToProps = (
   dispatch: Dispatch<Action<PropertyEffectActions | UserEffectActions>>
 ): IDispatch => {
-  return {
-    getLastOffers: () => dispatch({ type: PropertyEffectActions.GET_LAST_OFFERS }),
-  }
+  return { }
 }
 
 interface IProps extends IState, IDispatch {
@@ -60,22 +51,15 @@ interface IProps extends IState, IDispatch {
   }
 }
 
-export const getServerSideProps: GetServerSideProps = 
-  container.resolve<ReduxStore>('reduxStore').wrapper.getServerSideProps(
-    (store) => (context: any): any => {
-      return apiContainer.resolve<PropertyController>('propertyController')
-        .handlerSSR({
-          ...context, 
-          routePath: '/properties/last-offers',
-          dispatch: store.dispatch
-        });
-    }
+export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
+  .getServerSideProps(
+    apiContainer, 
+    '/properties/last-offers', 
+    'propertyController',
+    'PropertyService'
   );
 
-function Home({ properties, propertyImages, getLastOffers }: IProps) {
-  useEffect(() => {
-    getLastOffers();
-  }, []);
+function Home({ properties, propertyImages }: IProps) {
   return (
     <PageWrapper className="overflow-x-hidden">
       <PageContainer className="relative py-12">
@@ -91,7 +75,7 @@ function Home({ properties, propertyImages, getLastOffers }: IProps) {
           </p>
         </div>
         <div className="mt-8 w-full lg:max-w-3xl">
-         <FormSearch  className="p-4" />
+          <FormSearch  className="p-4" />
         </div>
       </PageContainer>
       <div className="bg-indigo-50 w-full py-14 lg:mt-36 lg:py-28">

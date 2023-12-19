@@ -12,10 +12,12 @@ import { AuthUser } from "@/common/types/auth.types";
 import { IPagination } from "@/common/types/common.types";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 import { PropertyEffectActions } from "@/common/services/property/property.service";
+import apiContainer from "@/server/container";
+import container from "@/common/container/container";
+import { ReduxStore } from "@/common/store/redux.store";
 
 interface IState {
     users: Entity<UserModel>;
@@ -60,22 +62,24 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions | Proper
   }
 }
 
+export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
+  .getServerSideProps(
+    apiContainer, 
+    '/user/profile', 
+    ['propertyController', 'userController'],
+    ['PropertyService', 'UserService']
+  );
+
 function Profile({ 
     users, 
     properties, 
     authUser, 
     propertyImages,
     userPropertiesPage,
-    getProfile, 
     getUserProperties
 }: IState & IDispatch) {
     const router = useRouter();
     const userId = router.query.userId as string || '';
-    useEffect(() => {
-        if (!userId) return;
-        getProfile(userId);
-        getUserProperties(userId, 1);
-    }, [userId]);
     if (!users[userId]) return <div>Loading...</div>
     const isCurrentUserProfile = authUser.isAuth && userId === authUser.userId;
     return (

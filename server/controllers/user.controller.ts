@@ -21,7 +21,7 @@ import PATCH from "../decorators/patch.decorator";
 import { editProfileValidation } from "../validators/user-schemas/edit-profile.schema";
 
 export class UserController extends BaseController {
-    @SSR('/user/profile/:userId')
+    @SSR('/user/profile')
     @GET('/api/user/profile/:userId')
     async getUserProfileById({ query }: ControllerConfig<{}, GetUserProfileParams>) {
         const { userService } = this.di;

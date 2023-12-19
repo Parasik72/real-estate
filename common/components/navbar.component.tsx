@@ -76,7 +76,7 @@ const Navbar = ({ getAuthUser, logout, authUser }: IState & IDispatch) => {
                             <Link href="/topoffers" className="text-gray-800">About us</Link>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center gap-5">
-                            {authUser.isAuth ? (
+                            {authUser?.isAuth ? (
                                 <>
                                     <Link href={FRONT_PATHS.profileById.replace(':userId', authUser.userId!)} className="px-6 py-2 text-white bg-blue-900 rounded-md font-bold">Profile</Link>
                                     <button onClick={onLogout} className="px-6 py-2 text-white bg-red-900 rounded-md font-bold">Logout</button>

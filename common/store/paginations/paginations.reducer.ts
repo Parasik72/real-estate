@@ -1,11 +1,12 @@
 import { Entity } from "../types/store.types";
 import { ReducerMethods } from "../reducer.methods";
 import { Paginations } from "./paginations.enum";
+import { HYDRATE } from "next-redux-wrapper";
 
 export type PaginationsState = Entity<Object>;
 
 export interface IReducerAction {
-    type: ReducerMethods;
+    type: ReducerMethods | typeof HYDRATE;
     payload?: {
         entities?: Entity<Object>;
     };
@@ -35,7 +36,7 @@ export const paginationsReducer =
                 if (!(entityName in entities)) break;
                 state = {
                     ...state,
-                    [entityName as keyof PaginationsState]: {}
+                    [entityName]: {}
                 };    
                 break;
             }

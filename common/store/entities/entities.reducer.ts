@@ -1,11 +1,12 @@
 import { Entities } from "./entities.enum";
 import { Entity } from "../types/store.types";
 import { ReducerMethods } from "../reducer.methods";
+import { HYDRATE } from "next-redux-wrapper";
 
 export type EntitiesState = Entity<Entity<Object>>;
 
 export interface IReducerAction {
-    type: ReducerMethods;
+    type: ReducerMethods | typeof HYDRATE;
     payload?: {
         entities?: Entity<Object>;
     };

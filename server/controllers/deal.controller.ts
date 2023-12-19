@@ -14,6 +14,7 @@ import { sessions } from "../sessions";
 import { passportInitialize, passportSession } from "../passport";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 import { objectToJSON } from "../functions/json.functions";
+import SSR from "../decorators/ssr.decorator";
 
 @USE([sessions, passportInitialize, passportSession, isLogedIn])
 export class DealController extends BaseController {
@@ -99,6 +100,7 @@ export class DealController extends BaseController {
         return { message: 'The deal has been canceled successfully.' }
     }
 
+    @SSR('/deals')
     @GET('/api/deals')
     async getAllDeals({ query, user }: ControllerConfig<{}, Params.GetAllDealsParams>) {
         const { dealService } = this.di;

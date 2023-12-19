@@ -1,4 +1,3 @@
-import { combineReducers } from "redux";
 import { entitiesReducer } from "./entities/entities.reducer";
 import { AuthUserState, authUserReducer } from "./auth-user/auth-user.reducer";
 import { Entities } from "./entities/entities.enum";
@@ -10,6 +9,8 @@ import { DealModel } from "../services/deal/deal.model";
 import { paginationsReducer } from "./paginations/paginations.reducer";
 import { Paginations } from "./paginations/paginations.enum";
 import { IPagination } from "../types/common.types";
+import { nextReducer } from "./next-reducer/next.reducer";
+import { HYDRATE } from "next-redux-wrapper";
 
 interface IRootReducer {
     entities: {
@@ -28,10 +29,21 @@ interface IRootReducer {
     authUser: AuthUserState;
 }
 
-export const rootReducer = combineReducers<IRootReducer>({
-    entities: entitiesReducer as any,
-    authUser: authUserReducer as any,
-    paginations: paginationsReducer as any
-});
+const mainReducers = (state: any, action: any) => {
+    return {
+        entities: entitiesReducer(state.entities, action),
+        paginations: paginationsReducer(state.paginations, action),
+        authUser: authUserReducer(state.authUser, action),
+    }
+}
+
+let initialState = {}
+
+export const rootReducer = (state = initialState, action: any) => {
+    if (action.type === HYDRATE) {
+        return nextReducer(state, action);
+    }
+    return mainReducers(state, action);
+};
 
 export type RootState = IRootReducer;
