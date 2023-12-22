@@ -4,6 +4,7 @@ export interface IPagination {
     limit: number;
     offset: number;
     totalPages: number;
+    query?: Record<string, string>;
     // pages: {
     //     [n]: { ids: number[] }
     // }

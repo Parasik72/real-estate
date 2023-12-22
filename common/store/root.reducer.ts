@@ -11,13 +11,15 @@ import { Paginations } from "./paginations/paginations.enum";
 import { IPagination } from "../types/common.types";
 import { nextReducer } from "./next-reducer/next.reducer";
 import { HYDRATE } from "next-redux-wrapper";
+import { combineReducers } from "redux";
+import { FiltersState, filtersReducer } from "./filters/filters.reducer";
 
 interface IRootReducer {
     entities: {
-        [Entities.Property]: Entity<PropertyModel>,
-        [Entities.PropertyImage]: Entity<PropertyImageModel>,
-        [Entities.User]: Entity<UserModel>,
-        [Entities.Deal]: Entity<DealModel>,
+        [Entities.Property]?: Entity<PropertyModel>,
+        [Entities.PropertyImage]?: Entity<PropertyImageModel>,
+        [Entities.User]?: Entity<UserModel>,
+        [Entities.Deal]?: Entity<DealModel>,
     };
     paginations: {
         [Paginations.AllOffers]?: IPagination;
@@ -27,20 +29,35 @@ interface IRootReducer {
         [Paginations.UserProperties]?: IPagination;
     }
     authUser: AuthUserState;
+    filters: FiltersState;
 }
 
-const mainReducers = (state: any, action: any) => {
-    return {
-        entities: entitiesReducer(state.entities, action),
-        paginations: paginationsReducer(state.paginations, action),
-        authUser: authUserReducer(state.authUser, action),
-    }
-}
+const mainReducers = combineReducers({
+    entities: entitiesReducer,
+    paginations: paginationsReducer,
+    authUser: authUserReducer,
+    filters: filtersReducer
+});
 
 let initialState = {}
 
+const compareKeys = ['entities', 'paginations'];
+
+const compareState = (state: any) => {
+    // console.log('hydration 1')
+    // const stateKeys = Object.keys(state);
+    // for (const stateKey of stateKeys) {
+    //     if (compareKeys.includes(stateKey) && Object.keys(state[stateKey]).length > 0) {
+    //         return false;
+    //     }
+    // } 
+    return true;
+}
+
 export const rootReducer = (state = initialState, action: any) => {
-    if (action.type === HYDRATE) {
+    // console.log('hydration start')
+    if (action.type === HYDRATE && compareState(state)) {
+        // console.log('hydration 2')
         return nextReducer(state, action);
     }
     return mainReducers(state, action);

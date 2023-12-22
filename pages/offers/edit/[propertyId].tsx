@@ -21,8 +21,8 @@ interface IState {
   
 function mapStateToProps(state: RootState): IState {
   return { 
-    properties: state.entities.properties,
-    propertyImages: state.entities.propertyImages
+    properties: state.entities.properties || {},
+    propertyImages: state.entities.propertyImages || {}
   }
 }
 

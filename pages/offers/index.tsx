@@ -20,13 +20,15 @@ interface IState {
     properties: PropertyModel[];
     propertyImages: Entity<PropertyImageModel>;
     allOffersPage?: IPagination;
+    filters: Record<string, string>;
 }
 
 function mapStateToProps(state: RootState): IState {
   return { 
-        properties: Object.values(state.entities.properties),
-        propertyImages: state.entities.propertyImages,
-        allOffersPage: state.paginations.allOffers
+        properties: Object.values(state.entities.properties || {}),
+        propertyImages: state.entities.propertyImages || {},
+        allOffersPage: state.paginations.allOffers,
+        filters: state.filters
     };
 }
 
@@ -56,13 +58,14 @@ function Offers({
     properties, 
     propertyImages,
     allOffersPage,
+    filters,
     getAllOffers 
 }: IState & IDispatch) {
     const router = useRouter();
     const getFirstPage = () => {
         getAllOffers({
             page: 1,
-            ...router.query
+            ...filters
         });
     }
     return (

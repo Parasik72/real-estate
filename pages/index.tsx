@@ -19,6 +19,7 @@ import { PropertyEffectActions } from "@/common/services/property/property.servi
 import apiContainer from "@/server/container";
 import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
+import { useEffect } from "react";
 
 interface IState {
   properties: PropertyModel[];
@@ -26,8 +27,8 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
-  const properties = state.entities.properties;
-  const propertyImages = state.entities.propertyImages;
+  const properties = state.entities.properties || {};
+  const propertyImages = state.entities.propertyImages || {};
   return { 
     properties: properties ? Object.values(properties) : [],
     propertyImages
@@ -35,13 +36,17 @@ function mapStateToProps(state: RootState): IState {
 }
 
 interface IDispatch {
-  
+  getLastOffers: () => {
+    type: PropertyEffectActions.GET_LAST_OFFERS;
+}
 }
 
 const mapDispatchToProps = (
   dispatch: Dispatch<Action<PropertyEffectActions | UserEffectActions>>
 ): IDispatch => {
-  return { }
+  return { 
+    getLastOffers: () => dispatch({ type: PropertyEffectActions.GET_LAST_OFFERS }),
+  }
 }
 
 interface IProps extends IState, IDispatch {
@@ -59,7 +64,10 @@ export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
     'PropertyService'
   );
 
-function Home({ properties, propertyImages }: IProps) {
+function Home({ properties, propertyImages, getLastOffers }: IProps) {
+  // useEffect(() => {
+  //   getLastOffers();
+  // }, []);
   return (
     <PageWrapper className="overflow-x-hidden">
       <PageContainer className="relative py-12">

@@ -22,7 +22,7 @@ interface IState {
 function mapStateToProps(state: RootState): IState {
   return {
     authUser: state.authUser,
-    deals: state.entities.deals,
+    deals: state.entities.deals || {},
     requestedByMePage: state.paginations.requestedByMeDeals,
     requestedForMePage: state.paginations.requestedForMeDeals,
     mySuccessfulPage: state.paginations.mySuccessfulDeals,

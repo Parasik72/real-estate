@@ -1,7 +1,7 @@
 import clsx from "clsx";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { FC, useEffect, useState } from "react";
-import { useRouter as useRoute } from "next/router";
+import { FC, useState } from "react";
+import { useDispatch } from "react-redux";
+import { FiltersMethods } from "@/common/store/filters/filters.methods";
 
 interface IProps {
     type: string;
@@ -15,25 +15,20 @@ interface IProps {
 export const Input: FC<IProps> = ({ 
     placeholder, className, type, name, disableQuery, id
 }) => {
-    const searchParams = useSearchParams();
-    const router = useRoute();
-    const pathname = usePathname();
+    const [timeHandler, setTimeHandler] = useState<NodeJS.Timeout | null>(null);
     const [value, setValue] = useState('');
-    const { replace } = useRouter();
+    const dispatch = useDispatch();
     const handleSearch = (term: string) => {
         setValue(term);
-        const params = new URLSearchParams(searchParams);
-        if (term) params.set(name, term);
-        else params.delete(name);
-        replace(`${pathname}?${params.toString()}`);
+        if (timeHandler) clearTimeout(timeHandler);
+        const handler = setTimeout(() => {
+            dispatch({ type: FiltersMethods.UPDATE, payload: {
+                key: name,
+                value: term
+            }});
+        }, 300);
+        setTimeHandler(handler);
     };
-    useEffect(() => {
-        if (!router.isReady) return;
-        setValue(router.query[name] 
-            ? router.query[name] as string
-            : ''
-        );
-    }, [router.isReady]);
     return (
         <input
             id={id}

@@ -11,6 +11,9 @@ import { EditProfileVariablesForm } from "@/common/types/profile.type";
 import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
+import apiContainer from "@/server/container";
+import container from "@/common/container/container";
+import { ReduxStore } from "@/common/store/redux.store";
 
 interface IState {
     users: Entity<UserModel>;
@@ -19,7 +22,7 @@ interface IState {
   
 function mapStateToProps(state: RootState): IState {
   return { 
-    users: state.entities.users,
+    users: state.entities.users || {},
     authUser: state.authUser
   }
 }
@@ -47,6 +50,14 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDis
         dispatch({ type: UserEffectActions.EDIT_PROFILE, payload: { values } }),    
   }
 }
+
+// export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
+//   .getServerSideProps(
+//     apiContainer, 
+//     '/user/profile', 
+//     ['userController'],
+//     ['UserService']
+//   );
 
 function EditProfile({ authUser, users, getProfile, editProfile }: IState & IDispatch) {
     const onSubmit = (values: EditProfileVariablesForm) => {

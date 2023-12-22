@@ -1,7 +1,7 @@
+import { FiltersMethods } from "@/common/store/filters/filters.methods";
 import clsx from "clsx";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { FC, useEffect, useState } from "react"
-import { useRouter as useRoute } from "next/router";
+import React, { FC, useState } from "react"
+import { useDispatch } from "react-redux";
 
 interface IProps {
     id?: string;
@@ -14,32 +14,27 @@ interface IProps {
 export const Select: FC<IProps> = ({ 
     children, title, name, className, id
 }) => {
-    const searchParams = useSearchParams();
-    const router = useRoute();
-    const pathname = usePathname();
+    const [timeHandler, setTimeHandler] = useState<NodeJS.Timeout | null>(null);
     const [value, setValue] = useState('');
-    const { replace } = useRouter();
+    const dispatch = useDispatch();
     const handleSearch = (term: string) => {
         setValue(term);
-        const params = new URLSearchParams(searchParams);
-        if (term) params.set(name, term);
-        else params.delete(name);
-        replace(`${pathname}?${params.toString()}`);
+        if (timeHandler) clearTimeout(timeHandler);
+        const handler = setTimeout(() => {
+            dispatch({ type: FiltersMethods.UPDATE, payload: {
+                key: name,
+                value: term
+            }});
+        }, 300);
+        setTimeHandler(handler);
     };
-    useEffect(() => {
-        if (!router.isReady) return;
-        setValue(router.query[name] 
-            ? router.query[name] as string
-            : title || ''
-        );
-    }, [router.isReady]);
     return (
         <select
             id={id}
             title={title} 
             name={name} 
             className={clsx("py-4 form-select rounded-md", className)}
-            value={value}
+            value={value.length === 0 ? title : value}
             onChange={event => handleSearch(event.target.value)}
         >
             {title && <option value={title} disabled>{title}</option>}

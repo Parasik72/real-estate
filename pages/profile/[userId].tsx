@@ -30,10 +30,10 @@ interface IState {
 function mapStateToProps(state: RootState): IState {
   const properties = state.entities.properties;
   return { 
-    users: state.entities.users,
+    users: state.entities.users || {},
     properties: properties ? Object.values(properties) : [],
     authUser: state.authUser,
-    propertyImages: state.entities.propertyImages,
+    propertyImages: state.entities.propertyImages || {},
     userPropertiesPage: state.paginations.userProperties
   };
 }

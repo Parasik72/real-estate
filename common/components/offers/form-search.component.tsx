@@ -27,7 +27,7 @@ export const FormSearch: FC<IProps> = ({ onSearch }) => {
                             <SearchIcon />
                         </div>
                         <span
-                            className="py-4 w-full lg:w-auto px-11 pl-13 bg-blue-900 text-white rounded-md font-bold"
+                            className="py-4 block w-full lg:w-auto px-11 pl-13 bg-blue-900 text-white rounded-md font-bold"
                         >
                             Search
                         </span>

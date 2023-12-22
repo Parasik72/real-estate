@@ -5,15 +5,16 @@ import { Provider } from 'react-redux'
 import container from '@/common/container/container'
 import { ReduxStore } from '@/common/store/redux.store'
 
-export default function App ({ Component, ...rest }: AppProps) {
-  const { store, props } = container.resolve<ReduxStore>('reduxStore').wrapper
-    .useWrappedStore(rest);
-  const { pageProps } = props;
+const redux = container.resolve<ReduxStore>('reduxStore');
+
+const app = function App ({ Component, pageProps }: AppProps) {
   return (
-    <Provider store={store}>
+    <Provider store={redux.store}>
       <Layout>
         <Component {...pageProps} />
       </Layout>
     </Provider>
   )
 }
+
+export default redux.wrapper.withRedux(app);
