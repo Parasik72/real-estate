@@ -38,6 +38,12 @@ interface IRootReducer {
     authUser: AuthUserState;
 }
 
+interface SSRConfig {
+    routePath: string;
+    apiControllerName: string;
+    serviceName: string;
+}
+
 export class ReduxStore extends BaseContext {
     private _store: EnhancedStore<IRootReducer>;
     private _sagas: ReturnType<typeof BaseService.sagas>;
@@ -118,31 +124,34 @@ export class ReduxStore extends BaseContext {
 
     public getServerSideProps(
         apiContainer: AwilixContainer,
-        routePath: string,
-        controllerName: string | string[],
-        serviceName: string | string[],
+        configs: SSRConfig[],
+        // routePath: string,
+        // controllerName: string | string[],
+        // serviceName: string | string[],
     ) {
         return this._wrapper.getServerSideProps(
           (store) => async (context: any) => {
-            const controllerNames = Array.isArray(controllerName) ? controllerName : [controllerName];
-            const servicesNames = Array.isArray(serviceName) ? serviceName : [serviceName];
             let actions: { type: string, payload: Object }[] = []
-            for (let i = 0; i < controllerNames.length; ++i) {
-                const controller = apiContainer.resolve(controllerNames[i]) as BaseController;
-                const res: any = await controller.handlerSSR({ ...context, routePath });
-                if (!res || !res.props || !res.props.data) continue;
-                
-                const service = this.di[servicesNames[i] as keyof typeof this.di] as BaseService;
-                const acts = normalizeReqBody(
-                    res.props.data, 
-                    service.entityName, 
-                    service.entitySchema, 
-                    ReducerMethods.UPDATE
-                );
-                actions.push(...acts);
-            }
-            actions.forEach(action => {
-                store.dispatch(action);
+            configs.forEach((config) => {
+                const controllerNames = Array.isArray(controllerName) ? controllerName : [controllerName];
+                const servicesNames = Array.isArray(serviceName) ? serviceName : [serviceName];
+                for (let i = 0; i < controllerNames.length; ++i) {
+                    const controller = apiContainer.resolve(controllerNames[i]) as BaseController;
+                    const res: any = await controller.handlerSSR({ ...context, routePath,  });
+                    if (!res || !res.props || !res.props.data) continue;
+                    
+                    const service = this.di[servicesNames[i] as keyof typeof this.di] as BaseService;
+                    const acts = normalizeReqBody(
+                        res.props.data, 
+                        service.entityName, 
+                        service.entitySchema, 
+                        ReducerMethods.UPDATE
+                    );
+                    actions.push(...acts);
+                }
+                actions.forEach(action => {
+                    store.dispatch(action);
+                });
             });
             return { props: { data: { } } };
         });

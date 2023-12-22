@@ -19,7 +19,6 @@ import { PropertyEffectActions } from "@/common/services/property/property.servi
 import apiContainer from "@/server/container";
 import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
-import { useEffect } from "react";
 
 interface IState {
   properties: PropertyModel[];
@@ -64,10 +63,7 @@ export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
     'PropertyService'
   );
 
-function Home({ properties, propertyImages, getLastOffers }: IProps) {
-  // useEffect(() => {
-  //   getLastOffers();
-  // }, []);
+function Home({ properties, propertyImages }: IProps) {
   return (
     <PageWrapper className="overflow-x-hidden">
       <PageContainer className="relative py-12">
