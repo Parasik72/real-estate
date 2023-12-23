@@ -8,12 +8,13 @@ import { RootState } from "@/common/store/root.reducer";
 import { Entity } from "@/common/store/types/store.types";
 import { AuthUser } from "@/common/types/auth.types";
 import { EditProfileVariablesForm } from "@/common/types/profile.type";
-import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 import apiContainer from "@/server/container";
 import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
+import { ContainerKeys } from "@/common/container/container.keys";
+import { ApiContainerKeys } from "@/server/contaier.keys";
 
 interface IState {
     users: Entity<UserModel>;
@@ -51,22 +52,21 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions>>): IDis
   }
 }
 
-// export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
-//   .getServerSideProps(
-//     apiContainer, 
-//     '/user/profile', 
-//     ['userController'],
-//     ['UserService']
-//   );
+export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
+  .getServerSideProps(
+    apiContainer, [
+        {
+            routePath: '/user/profile',
+            apiControllerName: ApiContainerKeys.UserController,
+            serviceName: ContainerKeys.UserService
+        },
+    ]
+  );
 
 function EditProfile({ authUser, users, getProfile, editProfile }: IState & IDispatch) {
     const onSubmit = (values: EditProfileVariablesForm) => {
         editProfile(values);
     }
-    useEffect(() => {
-        if (!authUser.userId) return;
-        getProfile(authUser.userId);
-    }, [authUser.userId]);
     const user = users[authUser?.userId || ''];
     if (!user) return <div>Loading...</div>
     return (

@@ -16,10 +16,10 @@ import { FiltersState, filtersReducer } from "./filters/filters.reducer";
 
 interface IRootReducer {
     entities: {
-        [Entities.Property]?: Entity<PropertyModel>,
-        [Entities.PropertyImage]?: Entity<PropertyImageModel>,
-        [Entities.User]?: Entity<UserModel>,
-        [Entities.Deal]?: Entity<DealModel>,
+        [Entities.Property]: Entity<PropertyModel>,
+        [Entities.PropertyImage]: Entity<PropertyImageModel>,
+        [Entities.User]: Entity<UserModel>,
+        [Entities.Deal]: Entity<DealModel>,
     };
     paginations: {
         [Paginations.AllOffers]?: IPagination;

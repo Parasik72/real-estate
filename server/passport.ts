@@ -34,7 +34,7 @@ export const passportInitialize: any = passport.initialize();
 export const passportSession = passport.session();
 export const passportAuthenticate = passport.authenticate('local');
 
-export const deserializeUserSSR = async (req: any, res: any, next: any) => {
+export const deserializeUser = async (req: any, res: any, next: any) => {
   if (!req?.session?.passport?.user) return next();
   const userService = container.resolve<UserService>('userService');
   const user = await userService.getUserById(req?.session?.passport?.user);

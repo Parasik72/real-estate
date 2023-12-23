@@ -6,13 +6,18 @@ import { PropertyModel } from "@/common/services/property/property.model";
 import { Entity } from "@/common/store/types/store.types";
 import { EditPropertyVariablesForm } from "@/common/types/property.type";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 import { RootState } from '@/common/store/root.reducer';
 import { Action, Dispatch } from "redux";
 import { connect } from "react-redux";
 import { EditPropertyDto } from "@/common/services/property/dto/edit-roperty.dto";
 import { PropertyImageModel } from "@/common/services/property/property-image.model";
 import { PropertyEffectActions } from "@/common/services/property/property.service";
+import apiContainer from "@/server/container";
+import container from "@/common/container/container";
+import { ReduxStore } from "@/common/store/redux.store";
+import { ContainerKeys } from "@/common/container/container.keys";
+import { ApiContainerKeys } from "@/server/contaier.keys";
+import { useState } from "react";
 
 interface IState {
     properties: Entity<PropertyModel>;
@@ -61,11 +66,28 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
   }
 }
 
-function EditProperty({ properties, propertyImages, getProperty, editProperty }: IState & IDispatch) {
+export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
+  .getServerSideProps(
+    apiContainer, [
+        {
+            routePath: '/properties/:propertyId',
+            apiControllerName: ApiContainerKeys.PropertyController,
+            serviceName: ContainerKeys.PropertyService
+        },
+    ]
+  );
+
+function EditProperty({ properties, propertyImages, editProperty }: IState & IDispatch) {
     const [newImages, setNewImages] = useState<FileList | null>(null);
     const router = useRouter();
     const propertyId = router.query.propertyId as string || '';
     const property = properties[propertyId];
+    const propertyImagesFiltered = Object.keys(propertyImages).reduce((result: any, key) => {
+        if (propertyImages[key].propertyId === propertyId) {
+            result[key] = propertyImages[key];
+        }
+        return result;
+    }, {});
 
     const onSubmit = (values: EditPropertyVariablesForm) => {
         editProperty({
@@ -75,11 +97,6 @@ function EditProperty({ properties, propertyImages, getProperty, editProperty }:
             values
         });
     }
-
-    useEffect(() => {
-        if (!propertyId) return;
-        getProperty(propertyId);
-    }, [propertyId]);
 
     if (!property) return <div>Loading...</div>;
     return (
@@ -94,7 +111,7 @@ function EditProperty({ properties, propertyImages, getProperty, editProperty }:
                             data={editPropertyInitForm(property, onSubmit)} 
                             newImages={newImages}
                             setNewImages={setNewImages}
-                            propertyImages={propertyImages}
+                            propertyImages={propertyImagesFiltered}
                         />
                     </div>
                 </div>

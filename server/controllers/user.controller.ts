@@ -1,5 +1,5 @@
 import { sessions } from "../sessions";
-import { passportAuthenticate, passportInitialize, passportSession } from "../passport";
+import { deserializeUser, passportAuthenticate, passportInitialize, passportSession } from "../passport";
 import { GetUserProfileParams } from "../params/user.params";
 import { SignUpDto } from "../dto/user/sign-up.dto";
 import { HttpException } from "../exceptions/http.exception";
@@ -21,13 +21,19 @@ import PATCH from "../decorators/patch.decorator";
 import { editProfileValidation } from "../validators/user-schemas/edit-profile.schema";
 
 export class UserController extends BaseController {
+    @USE([sessions, deserializeUser])
     @SSR('/user/profile')
     @GET('/api/user/profile/:userId')
-    async getUserProfileById({ query }: ControllerConfig<{}, GetUserProfileParams>) {
+    async getUserProfileById({ query, user }: ControllerConfig<{}, GetUserProfileParams>) {
         const { userService } = this.di;
-        const user = await userService.getUserProfileById(query.userId);
-        if (!user) throw new HttpException('The user was not found', 404);
-        return user; 
+        const userId = query.userId 
+            ? query.userId 
+            : user 
+            ? user.userId 
+            : '';
+        const userProfile = await userService.getUserProfileById(userId);
+        if (!userProfile) throw new HttpException('The user was not found', 404);
+        return userProfile; 
     }
 
     @USE([sessions, passportInitialize, passportAuthenticate])

@@ -15,6 +15,8 @@ import { Action, Dispatch } from "redux";
 import apiContainer from "@/server/container";
 import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
+import { ApiContainerKeys } from "@/server/contaier.keys";
+import { ContainerKeys } from "@/common/container/container.keys";
 
 interface IState {
     properties: PropertyModel[];
@@ -46,12 +48,14 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
     }
 }
 
-export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
+export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
   .getServerSideProps(
     apiContainer, 
-    '/properties/offers', 
-    'propertyController',
-    'PropertyService'
+    [{
+      routePath: '/properties/offers',
+      apiControllerName: ApiContainerKeys.PropertyController,
+      serviceName: ContainerKeys.PropertyService
+    }]
   );
 
 function Offers({ 

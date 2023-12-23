@@ -3,6 +3,7 @@ import { AuthService } from "./auth-user/auth-user.service";
 import { DealService } from "./deal/deal.service";
 import { PropertyService } from "./property/property.service";
 import { UserService } from "./user/user.service";
+import { ContainerKeys } from "../container/container.keys";
 
 export interface IServiceContainer {
     UserService: UserService;
@@ -12,8 +13,8 @@ export interface IServiceContainer {
 }
 
 export default {
-    UserService: asClass(UserService).singleton(),
-    PropertyService: asClass(PropertyService).singleton(),
-    AuthService: asClass(AuthService).singleton(),
-    DealService: asClass(DealService).singleton()
+    [ContainerKeys.UserService]: asClass(UserService).singleton(),
+    [ContainerKeys.PropertyService]: asClass(PropertyService).singleton(),
+    [ContainerKeys.AuthService]: asClass(AuthService).singleton(),
+    [ContainerKeys.DealService]: asClass(DealService).singleton()
 }

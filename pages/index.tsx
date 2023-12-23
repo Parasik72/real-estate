@@ -19,6 +19,8 @@ import { PropertyEffectActions } from "@/common/services/property/property.servi
 import apiContainer from "@/server/container";
 import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
+import { ContainerKeys } from "@/common/container/container.keys";
+import { ApiContainerKeys } from "@/server/contaier.keys";
 
 interface IState {
   properties: PropertyModel[];
@@ -26,8 +28,8 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
-  const properties = state.entities.properties || {};
-  const propertyImages = state.entities.propertyImages || {};
+  const properties = state.entities.properties;
+  const propertyImages = state.entities.propertyImages;
   return { 
     properties: properties ? Object.values(properties) : [],
     propertyImages
@@ -55,12 +57,14 @@ interface IProps extends IState, IDispatch {
   }
 }
 
-export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
+export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
   .getServerSideProps(
-    apiContainer, 
-    '/properties/last-offers', 
-    'propertyController',
-    'PropertyService'
+    apiContainer,
+    [{
+      routePath: '/properties/last-offers',
+      apiControllerName: ApiContainerKeys.PropertyController,
+      serviceName: ContainerKeys.PropertyService
+    }]
   );
 
 function Home({ properties, propertyImages }: IProps) {

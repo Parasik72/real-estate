@@ -1,6 +1,7 @@
 import * as awilix from 'awilix';
 import services from '../services'; 
 import { ReduxStore } from '../store/redux.store';
+import { ContainerKeys } from './container.keys';
 
 const container = awilix.createContainer({
     injectionMode: awilix.InjectionMode.PROXY
@@ -8,7 +9,7 @@ const container = awilix.createContainer({
 
 container.register({
     ...services,
-    reduxStore: awilix.asClass(ReduxStore).singleton()
+    [ContainerKeys.ReduxStore]: awilix.asClass(ReduxStore).singleton()
 });
 
 export default container;

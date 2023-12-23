@@ -11,12 +11,12 @@ import POST from "../decorators/post.decorator";
 import GET from "../decorators/get.decorator";
 import USE from "../decorators/use.decorator";
 import { sessions } from "../sessions";
-import { passportInitialize, passportSession } from "../passport";
+import { deserializeUser } from "../passport";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 import { objectToJSON } from "../functions/json.functions";
 import SSR from "../decorators/ssr.decorator";
 
-@USE([sessions, passportInitialize, passportSession, isLogedIn])
+@USE([sessions, deserializeUser, isLogedIn])
 export class DealController extends BaseController {
     @POST('/api/deals/send/:propertyId')
     async sendDeal({ query, user }: ControllerConfig<{}, Params.SendDealParams>) {

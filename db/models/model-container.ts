@@ -4,19 +4,20 @@ import Property, { PropertyType } from './property';
 import PropertyAddress, { PropertyAddressType } from './propertyaddress';
 import PropertyImage, { PropertyImageType } from './propertyimage';
 import Deal, { DealType } from './deal';
+import { ApiContainerKeys } from "@/server/contaier.keys";
 
 export interface IModelContainer {
-    User: UserType;
-    Property: PropertyType;
-    PropertyAddress: PropertyAddressType;
-    PropertyImage: PropertyImageType;
-    Deal: DealType;
+    [ApiContainerKeys.User]: UserType;
+    [ApiContainerKeys.Property]: PropertyType;
+    [ApiContainerKeys.PropertyAddress]: PropertyAddressType;
+    [ApiContainerKeys.PropertyImage]: PropertyImageType;
+    [ApiContainerKeys.Deal]: DealType;
 }
 
 export default {
-    User: asFunction(User).singleton(),
-    Property: asFunction(Property).singleton(),
-    PropertyAddress: asFunction(PropertyAddress).singleton(),
-    PropertyImage: asFunction(PropertyImage).singleton(),
-    Deal: asFunction(Deal).singleton(),
+    [ApiContainerKeys.User]: asFunction(User).singleton(),
+    [ApiContainerKeys.Property]: asFunction(Property).singleton(),
+    [ApiContainerKeys.PropertyAddress]: asFunction(PropertyAddress).singleton(),
+    [ApiContainerKeys.PropertyImage]: asFunction(PropertyImage).singleton(),
+    [ApiContainerKeys.Deal]: asFunction(Deal).singleton(),
 }

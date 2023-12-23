@@ -3,17 +3,18 @@ import { UserService } from './user.service';
 import { PropertyService } from './property.service';
 import { FileUploaderService } from './file-uploader.service';
 import { DealService } from './deal.service';
+import { ApiContainerKeys } from '../contaier.keys';
 
 export interface IServiceContainer {
-    userService: UserService;
-    propertyService: PropertyService;
-    fileUploaderService: FileUploaderService;
-    dealService: DealService;
+    [ApiContainerKeys.UserService]: UserService;
+    [ApiContainerKeys.PropertyService]: PropertyService;
+    [ApiContainerKeys.FileUploaderService]: FileUploaderService;
+    [ApiContainerKeys.DealService]: DealService;
 }
 
 export default {
-    userService: asClass(UserService).singleton(),
-    propertyService: asClass(PropertyService).singleton(),
-    fileUploaderService: asClass(FileUploaderService).singleton(),
-    dealService: asClass(DealService).singleton()
+    [ApiContainerKeys.UserService]: asClass(UserService).singleton(),
+    [ApiContainerKeys.PropertyService]: asClass(PropertyService).singleton(),
+    [ApiContainerKeys.FileUploaderService]: asClass(FileUploaderService).singleton(),
+    [ApiContainerKeys.DealService]: asClass(DealService).singleton()
 }

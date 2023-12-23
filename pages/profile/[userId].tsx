@@ -18,6 +18,8 @@ import { PropertyEffectActions } from "@/common/services/property/property.servi
 import apiContainer from "@/server/container";
 import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
+import { ApiContainerKeys } from "@/server/contaier.keys";
+import { ContainerKeys } from "@/common/container/container.keys";
 
 interface IState {
     users: Entity<UserModel>;
@@ -62,12 +64,20 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<UserEffectActions | Proper
   }
 }
 
-export const getServerSideProps = container.resolve<ReduxStore>('reduxStore')
+export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
   .getServerSideProps(
-    apiContainer, 
-    '/user/profile', 
-    ['propertyController', 'userController'],
-    ['PropertyService', 'UserService']
+    apiContainer, [
+        {
+            routePath: '/user/profile',
+            apiControllerName: ApiContainerKeys.PropertyController,
+            serviceName: ContainerKeys.PropertyService
+        },
+        {
+            routePath: '/user/profile',
+            apiControllerName: ApiContainerKeys.UserController,
+            serviceName: ContainerKeys.UserService
+        },
+    ]
   );
 
 function Profile({ 

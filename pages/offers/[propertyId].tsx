@@ -10,7 +10,6 @@ import { UserModel } from '@/common/services/user/user.model';
 import { getPropertyTypeNameWithArticle } from '@/common/functions/property.functions';
 import { RootState } from '@/common/store/root.reducer';
 import { Action, Dispatch } from 'redux';
-import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
 import { Entity } from '@/common/store/types/store.types';
@@ -21,6 +20,11 @@ import { PropertyStatuses } from '@/common/types/property.type';
 import { AuthUser } from '@/common/types/auth.types';
 import { PropertyEffectActions } from '@/common/services/property/property.service';
 import { DealEffectActions } from '@/common/services/deal/deal.service';
+import apiContainer from "@/server/container";
+import container from "@/common/container/container";
+import { ReduxStore } from '@/common/store/redux.store';
+import { ContainerKeys } from '@/common/container/container.keys';
+import { ApiContainerKeys } from '@/server/contaier.keys';
 
 interface IState {
     properties: Entity<PropertyModel>;
@@ -30,12 +34,12 @@ interface IState {
 }
   
 function mapStateToProps(state: RootState): IState {
-  return { 
-    properties: state.entities.properties || {},
-    propertyImages: state.entities.propertyImages || {},
-    users: state.entities.users || {},
-    authUser: state.authUser
-  }
+    return { 
+        properties: state.entities.properties || {},
+        propertyImages: state.entities.propertyImages || {},
+        users: state.entities.users || {},
+        authUser: state.authUser
+    }
 }
 
 interface IDispatch {
@@ -62,20 +66,32 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions | De
   }
 }
 
+export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
+  .getServerSideProps(
+    apiContainer, [
+        {
+            routePath: '/properties/:propertyId',
+            apiControllerName: ApiContainerKeys.PropertyController,
+            serviceName: ContainerKeys.PropertyService
+        },
+    ]
+  );
+
 function Property({ 
     properties,
     propertyImages,
     users, 
     authUser, 
-    getProperty,
     sendDeal
 }: IState & IDispatch) {
     const router = useRouter();
     const propertyId = router.query.propertyId as string || '';
-    useEffect(() => {
-        if (!propertyId) return;
-        getProperty(propertyId);
-    }, [propertyId]);
+    const propertyImagesFiltered = Object.keys(propertyImages).reduce((result: any, key) => {
+        if (propertyImages[key].propertyId === propertyId) {
+            result[key] = propertyImages[key];
+        }
+        return result;
+    }, {});
     const property = properties[propertyId];
     if (!property || !users[property.userId]) return <div>Loading...</div>;
     const isCurrentUserOwner = authUser.isAuth && property.userId === authUser.userId;
@@ -93,7 +109,7 @@ function Property({
                 <div className="flex flex-col lg:flex-row gap-10 mt-10">
                     <div className="w-full">
                         <div>
-                            <PropertyImages propertyImages={propertyImages} />
+                            <PropertyImages propertyImages={propertyImagesFiltered} />
                             <div className="flex flex-col gap-5 md:px-20 mt-5">
                                 <div className="flex flex-col md:flex-row justify-between gap-4">
                                     <div className="flex items-center gap-5">

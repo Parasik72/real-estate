@@ -7,14 +7,14 @@ import { ReduxStore } from '@/common/store/redux.store'
 
 const redux = container.resolve<ReduxStore>('reduxStore');
 
-const app = function App ({ Component, pageProps }: AppProps) {
+export default function App ({ Component, ...rest }: AppProps) {
+  const { store, props } = redux.wrapper.useWrappedStore(rest);
+  const { pageProps } = props;
   return (
-    <Provider store={redux.store}>
+    <Provider store={store}>
       <Layout>
         <Component {...pageProps} />
       </Layout>
     </Provider>
   )
 }
-
-export default redux.wrapper.withRedux(app);

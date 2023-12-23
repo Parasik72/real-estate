@@ -7,9 +7,13 @@ import { RootState } from "@/common/store/root.reducer";
 import { Entity } from "@/common/store/types/store.types";
 import { AuthUser } from "@/common/types/auth.types";
 import { IPagination } from "@/common/types/common.types";
-import { useEffect } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
+import apiContainer from "@/server/container";
+import container from "@/common/container/container";
+import { ReduxStore } from "@/common/store/redux.store";
+import { ContainerKeys } from "@/common/container/container.keys";
+import { ApiContainerKeys } from "@/server/contaier.keys";
 
 interface IState {
   deals: Entity<DealModel>;
@@ -52,6 +56,30 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<DealEffectActions>>): IDis
   }
 }
 
+export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
+  .getServerSideProps(
+    apiContainer, [
+        {
+            routePath: '/deals',
+            apiControllerName: ApiContainerKeys.DealController,
+            serviceName: ContainerKeys.DealService,
+            query: { requestedBy: 'Buyer' }
+        },
+        {
+            routePath: '/deals',
+            apiControllerName: ApiContainerKeys.DealController,
+            serviceName: ContainerKeys.DealService,
+            query: { requestedBy: 'Seller' }
+        },
+        {
+            routePath: '/deals',
+            apiControllerName: ApiContainerKeys.DealController,
+            serviceName: ContainerKeys.DealService,
+            query: { dealStatusName: 'Done' }
+        },
+    ]
+  );
+
 function Deals({ 
     getRequestedByMeDeals,
     getRequestedForMeDeals,
@@ -77,11 +105,6 @@ function Deals({
             ||  deals[dealId].buyerUserId === authUser.userId
         ) && deals[dealId].dealStatus === DealStatuses.Done;
     });
-    useEffect(() => {
-        getRequestedByMeDeals(1);
-        getRequestedForMeDeals(1);
-        getMySuccessfulDeals(1);
-    }, []);
     return (
         <PageWrapper>
             <PageContainer className="py-8">

@@ -82,7 +82,7 @@ export function PropertyForm<T extends PropertyVariableTypes>({
                 <div className="flex flex-col gap-10">
                     {data.type === PropertyTypeForm.EDIT 
                     && propertyImages 
-                    && Object.keys(propertyImages).map((imgId, index) => (
+                    && Object.keys(propertyImages).map((imgId) => (
                         <div key={imgId} className="flex flex-col gap-3 items-center">
                             <Image
                                 className="w-full"

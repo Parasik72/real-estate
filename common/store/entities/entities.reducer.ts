@@ -14,6 +14,13 @@ export interface IReducerAction {
 
 let initialState: EntitiesState = {};
 
+Object.values(Entities).forEach((entityKey) => {
+    initialState = {
+        ...initialState,
+        [entityKey]: {}
+    }
+});
+
 export const entitiesReducer = 
 <TAction extends IReducerAction>(
     state = initialState, action: TAction
