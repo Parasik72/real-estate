@@ -42,7 +42,7 @@ function ListOfDeals({
     return (
         <div className="flex flex-wrap -mx-4">
             {dealsIds.map((dealId) => (
-                <div key={dealId} className="h-full md:w-1/2 lg:w-1/3 p-4">
+                <div key={dealId} className="w-full h-full md:w-1/2 lg:w-1/3 p-4">
                     <DealCard
                         deal={dealsEntity[dealId]}
                         property={properties[dealsEntity[dealId].propertyId]}
