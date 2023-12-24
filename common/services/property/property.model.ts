@@ -1,41 +1,20 @@
 import { PropertyAddressModel } from "./property-address.model";
 import { PropertyImageModel } from "./property-image.model";
 
-export class PropertyModel {
-    constructor(
-        public propertyId: string,
-        public bedRooms: number,
-        public bathRooms: number,
-        public area: number,
-        public title: string,
-        public description: string,
-        public priceAmount: number,
-        public propertyStatus: string,
-        public userId: string,
-        public propertyAddressId: string,
-        public propertyType: string,
-        public createdAt: BigInt,
-        public updatedAt: BigInt,
-        public PropertyAddress?: PropertyAddressModel,
-        public PropertyImages?: PropertyImageModel[],
-    ) {}
+export interface PropertyModel {
+    propertyId: string,
+    bedRooms: number,
+    bathRooms: number,
+    area: number,
+    title: string,
+    description: string,
+    priceAmount: number,
+    propertyStatus: string,
+    userId: string,
+    propertyAddressId: string,
+    propertyType: string,
+    createdAt: BigInt,
+    updatedAt: BigInt,
+    PropertyAddress?: PropertyAddressModel,
+    PropertyImages?: PropertyImageModel[],
 }
-
-export const createPropertyModel = 
-    <T extends PropertyModel>(item: T) => new PropertyModel(
-        item.propertyId,
-        item.bedRooms,
-        item.bathRooms,
-        item.area,
-        item.title,
-        item.description,
-        item.priceAmount,
-        item.propertyStatus,
-        item.userId,
-        item.propertyAddressId,
-        item.propertyType,
-        item.createdAt,
-        item.updatedAt,
-        item.PropertyAddress,
-        item.PropertyImages,
-    );

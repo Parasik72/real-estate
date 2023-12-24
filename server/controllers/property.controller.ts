@@ -13,7 +13,7 @@ import POST from "../decorators/post.decorator";
 import SSR from "../decorators/ssr.decorator";
 import USE from "../decorators/use.decorator";
 import { sessions } from "../sessions";
-import { passportInitialize, passportSession } from "../passport";
+import { deserializeUser, passportInitialize, passportSession } from "../passport";
 import multer from "multer";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 import { createPropertyValidation } from "../validators/property-schemas/create-property.schema";
@@ -120,12 +120,13 @@ export class PropertyController extends BaseController {
     return { message: 'The property has been updated successfully.' };
   }
 
+  @USE([sessions, deserializeUser])
   @SSR('/properties/:propertyId')
   @GET('/api/properties/get/:propertyId')
-  async getPropertyById({ query }: ControllerConfig<{}, Params.GetPropertyByIdParams>) {
+  async getPropertyById({ query, user }: ControllerConfig<{}, Params.GetPropertyByIdParams>) {
     const { propertyService } = this.di;
     const { propertyId } = query;
-    const property = await propertyService.getPropertyWithOwnerByPropertyId(propertyId);
+    const property = await propertyService.getPropertyWithOwnerByPropertyId(propertyId, user);
     if (!property) throw new HttpException("The property was not found", 404);
     return property;
   }

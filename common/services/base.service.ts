@@ -1,22 +1,25 @@
-import { Schema, schema } from "normalizr";
+import { Schema, normalize, schema } from "normalizr";
 import { call, fork, put, take } from "redux-saga/effects";
 import { ReducerMethods } from "../store/reducer.methods";
-import { Entity } from "../store/types/store.types";
 import BaseContext from "../context/base-context";
 import IContextContainer from "../context/icontext-container";
 import { sagaAction } from "../functions/saga.functions";
 import { SagaEffectAction } from "../store/types/saga.types";
-import { normalizeReqBody } from "../functions/http.functions";
 import 'reflect-metadata';
+
 export interface HttpRequestConfig<ReqBody extends Object> {
     url: string;
     body?: ReqBody;
-    cleanEntities?: string[];
 }
 
 export interface ISagaMethod {
     className: string;
     methodName: string;
+}
+
+interface IAction {
+    type: string; 
+    payload: Object;
 }
 
 export class BaseService extends BaseContext {
@@ -46,12 +49,51 @@ export class BaseService extends BaseContext {
         });
     }
 
-    public get entityName(): string {
-        return this._entityName;
+    private async sendRequest<ReqBody extends Object, ResBody extends Object>
+    (url: string, method: string = 'GET', body: ReqBody | null = null): Promise<ResBody | Error> {
+        try {
+            const headers: HeadersInit = body instanceof FormData ? {} : {
+                'Content-Type': 'application/json'
+            };
+            const response = await fetch(url, { method, body: this.getBody(method, body), headers });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data?.error || 'Request error');
+            return data;
+        } catch (error) {
+            return error as Error;
+        }
     }
 
-    public get entitySchema(): schema.Entity[] {
-        return this._schema;
+    private getBody(method: string, body: any) {
+        if (method === 'GET') return null;
+        if (body instanceof FormData) return body;
+        return JSON.stringify(body);
+    }
+
+    private normalizeData(data: any) {
+        return normalize(Array.isArray(data) ? data : [data], this.entitySchema);
+    }
+
+    private getPager(data: any) {
+        const pageName = data.pager.paginationName;
+        const entitiesData = data[pageName];
+        const normalizedEntities: any = this.normalizeData(entitiesData);
+        const page = {
+            ...data.pager,
+            pageIds: normalizedEntities.result.length > 0 
+                ? Object.keys(normalizedEntities.entities[this.entityName])
+                : []
+        }
+        const action: IAction = {
+            type: ReducerMethods.UPDATE,
+            payload: { 
+                entities: {
+                    ...normalizedEntities.entities,
+                    [pageName]: page 
+                } 
+            }
+        }
+        return action;
     }
 
     protected initSchema(
@@ -67,48 +109,32 @@ export class BaseService extends BaseContext {
         this.sendRequest = this.sendRequest.bind(this);
     }
 
-    private generatePayloadForClean(entities: string[]) {
-        let toClean = { entities: {} as Entity<Object> };
-        entities.forEach((key) => {
-            toClean.entities[key] = {}
-        });
-        return toClean;
-    }
-
     protected *requestResult<ReqBody extends Object, ResBody extends Object>
     (config: HttpRequestConfig<ReqBody>, httpMethod: string, actionMethod: string) {
-        if (config.cleanEntities && config.cleanEntities.length > 0) {
-            yield put({
-                type: ReducerMethods.CLEAN,
-                payload: this.generatePayloadForClean(config.cleanEntities)
-            });
-        }
         let data: object | Error = yield call(this.sendRequest<ReqBody, ResBody>, config.url, httpMethod, config.body);
-        const actions = normalizeReqBody(data, this._entityName, this._schema, actionMethod);
-        for(const action of actions) {
-            yield put(action);
-        }
+        const action = this.normalizeReqBody(data, actionMethod);
+        yield put(action);
         return data as ResBody;
     }
 
-    private getBody = (method: string, body: any) => {
-        if (method === 'GET') return null;
-        if (body instanceof FormData) return body;
-        return JSON.stringify(body);
+    public get entityName(): string {
+        return this._entityName;
     }
-    
-    private async sendRequest<ReqBody extends Object, ResBody extends Object>
-    (url: string, method: string = 'GET', body: ReqBody | null = null): Promise<ResBody | Error> {
-        try {
-            const headers: HeadersInit = body instanceof FormData ? {} : {
-                'Content-Type': 'application/json'
-            };
-            const response = await fetch(url, { method, body: this.getBody(method, body), headers });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data?.error || 'Request error');
-            return data;
-        } catch (error) {
-            return error as Error;
+
+    public get entitySchema(): schema.Entity[] {
+        return this._schema;
+    }
+
+    public normalizeReqBody(
+        data: any, 
+        actionMethod: string
+    ): IAction {
+        if (data.hasOwnProperty('pager')) {
+            return this.getPager(data);
         }
+        return {
+            type: actionMethod,
+            payload: this.normalizeData(data)
+        };
     }
 }

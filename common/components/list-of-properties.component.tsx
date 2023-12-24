@@ -19,16 +19,17 @@ export const ListOfProperties: FC<IProps> = ({
     onShowNext
 }) => (
     <div className="flex flex-wrap justify-center md:justify-start -mx-4">
-        {properties.map((property, i) => (
+        {properties.map((property) => (
             <div key={property.propertyId} className="w-full md:w-1/2 lg:w-1/3 p-4">
                 <PropertyCard property={property} propertyImages={propertyImages} />
             </div>
         ))}
-        {pagination && onShowNext && pagination.page < pagination.totalPages && (
+        {pagination && onShowNext && pagination.currentPage < pagination.totalPages && (
             <div className="w-full flex justify-center">
                 <button 
-                    onClick={() => onShowNext(pagination.page + 1)} 
-                    className="mt-4 py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold">
+                    onClick={() => onShowNext(pagination.currentPage + 1)} 
+                    className="mt-4 py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold"
+                >
                     Show next
                 </button>
             </div>

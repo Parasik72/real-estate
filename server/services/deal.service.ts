@@ -1,7 +1,9 @@
-import { DealPaginationNames, DealRequestedBy, DealStatuses, DealsPage, IDeal, UpdateDeal } from "../types/deal.type";
+import { DealPaginationNames, DealRequestedBy, DealStatuses, IDeal, UpdateDeal } from "../types/deal.type";
 import { dealRequestedByFindMap } from "../functions/deal.functions";
 import BaseContext from "../context/base-context";
-import { InferCreationAttributes } from "sequelize";
+import { InferCreationAttributes, Order } from "sequelize";
+import { getModelPage } from "../functions/model.functions";
+import { IPager } from "../types/controller.types";
 
 export class DealService extends BaseContext {
     async getAwaitingDealByPropertyIdAndBuyerId(propertyId: string, buyerUserId: string)
@@ -43,19 +45,12 @@ export class DealService extends BaseContext {
         requestedBy: DealRequestedBy, 
         dealStatus: DealStatuses,
         userId: string
-    ): Promise<DealsPage> {
+    ): Promise<IPager<IDeal>> {
         const requestedByFunc = dealRequestedByFindMap[requestedBy];
         const requestedByData = requestedByFunc(userId)
-        const totalCount = await this.di.Deal.count({
-            where: {
-                ...requestedByData,
-                dealStatus
-            }
-        });
-        const offset = (page - 1) * limit;
-        const deals = await this.di.Deal.findAll({
-            order: [['updatedAt', 'DESC']],
-            offset,
+        const countOptions = { where: { ...requestedByData, dealStatus} };
+        const findAllOptions = {
+            order: [['updatedAt', 'DESC']] as Order,
             limit,
             where: {
                 ...requestedByData,
@@ -69,18 +64,12 @@ export class DealService extends BaseContext {
                 { model: this.di.User, as: 'seller', attributes: { exclude: ['password'] } },
                 { model: this.di.User, as: 'buyer', attributes: { exclude: ['password'] } }
             ]
-        });
-        return {
-            page,
-            limit,
-            offset,
-            totalPages: Math.ceil(totalCount / limit),
-            deals,
-            paginationName: requestedBy === DealRequestedBy.Buyer 
-                ? DealPaginationNames.RequestedByMeDeals
-                : requestedBy === DealRequestedBy.Seller
-                ? DealPaginationNames.RequestedForMeDeals
-                : DealPaginationNames.MySuccessfulDeals
         };
+        const pageName = requestedBy === DealRequestedBy.Buyer 
+            ? DealPaginationNames.RequestedByMeDeals
+            : requestedBy === DealRequestedBy.Seller
+            ? DealPaginationNames.RequestedForMeDeals
+            : DealPaginationNames.MySuccessfulDeals;
+        return getModelPage(this.di.Deal, page, limit, pageName, countOptions, findAllOptions);
     }
 }

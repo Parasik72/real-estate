@@ -12,9 +12,10 @@ import { IPagination } from "../types/common.types";
 import { nextReducer } from "./next-reducer/next.reducer";
 import { HYDRATE } from "next-redux-wrapper";
 import { combineReducers } from "redux";
-import { FiltersState, filtersReducer } from "./filters/filters.reducer";
+import { filtersReducer } from "./filters/filters.reducer";
+import { Filters } from "./filters/filters.enum";
 
-interface IRootReducer {
+export interface IRootReducer {
     entities: {
         [Entities.Property]: Entity<PropertyModel>,
         [Entities.PropertyImage]: Entity<PropertyImageModel>,
@@ -28,8 +29,10 @@ interface IRootReducer {
         [Paginations.RequestedForMeDeals]?: IPagination;
         [Paginations.UserProperties]?: IPagination;
     }
+    filters: {
+        [Filters.AllOffersFilter]: Entity<string>
+    };
     authUser: AuthUserState;
-    filters: FiltersState;
 }
 
 const mainReducers = combineReducers({

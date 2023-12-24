@@ -1,41 +1,57 @@
+import { Entity } from "../types/store.types";
+import { Filters } from "./filters.enum";
 import { FiltersMethods } from "./filters.methods";
 
-export interface FiltersState {
-    [key: string]: string;
-}
+export type FiltersState = Entity<Entity<string>>;
 
 export interface IReducerAction {
     type: FiltersMethods;
     payload?: {
-        key: string;
-        value: string;
+        entities?: Entity<{
+            key: string;
+            value: string;
+        }>;
     };
 }
 
-const initialState: FiltersState = {}
+let initialState: FiltersState = {}
+
+Object.values(Filters).forEach((entityKey) => {
+    initialState = {
+        ...initialState,
+        [entityKey]: {}
+    }
+});
 
 export const filtersReducer = 
 <TAction extends IReducerAction>(
     state = initialState, action: TAction
 ) => {
-    switch(action.type) {
-        case FiltersMethods.UPDATE: {
-            if (!action.payload) break;
-            if (state[action.payload.key] && action.payload.value === '') {
-                const { [action.payload.key]: toRemove, ...newState } = state;
-                state = { ...newState };
+    Object.values(Filters).forEach((entityName) => {
+        switch(action.type) {
+            case FiltersMethods.UPDATE: {
+                if (!action.payload || !action.payload.entities) break;
+                const entities = action.payload.entities;
+                if (!(entityName in entities)) break;
+                if (state?.[entityName]?.key && entities[entityName].value === '') {
+                    const { [entities[entityName].key]: toRemove, ...newState } = state;
+                    state = { ...newState };
+                    break;
+                }
+                state = {
+                    ...state,
+                    [entityName]: {
+                        ...state?.[entityName],
+                        [entities[entityName].key]: entities[entityName].value
+                    }
+                }
                 break;
             }
-            state = {
-                ...state,
-                [action.payload.key]: action.payload.value
+            case FiltersMethods.CLEAN: {
+                state = {};    
+                break;
             }
-            break;
         }
-        case FiltersMethods.CLEAN: {
-            state = {};    
-            break;
-        }
-    }
+    })
     return state;
 }

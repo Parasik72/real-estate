@@ -86,7 +86,6 @@ export class DealService extends HttpService {
             ReducerMethods.DELETE
         );
         if (res instanceof Error) return;
-        Router.push(FRONT_PATHS.offers);
     }
 
     @action()

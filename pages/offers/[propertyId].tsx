@@ -25,11 +25,13 @@ import container from "@/common/container/container";
 import { ReduxStore } from '@/common/store/redux.store';
 import { ContainerKeys } from '@/common/container/container.keys';
 import { ApiContainerKeys } from '@/server/contaier.keys';
+import { DealModel, DealStatuses } from '@/common/services/deal/deal.model';
 
 interface IState {
     properties: Entity<PropertyModel>;
     propertyImages: Entity<PropertyImageModel>;
     users: Entity<UserModel>;
+    deals: Entity<DealModel>;
     authUser: AuthUser;
 }
   
@@ -38,7 +40,8 @@ function mapStateToProps(state: RootState): IState {
         properties: state.entities.properties || {},
         propertyImages: state.entities.propertyImages || {},
         users: state.entities.users || {},
-        authUser: state.authUser
+        authUser: state.authUser,
+        deals: state.entities.deals
     }
 }
 
@@ -81,7 +84,8 @@ function Property({
     properties,
     propertyImages,
     users, 
-    authUser, 
+    authUser,
+    deals,
     sendDeal
 }: IState & IDispatch) {
     const router = useRouter();
@@ -95,6 +99,13 @@ function Property({
     const property = properties[propertyId];
     if (!property || !users[property.userId]) return <div>Loading...</div>;
     const isCurrentUserOwner = authUser.isAuth && property.userId === authUser.userId;
+    const canSendDeal = authUser.isAuth 
+        && Object
+            .values(deals)
+            .filter((deal) => deal.propertyId === propertyId 
+                && deal.dealStatus === DealStatuses.Awaiting
+                && deal.buyerUserId === authUser.userId
+            ).length === 0;
     
     const onSendDeal = () => {
         sendDeal(propertyId);
@@ -146,11 +157,12 @@ function Property({
                                     {authUser.isAuth 
                                     && property.propertyStatus === PropertyStatuses.ForSale 
                                     && !isCurrentUserOwner && (
-                                        <button 
+                                        <button
+                                        disabled={!canSendDeal}
                                             onClick={onSendDeal} 
-                                            className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold"
+                                            className="px-6 py-3 text-white bg-blue-900 rounded-md font-bold disabled:bg-indigo-300"
                                         >
-                                            Send the deal
+                                            {canSendDeal ? 'Send the deal' : 'Deal already sent'}
                                         </button>
                                     )}
                                 </div>

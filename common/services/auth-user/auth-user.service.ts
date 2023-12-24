@@ -3,7 +3,7 @@ import { BACK_PATHS } from "@/common/constants/back-paths.constants";
 import { HttpService } from "../http.service";
 import { SignInDto } from "../user/dto/sign-in.dto";
 import { SignUpDto } from "../user/dto/sign-up.dto";
-import { call } from "redux-saga/effects";
+import { call, put } from "redux-saga/effects";
 import { ReducerMethods } from "@/common/store/reducer.methods";
 import { AuthUser, SignInVariablesForm, SignUpVariablesForm } from "@/common/types/auth.types";
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
@@ -71,5 +71,9 @@ export class AuthService extends HttpService {
             { url: BACK_PATHS.logout },
             ReducerMethods.CLEAN
         );
+        yield put({
+            type: ReducerMethods.CLEAN,
+            payload: { entities: { deals: {} } }
+        });
     }
 }

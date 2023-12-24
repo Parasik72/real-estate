@@ -1,12 +1,10 @@
 export interface IPagination {
     paginationName: string;
-    page: number;
+    currentPage: number;
     limit: number;
     offset: number;
     totalPages: number;
-    query?: Record<string, string>;
-    // pages: {
-    //     [n]: { ids: number[] }
-    // }
-    
+    pages: {
+        [pageNumber: number]: { ids: number[] }
+    }
 }

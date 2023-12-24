@@ -12,7 +12,10 @@ import { GetAllPropertiesParams } from "../params/property.params";
 import { allOffersPAWhereOptions, allOffersWhereOptions } from "../functions/property.functions";
 import BaseContext from "../context/base-context";
 import { IUser } from "../types/user.types";
-import { InferAttributes, InferCreationAttributes } from "sequelize";
+import { Includeable, InferAttributes, InferCreationAttributes, Order } from "sequelize";
+import { getModelPage } from "../functions/model.functions";
+import { IPager } from "../types/controller.types";
+import { DealStatuses } from "../types/deal.type";
 
 export class PropertyService extends BaseContext {
     async getLastOffers(): Promise<Types.IProperty[]> {
@@ -29,12 +32,13 @@ export class PropertyService extends BaseContext {
         });
     }
 
-    async getAllOffers(params: GetAllPropertiesParams): Promise<Types.PropertiesPage> {
+    async getAllOffers(params: GetAllPropertiesParams)
+    : Promise<IPager<Types.IProperty>> {
         const page = Number(params.page || OFFERS_PAGE_DEFAULT);
         const limit = Number(params.limit || OFFERS_LIMIT_DEFAULT);
         const mainWhere = allOffersWhereOptions(params);
         const propertyAddressWhere = allOffersPAWhereOptions(params);
-        const totalCount = await this.di.Property.count({
+        const countOptions = {
             where: mainWhere,
             include: [
                 {
@@ -42,11 +46,9 @@ export class PropertyService extends BaseContext {
                     where: propertyAddressWhere
                 }
             ]  
-        });
-        const offset = (page - 1) * limit;
-        const properties = await this.di.Property.findAll({
-            order: [['updatedAt', 'DESC']],
-            offset,
+        };
+        const findAllOptions = {
+            order: [['updatedAt', 'DESC']] as Order,
             limit,
             where: mainWhere,
             include: [
@@ -56,54 +58,46 @@ export class PropertyService extends BaseContext {
                 },
                 { model: this.di.PropertyImage, limit: 1 }
             ] 
-        });
-        return {
-            page,
-            limit,
-            offset,
-            totalPages: Math.ceil(totalCount / limit),
-            properties,
-            paginationName: Types.PropertyPaginationNames.AllOffers
         };
+        const pageName = Types.PropertyPaginationNames.AllOffers;
+        return getModelPage(this.di.Property, page, limit, pageName, countOptions, findAllOptions);
     }
 
     async getUserProperties(userId: string, page?: string, limit?: string)
-    : Promise<Types.PropertiesPage> {
+    : Promise<IPager<Types.IProperty>> {
         const currentPage = Number(page || PROPERTIES_PAGE_DEFAULT);
         const currentLimit = Number(limit || PROPERTIES_LIMIT_DEFAULT);
-        const offset = (currentPage - 1) * currentLimit;
-        const totalCount = await this.di.Property.count({
-            where: { userId }
-        });
-        const properties = await this.di.Property.findAll({
-            order: [['updatedAt', 'DESC']],
-            offset,
+        const countOptions = { where: { userId } };
+        const findAllOptions = {
+            order: [['updatedAt', 'DESC']] as Order,
             limit: currentLimit,
             where: { userId },
             include: [
                 { model: this.di.PropertyAddress },
                 { model: this.di.PropertyImage, limit: 1 }
-            ] 
-        });
-        return {
-            page: currentPage,
-            limit: currentLimit,
-            offset,
-            totalPages: Math.ceil(totalCount / currentLimit),
-            properties,
-            paginationName: Types.PropertyPaginationNames.UserProperties
+            ]
         };
+        const pageName = Types.PropertyPaginationNames.UserProperties;
+        return getModelPage(this.di.Property, currentPage, currentLimit, pageName, countOptions, findAllOptions);
     }
 
-    async getPropertyWithOwnerByPropertyId(propertyId: string)
+    async getPropertyWithOwnerByPropertyId(propertyId: string, user?: IUser)
     : Promise<Types.IProperty & { User: IUser } | null> {
+        const include: Includeable[] = [
+            { model: this.di.User, attributes: { exclude: ['password'] } },
+            { model: this.di.PropertyAddress },
+            { model: this.di.PropertyImage },
+        ];
+        if (user) {
+            include.push({
+                model: this.di.Deal,
+                where: { dealStatus: DealStatuses.Awaiting, buyerUserId: user.userId },
+                limit: 1
+            });
+        }
         return this.di.Property.findOne({ 
             where: { propertyId }, 
-            include: [
-                { model: this.di.User, attributes: { exclude: ['password'] } },
-                { model: this.di.PropertyAddress },
-                { model: this.di.PropertyImage },
-            ] 
+            include 
         }) as Promise<Types.IProperty & { User: IUser } | null>;
     }
 

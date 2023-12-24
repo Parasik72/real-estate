@@ -11,7 +11,6 @@ import { schema } from "normalizr";
 import { call } from "redux-saga/effects";
 import { generateQueryString } from "@/common/functions/http.functions";
 import { ReducerMethods } from "@/common/store/reducer.methods";
-import { Entities } from "@/common/store/entities/entities.enum";
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
 import IContextContainer from '@/common/context/icontext-container';
 import action from '@/common/decorators/action.decorator';
@@ -30,9 +29,10 @@ export class PropertyService extends HttpService {
         super(ctx);
         const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
         const userSchema = new schema.Entity('users', {}, { idAttribute: 'userId' });
+        const dealSchema = new schema.Entity('deals', {}, { idAttribute: 'dealId' });
         this.initSchema(
             'properties',
-            { PropertyImages: [propertyImageSchema], User: userSchema }, 
+            { PropertyImages: [propertyImageSchema], Deals: [dealSchema], User: userSchema }, 
             { idAttribute: 'propertyId' }
         );
     }
@@ -41,10 +41,7 @@ export class PropertyService extends HttpService {
     public *getLastOffers() {
         yield call(
             this.get<(PropertyModel & { PropertyAddress: PropertyAddressModel; })[]>, 
-            { 
-                url: BACK_PATHS.getLastOffers,
-                cleanEntities: [Entities.Property, Entities.PropertyImage] 
-            },
+            { url: BACK_PATHS.getLastOffers },
             ReducerMethods.UPDATE
         );
     }
@@ -54,12 +51,7 @@ export class PropertyService extends HttpService {
         const queryStr = generateQueryString(payload);
         yield call(
             this.get<PropertiesPageResponse>, 
-            { 
-                url: `${BACK_PATHS.getAllOffers}${queryStr}`,
-                cleanEntities: payload.page === 1 
-                    ? [Entities.Property, Entities.PropertyImage] 
-                    : []
-            },
+            { url: `${BACK_PATHS.getAllOffers}${queryStr}` },
             ReducerMethods.UPDATE
         );
     }
@@ -74,9 +66,6 @@ export class PropertyService extends HttpService {
             { 
                 url: `${BACK_PATHS.getUserProperties
                     .replace(':userId', payload.userId)}${queryStr}`,
-                cleanEntities: payload.page === 1 
-                    ? [Entities.Property, Entities.PropertyImage] 
-                    : []
             },
             ReducerMethods.UPDATE
         );
@@ -86,10 +75,7 @@ export class PropertyService extends HttpService {
     public *getPropertyById(payload: string) {
         yield call (
             this.get<PropertyModel & {PropertyAddress: PropertyAddressModel, User: UserModel}>, 
-            { 
-                url: BACK_PATHS.getPropertyById.replace(':propertyId', payload),
-                cleanEntities: [Entities.PropertyImage]
-            },
+            { url: BACK_PATHS.getPropertyById.replace(':propertyId', payload) },
             ReducerMethods.UPDATE
         );
     }
@@ -100,7 +86,8 @@ export class PropertyService extends HttpService {
     }) {
         const res: { property: PropertyModel } = yield call(
             this.post<FormData, {property: PropertyModel}>, 
-            { url: BACK_PATHS.addProperty,
+            { 
+                url: BACK_PATHS.addProperty,
                 body: this.toFormData(payload.values) 
             },
             ReducerMethods.UPDATE

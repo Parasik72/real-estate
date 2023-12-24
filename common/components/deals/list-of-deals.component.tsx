@@ -52,10 +52,10 @@ function ListOfDeals({
                     />
                 </div>
             ))}
-            {pagination && onShowNext && pagination.page < pagination.totalPages && (
+            {pagination && onShowNext && pagination.currentPage < pagination.totalPages && (
                 <div className="w-full flex justify-center">
                     <button
-                        onClick={() => onShowNext(pagination.page + 1)} 
+                        onClick={() => onShowNext(pagination.currentPage + 1)} 
                         className="mt-4 py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold"
                     >
                         Show next

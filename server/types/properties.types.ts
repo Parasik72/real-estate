@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
 import { Model } from "sequelize";
+import { IPager } from "./controller.types";
 
 export type PropertyStatus = PropertyStatuses.Awaiting | PropertyStatuses.ForSale;
 export type PropertyType = PropertyTypes.House | PropertyTypes.Apartment | PropertyTypes.Villa;
@@ -37,15 +38,6 @@ export interface IPropertyImage extends Model {
 export enum PropertyPaginationNames {
     AllOffers = 'allOffers',
     UserProperties = 'userProperties',
-}
-
-export interface PropertiesPage {
-    page: number;
-    limit: number;
-    offset: number;
-    totalPages: number;
-    paginationName: PropertyPaginationNames;
-    properties: IProperty[];
 }
 
 export type PropertyWithAddress = IProperty & { PropertyAddress: IPropertyAddress };

@@ -37,12 +37,3 @@ export enum DealPaginationNames {
     RequestedForMeDeals = 'requestedForMeDeals',
     MySuccessfulDeals = 'mySuccessfulDeals'
 }
-
-export interface DealsPage {
-    page: number;
-    limit: number;
-    offset: number;
-    totalPages: number;
-    paginationName: DealPaginationNames;
-    deals: IDeal[];
-}

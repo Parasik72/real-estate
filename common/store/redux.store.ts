@@ -1,42 +1,17 @@
 import { AnyAction, Dispatch, Store, applyMiddleware, compose } from "redux";
 import BaseContext from "../context/base-context";
 import IContextContainer from "../context/icontext-container";
-import { Entities } from "./entities/entities.enum";
-import { Entity } from "./types/store.types";
 import { Paginations } from "./paginations/paginations.enum";
-import { AuthUserState } from "./auth-user/auth-user.reducer";
-import { PropertyModel } from "../services/property/property.model";
-import { PropertyImageModel } from "../services/property/property-image.model";
-import { UserModel } from "../services/user/user.model";
-import { DealModel } from "../services/deal/deal.model";
-import { IPagination } from "../types/common.types";
 import { BaseService } from "../services/base.service";
 import { all } from "redux-saga/effects";
 import createSagaMiddleware from "redux-saga";
 import { EnhancedStore, configureStore } from "@reduxjs/toolkit";
-import { rootReducer } from "./root.reducer";
+import { IRootReducer, rootReducer } from "./root.reducer";
 import { createWrapper } from "next-redux-wrapper";
 import { AwilixContainer } from "awilix";
 import { BaseController } from "@/server/controllers/base-controller";
 import { ReducerMethods } from "./reducer.methods";
-import { normalizeReqBody } from "../functions/http.functions";
-
-interface IRootReducer {
-    entities: {
-        [Entities.Property]: Entity<PropertyModel>,
-        [Entities.PropertyImage]: Entity<PropertyImageModel>,
-        [Entities.User]: Entity<UserModel>,
-        [Entities.Deal]: Entity<DealModel>,
-    };
-    paginations: {
-        [Paginations.AllOffers]?: IPagination;
-        [Paginations.MySuccessfulDeals]?: IPagination;
-        [Paginations.RequestedByMeDeals]?: IPagination;
-        [Paginations.RequestedForMeDeals]?: IPagination;
-        [Paginations.UserProperties]?: IPagination;
-    };
-    authUser: AuthUserState;
-}
+import { Entities } from "./entities/entities.enum";
 
 interface SSRConfig {
     routePath: string;
@@ -63,22 +38,6 @@ export class ReduxStore extends BaseContext {
             : this.configureProdStore();
     }
 
-    public get store(): Store<IRootReducer> {
-        return this._store;
-    }
-
-    public get wrapper() {
-        return this._wrapper;
-    }
-
-    public state = (): IRootReducer => {
-        return this._store.getState();
-    };
-
-    public dispatch = (args: any): Dispatch => {
-        return this._store.dispatch(args);
-    };
-
     private *rootSaga() {
         yield all(this._sagas);
     }
@@ -103,9 +62,7 @@ export class ReduxStore extends BaseContext {
         middleware.push(sagaMiddleware);
 
         const composeEnhancers = (window as any)?.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-            ? (window as any)?.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-                  // Options: http://zalmoxisus.github.io/redux-devtools-extension/API/Arguments.html
-              })
+            ? (window as any)?.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__()
             : compose;
         enhancers.push(applyMiddleware(...middleware));
         const enhancer = composeEnhancers(...enhancers);
@@ -123,6 +80,39 @@ export class ReduxStore extends BaseContext {
         return store;
     };
 
+    public get store(): Store<IRootReducer> {
+        return this._store;
+    }
+
+    public get wrapper() {
+        return this._wrapper;
+    }
+
+    public state = (): IRootReducer => {
+        return this._store.getState();
+    };
+
+    public dispatch = (args: any): Dispatch => {
+        return this._store.dispatch(args);
+    };
+
+    public getEntityPage<T extends Object>(
+        paginationName: Paginations,
+        entityName: Entities
+    ): T[] {
+        const state = this._store.getState();
+        const pager = state.paginations[paginationName];
+        if (!pager) return [];
+        const entities: Object[] = [];
+        for (let i = 1; i <= pager.currentPage; ++i) {
+            pager.pages[i].ids.forEach((entityId) => {
+                const entity = state.entities[entityName][entityId] as Object;
+                entities.push(entity)
+            });
+        }
+        return entities as T[];
+    }
+
     public getServerSideProps(
         apiContainer: AwilixContainer,
         configs: SSRConfig[],
@@ -132,27 +122,17 @@ export class ReduxStore extends BaseContext {
             let actions: { type: string, payload: Object }[] = [];
             for (const config of configs) {
                 const controller = apiContainer.resolve(config.apiControllerName) as BaseController;
-                const query = {
-                    ...context.query, 
-                    ...config.query,
-                }
+                const query = { ...context.query, ...config.query };
                 const res: any = await controller.handlerSSR({ 
                     ...context, routePath: config.routePath, query
                 });
                 if (!res || !res.props || !res.props.data) continue;
                 
                 const service = this.di[config.serviceName as keyof typeof this.di] as BaseService;
-                const acts = normalizeReqBody(
-                    res.props.data, 
-                    service.entityName, 
-                    service.entitySchema, 
-                    ReducerMethods.UPDATE
-                );
-                actions.push(...acts);
+                const acttion = service.normalizeReqBody(res.props.data, ReducerMethods.UPDATE);
+                actions.push(acttion);
             }
-            actions.forEach(action => {
-                store.dispatch(action);
-            });
+            actions.forEach(action => store.dispatch(action));
             return { props: { data: { } } };
         });
     }

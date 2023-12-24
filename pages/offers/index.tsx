@@ -17,6 +17,8 @@ import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
 import { ApiContainerKeys } from "@/server/contaier.keys";
 import { ContainerKeys } from "@/common/container/container.keys";
+import { Paginations } from "@/common/store/paginations/paginations.enum";
+import { Entities } from "@/common/store/entities/entities.enum";
 
 interface IState {
     properties: PropertyModel[];
@@ -25,12 +27,15 @@ interface IState {
     filters: Record<string, string>;
 }
 
+const store = container.resolve<ReduxStore>(ContainerKeys.ReduxStore);
+
 function mapStateToProps(state: RootState): IState {
-  return { 
-        properties: Object.values(state.entities.properties || {}),
+    const properties = store.getEntityPage<PropertyModel>(Paginations.AllOffers, Entities.Property);
+    return { 
+        properties: properties,
         propertyImages: state.entities.propertyImages || {},
         allOffersPage: state.paginations.allOffers,
-        filters: state.filters
+        filters: state.filters.allOffersFilter
     };
 }
 
@@ -48,8 +53,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action<PropertyEffectActions>>): 
     }
 }
 
-export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
-  .getServerSideProps(
+export const getServerSideProps = store.getServerSideProps(
     apiContainer, 
     [{
       routePath: '/properties/offers',

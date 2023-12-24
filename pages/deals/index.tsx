@@ -14,6 +14,7 @@ import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
 import { ContainerKeys } from "@/common/container/container.keys";
 import { ApiContainerKeys } from "@/server/contaier.keys";
+import { useMemo } from "react";
 
 interface IState {
   deals: Entity<DealModel>;
@@ -91,20 +92,20 @@ function Deals({
     mySuccessfulPage,
 }: IState & IDispatch) {
     const dealsIds = Object.keys(deals);
-    const requestedByMe = dealsIds.filter((dealId) => {
+    const requestedByMe = useMemo(() => dealsIds.filter((dealId) => {
         return deals[dealId].buyerUserId === authUser.userId 
             && deals[dealId].dealStatus === DealStatuses.Awaiting;
-    });
-    const requestedForMe = dealsIds.filter((dealId) => {
+    }), [requestedByMePage, deals, authUser.userId]);
+    const requestedForMe = useMemo(() => dealsIds.filter((dealId) => {
         return deals[dealId].sellerUserId === authUser.userId 
             && deals[dealId].dealStatus === DealStatuses.Awaiting;
-    });
-    const mySuccessful = dealsIds.filter((dealId) => {
+    }), [requestedForMePage, deals, authUser.userId]);
+    const mySuccessful = useMemo(() => dealsIds.filter((dealId) => {
         return (
             deals[dealId].sellerUserId === authUser.userId
             ||  deals[dealId].buyerUserId === authUser.userId
         ) && deals[dealId].dealStatus === DealStatuses.Done;
-    });
+    }), [mySuccessfulPage, deals, authUser.userId]);
     return (
         <PageWrapper>
             <PageContainer className="py-8">
