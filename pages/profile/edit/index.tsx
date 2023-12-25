@@ -23,7 +23,7 @@ interface IState {
   
 function mapStateToProps(state: RootState): IState {
   return { 
-    users: state.entities.users || {},
+    users: state.users,
     authUser: state.authUser
   }
 }

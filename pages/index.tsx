@@ -28,8 +28,8 @@ interface IState {
 }
 
 function mapStateToProps(state: RootState): IState {
-  const properties = state.entities.properties;
-  const propertyImages = state.entities.propertyImages;
+  const properties = state.properties;
+  const propertyImages = state.propertyImages;
   return { 
     properties: properties ? Object.values(properties) : [],
     propertyImages

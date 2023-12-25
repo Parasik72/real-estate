@@ -66,10 +66,10 @@ export class DealService extends BaseContext {
             ]
         };
         const pageName = requestedBy === DealRequestedBy.Buyer 
-            ? DealPaginationNames.RequestedByMeDeals
+            ? DealPaginationNames.RequestedByMeDealsPage
             : requestedBy === DealRequestedBy.Seller
-            ? DealPaginationNames.RequestedForMeDeals
-            : DealPaginationNames.MySuccessfulDeals;
+            ? DealPaginationNames.RequestedForMeDealsPage
+            : DealPaginationNames.MySuccessfulDealsPage;
         return getModelPage(this.di.Deal, page, limit, pageName, countOptions, findAllOptions);
     }
 }

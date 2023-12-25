@@ -33,9 +33,10 @@ export class ReduxStore extends BaseContext {
         const isDebug =
             process.env.NODE_ENV as string === 'local' ||
             process.env.DEBUG_PROD === 'true';
-        this._store = isDebug 
-            ? this.configureDevStore() 
-            : this.configureProdStore();
+        // this._store = isDebug 
+        //     ? this.configureDevStore() 
+        //     : this.configureProdStore();
+        this._wrapper = this.configureDevStore();
     }
 
     private *rootSaga() {
@@ -55,29 +56,34 @@ export class ReduxStore extends BaseContext {
     }
 
     private configureDevStore = () => {
-        const middleware: any[] = [];
-        const enhancers: any[] = [];
-
-        const sagaMiddleware = createSagaMiddleware();
-        middleware.push(sagaMiddleware);
-
-        const composeEnhancers = (window as any)?.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-            ? (window as any)?.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__()
-            : compose;
-        enhancers.push(applyMiddleware(...middleware));
-        const enhancer = composeEnhancers(...enhancers);
-        const store = configureStore({
-            reducer: rootReducer,
-            middleware: (getDefaultMiddleware): any =>
-                getDefaultMiddleware({ serializableCheck: false }).concat(middleware),
-            enhancers: enhancer
+        const makeStore = () => {
+            const middleware: any[] = [];
+            const enhancers: any[] = [];
+    
+            const sagaMiddleware = createSagaMiddleware();
+            middleware.push(sagaMiddleware);
+    
+            const composeEnhancers = (typeof window == "object" &&
+                (window as any)["REDUX_DEVTOOLS_EXTENSION_COMPOSE"]) ||
+                compose;
+            enhancers.push(applyMiddleware(...middleware));
+            const enhancer = composeEnhancers(...enhancers);
+            const store = configureStore({
+                reducer: rootReducer,
+                middleware: (getDefaultMiddleware): any =>
+                    getDefaultMiddleware({ serializableCheck: false }).concat(middleware),
+                // enhancers: enhancer
+            });
+    
+            (store as any).sagaTask = sagaMiddleware.run(this.rootSaga);
+            this._store = store;
+            return store;
+        }
+        
+        this._wrapper = createWrapper<EnhancedStore<any, AnyAction>>(makeStore, {
+            debug: false,
         });
-
-        sagaMiddleware.run(this.rootSaga);
-        this._wrapper = createWrapper<EnhancedStore<any, AnyAction>>(() => store, {
-            debug: true,
-        });
-        return store;
+        return this._wrapper;
     };
 
     public get store(): Store<IRootReducer> {
@@ -100,13 +106,14 @@ export class ReduxStore extends BaseContext {
         paginationName: Paginations,
         entityName: Entities
     ): T[] {
+        if (!this._store) return [];
         const state = this._store.getState();
-        const pager = state.paginations[paginationName];
-        if (!pager) return [];
+        const pager = state[paginationName];
+        if (!pager || !pager.currentPage || !pager.pages) return [];
         const entities: Object[] = [];
-        for (let i = 1; i <= pager.currentPage; ++i) {
+        for (let i = 1; i <= pager?.currentPage ?? 0; ++i) {
             pager.pages[i].ids.forEach((entityId) => {
-                const entity = state.entities[entityName][entityId] as Object;
+                const entity = state[entityName][entityId] as Object;
                 entities.push(entity)
             });
         }

@@ -33,8 +33,8 @@ interface IProps {
 function mapStateToProps(state: RootState, ownProps: IProps): IState {
   return {
     authUser: state.authUser,
-    propertyImages: state.entities.propertyImages,
-    users: state.entities.users,
+    propertyImages: state.propertyImages,
+    users: state.users,
     ...ownProps
   };
 }

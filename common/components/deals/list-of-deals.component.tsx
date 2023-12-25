@@ -13,7 +13,7 @@ interface IState {
 interface IProps {
     dealsIds: string[];
     dealsEntity: Entity<DealModel>;
-    pagination?: IPagination;
+    pagination: IPagination;
     displaySignBtn?: boolean;
     displayCancelBtn?: boolean;
     isSuccessful?: boolean;
@@ -22,7 +22,7 @@ interface IProps {
 
 function mapStateToProps(state: RootState, ownProps: IProps): IState {
   return {
-    properties: state.entities.properties,
+    properties: state.properties,
     ...ownProps
   };
 }
@@ -52,10 +52,13 @@ function ListOfDeals({
                     />
                 </div>
             ))}
-            {pagination && onShowNext && pagination.currentPage < pagination.totalPages && (
+            {pagination.currentPage !== undefined 
+            && pagination.totalPages !== undefined 
+            && onShowNext 
+            && pagination?.currentPage < pagination.totalPages && (
                 <div className="w-full flex justify-center">
                     <button
-                        onClick={() => onShowNext(pagination.currentPage + 1)} 
+                        onClick={() => onShowNext(pagination?.currentPage! + 1)} 
                         className="mt-4 py-3 px-4 text-blue-900 border-2 border-blue-900 rounded-md font-bold"
                     >
                         Show next

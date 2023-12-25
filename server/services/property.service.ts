@@ -59,7 +59,7 @@ export class PropertyService extends BaseContext {
                 { model: this.di.PropertyImage, limit: 1 }
             ] 
         };
-        const pageName = Types.PropertyPaginationNames.AllOffers;
+        const pageName = Types.PropertyPaginationNames.AllOffersPage;
         return getModelPage(this.di.Property, page, limit, pageName, countOptions, findAllOptions);
     }
 
@@ -77,7 +77,7 @@ export class PropertyService extends BaseContext {
                 { model: this.di.PropertyImage, limit: 1 }
             ]
         };
-        const pageName = Types.PropertyPaginationNames.UserProperties;
+        const pageName = Types.PropertyPaginationNames.UserPropertiesPage;
         return getModelPage(this.di.Property, currentPage, currentLimit, pageName, countOptions, findAllOptions);
     }
 

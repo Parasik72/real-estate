@@ -23,19 +23,17 @@ import { Entities } from "@/common/store/entities/entities.enum";
 interface IState {
     properties: PropertyModel[];
     propertyImages: Entity<PropertyImageModel>;
-    allOffersPage?: IPagination;
-    filters: Record<string, string>;
+    allOffersPage: IPagination;
 }
 
 const store = container.resolve<ReduxStore>(ContainerKeys.ReduxStore);
 
 function mapStateToProps(state: RootState): IState {
-    const properties = store.getEntityPage<PropertyModel>(Paginations.AllOffers, Entities.Property);
+    const properties = store.getEntityPage<PropertyModel>(Paginations.AllOffersPage, Entities.Property);
     return { 
         properties: properties,
-        propertyImages: state.entities.propertyImages || {},
-        allOffersPage: state.paginations.allOffers,
-        filters: state.filters.allOffersFilter
+        propertyImages: state.propertyImages || {},
+        allOffersPage: state.allOffersPage,
     };
 }
 
@@ -66,14 +64,13 @@ function Offers({
     properties, 
     propertyImages,
     allOffersPage,
-    filters,
     getAllOffers 
 }: IState & IDispatch) {
     const router = useRouter();
     const getFirstPage = () => {
         getAllOffers({
             page: 1,
-            ...filters
+            ...allOffersPage.query || {}
         });
     }
     return (

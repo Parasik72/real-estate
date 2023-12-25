@@ -21,9 +21,6 @@ function mapStateToProps(state: RootState): IState {
 }
 
 interface IDispatch {
-  getAuthUser: () => {
-    type: AuthUserEffectActions.GET_AUTH_USER;
-  };
   logout: () => {
     type: AuthUserEffectActions.LOG_OUT;
   }
@@ -31,12 +28,11 @@ interface IDispatch {
  
 const mapDispatchToProps = (dispatch: Dispatch<Action<AuthUserEffectActions>>): IDispatch => {
   return {
-    getAuthUser: () => dispatch({ type: AuthUserEffectActions.GET_AUTH_USER }),
     logout: () => dispatch({ type: AuthUserEffectActions.LOG_OUT })
   }
 }
 
-const Navbar = ({ getAuthUser, logout, authUser }: IState & IDispatch) => {
+const Navbar = ({ logout, authUser }: IState & IDispatch) => {
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const toggleMenu = () => setIsMenuOpen(prev => !prev);
@@ -44,10 +40,6 @@ const Navbar = ({ getAuthUser, logout, authUser }: IState & IDispatch) => {
     useEffect(() => {
         setIsMenuOpen(false);
     }, [router.pathname]);
-
-    useEffect(() => {
-        getAuthUser();
-    }, []);
 
     const onLogout = () => {
         logout();

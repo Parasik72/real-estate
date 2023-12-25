@@ -33,7 +33,7 @@ export interface UpdateDeal {
 }
 
 export enum DealPaginationNames {
-    RequestedByMeDeals = 'requestedByMeDeals',
-    RequestedForMeDeals = 'requestedForMeDeals',
-    MySuccessfulDeals = 'mySuccessfulDeals'
+    RequestedByMeDealsPage = 'requestedByMeDealsPage',
+    RequestedForMeDealsPage = 'requestedForMeDealsPage',
+    MySuccessfulDealsPage = 'mySuccessfulDealsPage'
 }

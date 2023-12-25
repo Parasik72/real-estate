@@ -30,13 +30,13 @@ interface IState {
 }
   
 function mapStateToProps(state: RootState): IState {
-  const properties = state.entities.properties;
+  const properties = state.properties;
   return { 
-    users: state.entities.users || {},
+    users: state.users || {},
     properties: properties ? Object.values(properties) : [],
     authUser: state.authUser,
-    propertyImages: state.entities.propertyImages || {},
-    userPropertiesPage: state.paginations.userProperties
+    propertyImages: state.propertyImages || {},
+    userPropertiesPage: state.userPropertiesPage
   };
 }
 
@@ -90,7 +90,6 @@ function Profile({
 }: IState & IDispatch) {
     const router = useRouter();
     const userId = router.query.userId as string || '';
-    if (!users[userId]) return <div>Loading...</div>
     const isCurrentUserProfile = authUser.isAuth && userId === authUser.userId;
     return (
         <PageWrapper>
@@ -99,12 +98,12 @@ function Profile({
                     <h2 className="text-dark-blue text-4xl lg:text-6xl font-bold">
                         User profile
                     </h2>
-                    <div className="mt-4">
+                    {users[userId] && <div className="mt-4">
                         <UserInfo 
                             user={users[userId]} 
                             displayEditLink={isCurrentUserProfile} 
                         />
-                    </div>
+                    </div>}
                 </div>
             </PageContainer>
             <div className="py-8 bg-indigo-50 w-full">

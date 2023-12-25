@@ -36,8 +36,8 @@ export interface IPropertyImage extends Model {
 }
 
 export enum PropertyPaginationNames {
-    AllOffers = 'allOffers',
-    UserProperties = 'userProperties',
+    AllOffersPage = 'allOffersPage',
+    UserPropertiesPage = 'userPropertiesPage',
 }
 
 export type PropertyWithAddress = IProperty & { PropertyAddress: IPropertyAddress };

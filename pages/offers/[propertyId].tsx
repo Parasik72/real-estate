@@ -37,11 +37,11 @@ interface IState {
   
 function mapStateToProps(state: RootState): IState {
     return { 
-        properties: state.entities.properties || {},
-        propertyImages: state.entities.propertyImages || {},
-        users: state.entities.users || {},
+        properties: state.properties,
+        propertyImages: state.propertyImages,
+        users: state.users,
         authUser: state.authUser,
-        deals: state.entities.deals
+        deals: state.deals
     }
 }
 

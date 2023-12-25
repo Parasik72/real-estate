@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import { FC, useState } from "react";
 import { useDispatch } from "react-redux";
-import { FiltersMethods } from "@/common/store/filters/filters.methods";
-import { Filters } from "@/common/store/filters/filters.enum";
+import { Paginations } from "@/common/store/paginations/paginations.enum";
+import { ReducerMethods } from "@/common/store/reducer.methods";
 
 interface IProps {
     type: 'text' | 'number' | 'select';
@@ -11,25 +11,26 @@ interface IProps {
     title?: string;
     placeholder?: string;
     className?: string;
-    filterName?: Filters;
+    paginationName?: Paginations;
     children?: React.ReactNode;
 }
 
 export const Input: FC<IProps> = ({ 
-    placeholder, className, type, name, id, title, filterName, children
+    placeholder, className, type, name, id, title, paginationName, children
 }) => {
     const [timeHandler, setTimeHandler] = useState<NodeJS.Timeout | null>(null);
     const [value, setValue] = useState('');
     const dispatch = useDispatch();
     const handleSearch = (term: string) => {
         setValue(term);
-        if (!filterName) return;
+        if (!paginationName) return;
         if (timeHandler) clearTimeout(timeHandler);
         const handler = setTimeout(() => {
+            const query = { key: name, value: term };
             const payload = {
-                entities: { [filterName]: { key: name, value: term } }
+                entities: { [paginationName]: { query } }
             };
-            dispatch({ type: FiltersMethods.UPDATE, payload });
+            dispatch({ type: ReducerMethods.UPDATE, payload });
         }, 300);
         setTimeHandler(handler);
     };

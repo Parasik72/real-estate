@@ -19,18 +19,18 @@ import { useMemo } from "react";
 interface IState {
   deals: Entity<DealModel>;
   authUser: AuthUser;
-  requestedByMePage?: IPagination;
-  requestedForMePage?: IPagination;
-  mySuccessfulPage?: IPagination;
+  requestedByMePage: IPagination;
+  requestedForMePage: IPagination;
+  mySuccessfulPage: IPagination;
 }
 
 function mapStateToProps(state: RootState): IState {
   return {
     authUser: state.authUser,
-    deals: state.entities.deals || {},
-    requestedByMePage: state.paginations.requestedByMeDeals,
-    requestedForMePage: state.paginations.requestedForMeDeals,
-    mySuccessfulPage: state.paginations.mySuccessfulDeals,
+    deals: state.deals,
+    requestedByMePage: state.requestedByMeDealsPage,
+    requestedForMePage: state.requestedForMeDealsPage,
+    mySuccessfulPage: state.mySuccessfulDealsPage,
   };
 }
 

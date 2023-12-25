@@ -12,55 +12,41 @@ import { IPagination } from "../types/common.types";
 import { nextReducer } from "./next-reducer/next.reducer";
 import { HYDRATE } from "next-redux-wrapper";
 import { combineReducers } from "redux";
-import { filtersReducer } from "./filters/filters.reducer";
-import { Filters } from "./filters/filters.enum";
+import { ToastifyState, toastifyReducer } from "./toastify/toastify.reducer";
 
 export interface IRootReducer {
-    entities: {
-        [Entities.Property]: Entity<PropertyModel>,
-        [Entities.PropertyImage]: Entity<PropertyImageModel>,
-        [Entities.User]: Entity<UserModel>,
-        [Entities.Deal]: Entity<DealModel>,
-    };
-    paginations: {
-        [Paginations.AllOffers]?: IPagination;
-        [Paginations.MySuccessfulDeals]?: IPagination;
-        [Paginations.RequestedByMeDeals]?: IPagination;
-        [Paginations.RequestedForMeDeals]?: IPagination;
-        [Paginations.UserProperties]?: IPagination;
-    }
-    filters: {
-        [Filters.AllOffersFilter]: Entity<string>
-    };
+    [Entities.Property]: Entity<PropertyModel>,
+    [Entities.PropertyImage]: Entity<PropertyImageModel>,
+    [Entities.User]: Entity<UserModel>,
+    [Entities.Deal]: Entity<DealModel>,
+    [Paginations.AllOffersPage]: IPagination;
+    [Paginations.MySuccessfulDealsPage]: IPagination;
+    [Paginations.RequestedByMeDealsPage]: IPagination;
+    [Paginations.RequestedForMeDealsPage]: IPagination;
+    [Paginations.UserPropertiesPage]: IPagination;
     authUser: AuthUserState;
+    toastify: ToastifyState;
 }
 
-const mainReducers = combineReducers({
-    entities: entitiesReducer,
-    paginations: paginationsReducer,
+let reducers: any = {
     authUser: authUserReducer,
-    filters: filtersReducer
+    toastify: toastifyReducer
+};
+
+Object.values(Entities).forEach((entityName) => {
+    reducers[entityName] = (state: any, action: any) => entitiesReducer(state, action, entityName)
 });
+
+Object.values(Paginations).forEach((entityName) => {
+    reducers[entityName] = (state: any, action: any) => paginationsReducer(state, action, entityName)
+});
+
+const mainReducers = combineReducers(reducers);
 
 let initialState = {}
 
-const compareKeys = ['entities', 'paginations'];
-
-const compareState = (state: any) => {
-    // console.log('hydration 1')
-    // const stateKeys = Object.keys(state);
-    // for (const stateKey of stateKeys) {
-    //     if (compareKeys.includes(stateKey) && Object.keys(state[stateKey]).length > 0) {
-    //         return false;
-    //     }
-    // } 
-    return true;
-}
-
 export const rootReducer = (state = initialState, action: any) => {
-    // console.log('hydration start')
-    if (action.type === HYDRATE && compareState(state)) {
-        // console.log('hydration 2')
+    if (action.type === HYDRATE) {
         return nextReducer(state, action);
     }
     return mainReducers(state, action);

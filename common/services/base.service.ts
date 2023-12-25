@@ -6,6 +6,8 @@ import IContextContainer from "../context/icontext-container";
 import { sagaAction } from "../functions/saga.functions";
 import { SagaEffectAction } from "../store/types/saga.types";
 import 'reflect-metadata';
+import { ToastifyMethods } from "../store/toastify/toastify.methods";
+import { ToastifyAction, ToastifyStatus } from "../store/toastify/toastify.types";
 
 export interface HttpRequestConfig<ReqBody extends Object> {
     url: string;
@@ -96,6 +98,14 @@ export class BaseService extends BaseContext {
         return action;
     }
 
+    private generateErrorToastify(err: Error): ToastifyAction {
+        return {
+            id: `${new Date().getTime() + Math.random()}`,
+            message: err.message,
+            status: ToastifyStatus.Error
+        };
+    }
+
     protected initSchema(
         name: string,
         definitions: Schema = {},
@@ -112,6 +122,13 @@ export class BaseService extends BaseContext {
     protected *requestResult<ReqBody extends Object, ResBody extends Object>
     (config: HttpRequestConfig<ReqBody>, httpMethod: string, actionMethod: string) {
         let data: object | Error = yield call(this.sendRequest<ReqBody, ResBody>, config.url, httpMethod, config.body);
+        if (data instanceof Error) {
+            yield put({
+                type: ToastifyMethods.UPDATE,
+                payload: this.generateErrorToastify(data)
+            });
+            return data;
+        }
         const action = this.normalizeReqBody(data, actionMethod);
         yield put(action);
         return data as ResBody;
