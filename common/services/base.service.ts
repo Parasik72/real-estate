@@ -128,6 +128,7 @@ export class BaseService extends BaseContext {
     protected *requestResult<ReqBody extends Object, ResBody extends Object>
     (config: HttpRequestConfig<ReqBody>, httpMethod: string, actionMethod: string) {
         let data: object | Error = yield call(this.sendRequest<ReqBody, ResBody>, config.url, httpMethod, config.body);
+        let currentData = data;
         if (data instanceof Error) {
             yield put({
                 type: ToastifyEffectActions.ADD_TOASTIFY,
@@ -143,10 +144,10 @@ export class BaseService extends BaseContext {
             });
             const keys = Object.keys(otherData);
             if (keys.length > 0) {
-                data = otherData[keys[0]];
+                currentData = otherData[keys[0]];
             }
         }
-        const action = this.normalizeReqBody(data, actionMethod);
+        const action = this.normalizeReqBody(currentData, actionMethod);
         yield put(action);
         return data as ResBody;
     }
