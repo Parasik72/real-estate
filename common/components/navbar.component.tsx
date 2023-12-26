@@ -63,9 +63,8 @@ const Navbar = ({ logout, authUser }: IState & IDispatch) => {
                         'hidden': !isMenuOpen
                     })}>
                         <div className="flex flex-col md:flex-row md:items-center gap-5 lg:ml-12">
-                            <Link href="/topoffers" className="text-gray-800">Last offers</Link>
+                            <Link href="/" className="text-gray-800">Home</Link>
                             <Link href="/offers" className="text-gray-800">Search in offers</Link>
-                            <Link href="/topoffers" className="text-gray-800">About us</Link>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center gap-5">
                             {authUser?.isAuth ? (
