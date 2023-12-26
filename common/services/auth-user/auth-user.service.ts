@@ -57,11 +57,17 @@ export class AuthService extends HttpService {
 
     @action()
     public *auth() {
-        yield call(
+        const res: { isAuth: boolean } = yield call(
             this.get<AuthUser>,
             { url: BACK_PATHS.auth },
             ReducerMethods.UPDATE
         );
+        if (res.isAuth) return;
+        const payload = { entities: { authUser: { true: res } } };
+        yield put({
+            type: ReducerMethods.UPDATE,
+            payload
+        });
     }
 
     @action()

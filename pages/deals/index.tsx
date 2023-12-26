@@ -15,6 +15,7 @@ import { ReduxStore } from "@/common/store/redux.store";
 import { ContainerKeys } from "@/common/container/container.keys";
 import { ApiContainerKeys } from "@/server/contaier.keys";
 import { useMemo } from "react";
+import { withAuth } from "@/common/components/with-auth.component";
 
 interface IState {
   deals: Entity<DealModel>;
@@ -172,4 +173,4 @@ function Deals({
     );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Deals);
+export default connect(mapStateToProps, mapDispatchToProps)(withAuth(Deals));

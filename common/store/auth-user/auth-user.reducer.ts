@@ -1,6 +1,7 @@
 import { ReducerMethods } from "../reducer.methods";
 
 export interface AuthUserState {
+    isReady: boolean;
     isAuth: boolean;
     userId?: string;
 }
@@ -20,6 +21,7 @@ export interface IReducerAction {
 }
 
 const initialState: AuthUserState = {
+    isReady: false,
     isAuth: false
 }
 
@@ -32,14 +34,17 @@ export const authUserReducer =
             if (!action.payload || !action.payload.entities) break;
             const entities = action.payload.entities;
             if (!entities.authUser || !entities.authUser.true) break;
-            state = entities.authUser.true;
+            state = {
+                ...entities.authUser.true,
+                isReady: true
+            };
             break;
         }
         case ReducerMethods.CLEAN: {
             if (!action.payload || !action.payload.entities) break;
             const entities = action.payload.entities;
             if (!entities.authUser) break;
-            state = initialState;    
+            state = initialState;
             break;
         }
     }

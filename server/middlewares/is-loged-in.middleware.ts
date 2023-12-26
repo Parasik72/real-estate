@@ -9,6 +9,7 @@ export const isLogedIn =
       if (!req.user) throw new HttpException('Unauthorized', 401);
       return next();
     } catch (error) {
+      if (!res.status) return;
       if (error instanceof HttpException) {
         return res.status(error.statusCode).json({ error: error.message });
       }
