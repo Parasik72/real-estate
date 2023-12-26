@@ -97,7 +97,10 @@ export class DealController extends BaseController {
             dealStatus: DealStatuses.Canceled,
             updatedAt: time
         }, deal);
-        return objectToJSON(deal);
+        return { 
+            message: 'The deal has been canceled successfully.',
+            deal: objectToJSON(deal)
+        };
     }
 
     @SSR('/deals')

@@ -27,6 +27,9 @@ interface IAction {
     payload: Object;
 }
 
+const MESSAGE = 'message';
+const PAGER = 'pager';
+
 export class BaseService extends BaseContext {
     private _schema: schema.Entity[] = [];
     private _entityName: string = '';
@@ -101,11 +104,11 @@ export class BaseService extends BaseContext {
         return action;
     }
 
-    private generateErrorToastify(err: Error): ToastifyAction {
+    private generateToastify(message: string, status: ToastifyStatus): ToastifyAction {
         return {
             id: `${new Date().getTime() + Math.random()}`,
-            message: err.message,
-            status: ToastifyStatus.Error
+            message,
+            status
         };
     }
 
@@ -128,9 +131,20 @@ export class BaseService extends BaseContext {
         if (data instanceof Error) {
             yield put({
                 type: ToastifyEffectActions.ADD_TOASTIFY,
-                payload: this.generateErrorToastify(data)
+                payload: this.generateToastify(data.message, ToastifyStatus.Error)
             });
             return data;
+        }
+        if (data.hasOwnProperty(MESSAGE)) {
+            const { [MESSAGE]: message, ...otherData } = data as any;
+            yield put({
+                type: ToastifyEffectActions.ADD_TOASTIFY,
+                payload: this.generateToastify(message, ToastifyStatus.Success)
+            });
+            const keys = Object.keys(otherData);
+            if (keys.length > 0) {
+                data = otherData[keys[0]];
+            }
         }
         const action = this.normalizeReqBody(data, actionMethod);
         yield put(action);
@@ -149,7 +163,7 @@ export class BaseService extends BaseContext {
         data: any, 
         actionMethod: string
     ): IAction {
-        if (data.hasOwnProperty('pager')) {
+        if (data.hasOwnProperty(PAGER)) {
             return this.getPager(data);
         }
         return {
