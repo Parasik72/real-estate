@@ -25,7 +25,6 @@ export default function validate(schema: AnySchema, validationType = ValidationT
             if (!valid) {
                 const errorMsg = validate.errors?.map((error) => error.message)
                     .join('; ') || 'Validation error';
-                console.log('errorMsg', errorMsg)
                 throw new ValidationException(errorMsg, 400);
             }
             return next();

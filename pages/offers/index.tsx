@@ -9,7 +9,6 @@ import { PropertyEffectActions } from "@/common/services/property/property.servi
 import { RootState } from "@/common/store/root.reducer";
 import { Entity } from "@/common/store/types/store.types";
 import { IPagination } from "@/common/types/common.types";
-import { useRouter } from "next/router";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 import apiContainer from "@/server/container";
@@ -31,7 +30,7 @@ const store = container.resolve<ReduxStore>(ContainerKeys.ReduxStore);
 function mapStateToProps(state: RootState): IState {
     const properties = store.getEntityPage<PropertyModel>(Paginations.AllOffersPage, Entities.Property);
     return { 
-        properties: properties,
+        properties,
         propertyImages: state.propertyImages || {},
         allOffersPage: state.allOffersPage,
     };
@@ -66,7 +65,6 @@ function Offers({
     allOffersPage,
     getAllOffers 
 }: IState & IDispatch) {
-    const router = useRouter();
     const getFirstPage = () => {
         getAllOffers({
             page: 1,
@@ -97,7 +95,7 @@ function Offers({
                     pagination={allOffersPage}
                     onShowNext={(nextPage: number) => getAllOffers({
                         page: nextPage,
-                        ...router.query
+                        ...allOffersPage.query || {}
                     })}
                 />
             </PageContainer>
