@@ -12,6 +12,7 @@ export interface INextApiRequestExtended<
   body: TBody;
   user?: IUser;
   files?: Express.Multer.File[];
+  errors?: { statusCode: number, message: string }[];
   logout?: () => any;
 }
 

@@ -10,11 +10,14 @@ passport.use(
       usernameField: 'email',
       passReqToCallback: true
     },
-    async (req, email, password, done) => {
+    async (req: any, email, password, done) => {
       const userService = container.resolve<UserService>('userService');
       const user = await userService.getUserByEmail(email);
-      if (!user) return done(null, false, { message: 'Incorrect data' });
-      if (!bcryptjs.compareSync(password, user.password)) return done(null, false, { message: 'Incorrect data' });
+      if (!user || !bcryptjs.compareSync(password, user.password)) {
+        const error = { message: 'Incorrect data', statusCode: 401 };
+        req.errors = [...(req?.errors || []), error];
+        return done(error, false, error);
+      }
       return done(null, user);
     }
 ));

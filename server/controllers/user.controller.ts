@@ -19,6 +19,7 @@ import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 import { EditProfileDto } from "../dto/user/edit-profile.dto";
 import PATCH from "../decorators/patch.decorator";
 import { editProfileValidation } from "../validators/user-schemas/edit-profile.schema";
+import { validateRequest } from "../middlewares/validate-request.middleware";
 
 export class UserController extends BaseController {
     @USE([sessions, deserializeUser])
@@ -36,7 +37,7 @@ export class UserController extends BaseController {
         return userProfile; 
     }
 
-    @USE([sessions, passportInitialize, passportAuthenticate])
+    @USE([sessions, passportInitialize, passportAuthenticate, validateRequest])
     @USE(validate(signInValidation))
     @POST('/api/user/sign-in')
     async signIn({ user }: ControllerConfig) {

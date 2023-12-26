@@ -63,7 +63,7 @@ export class AuthService extends HttpService {
             ReducerMethods.UPDATE
         );
         if (res.isAuth) return;
-        const payload = { entities: { authUser: { true: res } } };
+        const payload = { entities: { authUser: { true: { isAuth: false } } } };
         yield put({
             type: ReducerMethods.UPDATE,
             payload
