@@ -4,4 +4,5 @@ export enum ContainerKeys {
   PropertyService = 'PropertyService',
   AuthService = 'AuthService',
   DealService = 'DealService',
+  ToastifyService = 'ToastifyService'
 }

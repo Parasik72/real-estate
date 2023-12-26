@@ -1,8 +1,8 @@
 import { CrossIcon } from "@/common/icons/cross.icon";
+import { UserEffectActions } from "@/common/services/user/user.service";
 import { ToastifyMethods } from "@/common/store/toastify/toastify.methods";
 import { ToastifyAction, ToastifyStatus } from "@/common/store/toastify/toastify.types";
 import clsx from "clsx";
-import { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Action, Dispatch } from "redux";
 
@@ -13,10 +13,10 @@ interface IDispatch {
     }
 }
 
-const mapToDispatchState = (dispatch: Dispatch<Action<ToastifyMethods>>): IDispatch => {
+const mapToDispatchState = (dispatch: Dispatch<Action<ToastifyMethods | UserEffectActions>>): IDispatch => {
     return {
         removeToastify: (action: ToastifyAction) => 
-            dispatch({ type: ToastifyMethods.DELETE, payload: action })
+            dispatch({ type: ToastifyMethods.DELETE, payload: action }),
     }
 }
 
@@ -25,21 +25,10 @@ interface IProps {
 }
 
 function ToastifyComponent({ action, removeToastify }: IProps & IDispatch) {
-    const [handler, setHandler] = useState<NodeJS.Timeout | null>(null);
     const onClose = () => {
         removeToastify(action);
     }
-    
-    useEffect(() => {
-        const timeoutHandler = setTimeout(() => {
-            removeToastify(action);
-        }, 5000);
-        setHandler(timeoutHandler);
-        return () => {
-            if (!handler) return;
-            clearTimeout(handler);
-        }
-    }, []);
+
     return (
         <div className={clsx("relative z-50 p-4 rounded-md w-full flex justify-between items-center gap-2", {
             'bg-red-900': action.status === ToastifyStatus.Error,

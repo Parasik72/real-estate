@@ -5,9 +5,8 @@ import BaseContext from "../context/base-context";
 import IContextContainer from "../context/icontext-container";
 import { sagaAction } from "../functions/saga.functions";
 import { SagaEffectAction } from "../store/types/saga.types";
-import 'reflect-metadata';
-import { ToastifyMethods } from "../store/toastify/toastify.methods";
 import { ToastifyAction, ToastifyStatus } from "../store/toastify/toastify.types";
+import 'reflect-metadata';
 
 export interface HttpRequestConfig<ReqBody extends Object> {
     url: string;
@@ -17,6 +16,10 @@ export interface HttpRequestConfig<ReqBody extends Object> {
 export interface ISagaMethod {
     className: string;
     methodName: string;
+}
+
+export enum ToastifyEffectActions {
+    ADD_TOASTIFY = 'toastify_addToastify',
 }
 
 interface IAction {
@@ -124,7 +127,7 @@ export class BaseService extends BaseContext {
         let data: object | Error = yield call(this.sendRequest<ReqBody, ResBody>, config.url, httpMethod, config.body);
         if (data instanceof Error) {
             yield put({
-                type: ToastifyMethods.UPDATE,
+                type: ToastifyEffectActions.ADD_TOASTIFY,
                 payload: this.generateErrorToastify(data)
             });
             return data;
