@@ -21,20 +21,7 @@ import container from "@/common/container/container";
 import { ReduxStore } from "@/common/store/redux.store";
 import { ContainerKeys } from "@/common/container/container.keys";
 import { ApiContainerKeys } from "@/server/contaier.keys";
-
-interface IState {
-  properties: PropertyModel[];
-  propertyImages: Entity<PropertyImageModel>;
-}
-
-function mapStateToProps(state: RootState): IState {
-  const properties = state.properties;
-  const propertyImages = state.propertyImages;
-  return { 
-    properties: properties ? Object.values(properties) : [],
-    propertyImages
-  };
-}
+import { PropertyContainer } from "@/common/components/home/property-container.component";
 
 interface IDispatch {
   getLastOffers: () => {
@@ -50,13 +37,6 @@ const mapDispatchToProps = (
   }
 }
 
-interface IProps extends IState, IDispatch {
-  data: {
-    userId?: string;
-    isAuth: boolean;
-  }
-}
-
 export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.ReduxStore)
   .getServerSideProps(
     apiContainer,
@@ -67,7 +47,7 @@ export const getServerSideProps = container.resolve<ReduxStore>(ContainerKeys.Re
     }]
   );
 
-function Home({ properties, propertyImages }: IProps) {
+function Home() {
   return (
     <PageWrapper className="overflow-x-hidden">
       <PageContainer className="relative py-12">
@@ -104,30 +84,7 @@ function Home({ properties, propertyImages }: IProps) {
               </Link>
             </div>
           </div>
-          <div className="mt-16 sm:mt-4 flex gap-5 justify-center items-center">
-            <div className="hidden sm:block w-full h-2px bg-indigo-100">
-              <div className="h-2px bg-blue-900 w-64"></div>
-            </div>
-            <div className="flex gap-5">
-              <button className="bg-indigo-100 rounded-full px-6 py-5">
-                <ArrowIcon reverse />
-              </button>
-              <button className="bg-blue-900 rounded-full px-6 py-5">
-                <ArrowIcon />
-              </button>
-            </div>
-          </div>
-          <div className="inline-flex gap-5 mt-6 overflow-x-hidden">
-            {properties.map((property, i) => (
-              <div key={property.propertyId} className="w-full flex-shrink-0 max-w-250px md:max-w-350px">
-                <PropertyCard 
-                  property={property}
-                  propertyImages={propertyImages}
-                  className="max-w-250px md:max-w-350px"
-                />
-              </div>
-            ))}
-          </div>
+          <PropertyContainer />
         </PageContainer>
       </div>
       <div className="py-14 lg:py-28">
@@ -156,4 +113,4 @@ function Home({ properties, propertyImages }: IProps) {
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Home);
+export default connect(null, mapDispatchToProps)(Home);
