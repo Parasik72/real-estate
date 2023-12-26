@@ -18,8 +18,9 @@ import multer from "multer";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 import { createPropertyValidation } from "../validators/property-schemas/create-property.schema";
 import { updatePropertyValidation } from "../validators/property-schemas/update-property.schema";
-import validate from "../validators/validate";
+import validate, { ValidationType } from "../validators/validate";
 import { objectToJSON } from "../functions/json.functions";
+import { allOffersValidation } from "../validators/property-schemas/get-all-offers.schema";
 
 export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
@@ -30,6 +31,7 @@ export class PropertyController extends BaseController {
 
   @SSR('/properties/offers')
   @GET('/api/properties/offers')
+  @USE(validate(allOffersValidation, ValidationType.Query))
   async getAllOffers({ query }: ControllerConfig<{}, Params.GetAllPropertiesParams>) {
     return this.di.propertyService.getAllOffers(query);
   }
