@@ -134,7 +134,7 @@ export class BaseService extends BaseContext {
                 type: ToastifyEffectActions.ADD_TOASTIFY,
                 payload: this.generateToastify(data.message, ToastifyStatus.Error)
             });
-            return data;
+            return currentData;
         }
         if (data.hasOwnProperty(MESSAGE)) {
             const { [MESSAGE]: message, ...otherData } = data as any;
