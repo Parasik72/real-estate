@@ -3,9 +3,6 @@ import { deserializeUser, passportAuthenticate, passportInitialize, passportSess
 import { GetUserProfileParams } from "../params/user.params";
 import { SignUpDto } from "../dto/user/sign-up.dto";
 import { HttpException } from "../exceptions/http.exception";
-import bcryptjs from 'bcryptjs';
-import { v4 } from "uuid";
-import { UUID } from "crypto";
 import type { ControllerConfig } from "../types/controller.types";
 import { BaseController } from "./base-controller";
 import POST from "../decorators/post.decorator";
@@ -53,18 +50,8 @@ export class UserController extends BaseController {
         const { userService } = this.di;
         const emailInUse = await userService.getUserByEmail(body.email);
         if (emailInUse) throw new HttpException('This email is already in use', 400);
-        const userId = v4() as UUID;
-        const hashPassword = bcryptjs.hashSync(body.password, 5);
-        const time = BigInt(new Date().getTime());
-        await userService.createUser({
-            ...body,
-            userId,
-            password: hashPassword,
-            createdAt: time,
-            updatedAt: time
-        });
+        await userService.createUser(body);
         this.sendMessage('Successful sign up!');
-        return {};
     }
 
     @USE([sessions, passportInitialize, passportSession])
@@ -82,19 +69,13 @@ export class UserController extends BaseController {
         if (!req.logout) throw new HttpException('Unauthorized', 401);
         req.logout();
         this.sendMessage('Successful log out!');
-        return {};
     }
 
     @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @USE(validate(editProfileValidation))
     @PATCH('/api/user/edit-profile')
     async editProfile({ body, user }: ControllerConfig<EditProfileDto>) {
-        const time = BigInt(new Date().getTime());
-        await this.di.userService.editProfile(user?.userId!, {
-            ...body,
-            updatedAt: time
-        });
+        await this.di.userService.editProfile(user?.userId!, body);
         this.sendMessage('The user has been updated successfully!');
-        return {};
     }
 }

@@ -16,6 +16,8 @@ import { Includeable, InferAttributes, InferCreationAttributes, Order } from "se
 import { getModelPage } from "../functions/model.functions";
 import { IPager } from "../types/controller.types";
 import { DealStatuses } from "../types/deal.type";
+import { CreatePropertyDto } from "../dto/property/create-property.dto";
+import { UpdatePropertyDto } from "../dto/property/update-property.dto";
 
 export class PropertyService extends BaseContext {
     async getLastOffers(): Promise<Types.IProperty[]> {
@@ -121,21 +123,73 @@ export class PropertyService extends BaseContext {
         });
     }
 
-    async createProperty(data: InferCreationAttributes<Types.IProperty>): Promise<Types.IProperty> {
-        return this.di.Property.create(data);
+    async createProperty(data: CreatePropertyDto, user: IUser, files: Express.Multer.File[]): Promise<Types.IProperty> {
+        const propertyAddress = await this.createPropertyAddress({
+          countryName: data.countryName,
+          cityName: data.cityName,
+          addressLine1: data.addressLine1,
+          addressLine2: data.addressLine2,
+        });
+        const propertyId = v4() as UUID;
+        const userId = user?.userId as UUID;
+        const time = BigInt(new Date().getTime());
+        const property = await this.di.Property.create({
+            ...data,
+            propertyId,
+            userId,
+            propertyAddressId: propertyAddress.propertyAddressId,
+            createdAt: time,
+            updatedAt: time,
+          });
+        await this.createPropertyImages(propertyId, files!);
+        return property;
     }
 
-    async createPropertyAddress(data: InferCreationAttributes<Types.IPropertyAddress>)
+    async createPropertyAddress(data: Types.CreatePropertyAddress)
     : Promise<Types.IPropertyAddress> {
-        return this.di.PropertyAddress.create(data);
+        const propertyAddressId = v4() as UUID;
+        return this.di.PropertyAddress.create({
+            ...data,
+            propertyAddressId
+        });
     }
 
     async updatePropertyAddressById(data: Types.UpdatePropertyAddress, propertyAddressId: string) {
         return this.di.PropertyAddress.update(data, { where: { propertyAddressId } });
     }
 
-    async updatePropertyById(data: Types.UpdateProperty, propertyId: string) {
-        return this.di.Property.update(data, { where: { propertyId }});
+    async updatePropertyById(
+        data: UpdatePropertyDto, 
+        property: Types.IProperty,
+        files: Express.Multer.File[] | undefined
+    ) {
+        if (data.propertyStatus) {
+          await this.di.dealService.updateDealsByPropertyIdAndStatusId({ 
+            dealStatus: DealStatuses.Canceled,
+            updatedAt: BigInt(new Date().getTime())
+          }, property.propertyId, DealStatuses.Awaiting);
+        }
+        await this.updatePropertyAddressById({
+          countryName: data.countryName,
+          cityName: data.cityName,
+          addressLine1: data.addressLine1,
+          addressLine2: data.addressLine2,
+        }, property.propertyAddressId);
+        await this.di.Property.update({
+          area: data.area,
+          bathRooms: data.bathRooms,
+          bedRooms: data.bedRooms,
+          title: data.title,
+          description: data.description,
+          priceAmount: data.priceAmount,
+          propertyStatus: data.propertyStatus,
+          propertyType: data.propertyType,
+          updatedAt: BigInt(new Date().getTime())
+        }, { where: { propertyId: property.propertyId }});
+        if (data.imgsToDeleteIds) {
+          await this.deletePropertyImages(data.imgsToDeleteIds, property.propertyId);
+        } 
+        if (files) await this.createPropertyImages(property.propertyId, files!);
     }
 
     async changePropertyOwnerById(data: Types.ChangePropertyOwner, propertyId: string) {

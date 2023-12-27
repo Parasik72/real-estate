@@ -64,12 +64,12 @@ export class AuthService extends HttpService {
 
     @action()
     public *auth() {
-        const res: { isAuth: boolean } = yield call(
+        const res: object = yield call(
             this.get<AuthUser>,
             { url: BACK_PATHS.auth },
             ReducerMethods.UPDATE
         );
-        if (res.isAuth) return;
+        if ((res as any).entities[0].isAuth) return;
         const payload = { entities: { authUser: { true: { isAuth: false } } } };
         yield put({
             type: ReducerMethods.UPDATE,

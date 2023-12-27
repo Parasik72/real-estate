@@ -1,9 +1,13 @@
-import { DealPaginationNames, DealRequestedBy, DealStatuses, IDeal, UpdateDeal } from "../types/deal.type";
+import { CreateDeal, DealPaginationNames, DealRequestedBy, DealStatuses, IDeal, UpdateDeal } from "../types/deal.type";
 import { dealRequestedByFindMap } from "../functions/deal.functions";
 import BaseContext from "../context/base-context";
 import { InferCreationAttributes, Order } from "sequelize";
 import { getModelPage } from "../functions/model.functions";
 import { IPager } from "../types/controller.types";
+import { v4 } from "uuid";
+import { UUID } from "crypto";
+import { IUser } from "../types/user.types";
+import { IProperty } from "../types/properties.types";
 
 export class DealService extends BaseContext {
     async getAwaitingDealByPropertyIdAndBuyerId(propertyId: string, buyerUserId: string)
@@ -17,8 +21,20 @@ export class DealService extends BaseContext {
         });
     }
 
-    async createDeal(data: InferCreationAttributes<IDeal>): Promise<IDeal> {
-        return this.di.Deal.create(data);
+    async createDeal(user: IUser, property: IProperty): Promise<IDeal> {
+        const dealId = v4() as UUID;
+        const time = BigInt(new Date().getTime());
+        return this.di.Deal.create({
+            dealId,
+            buyerUserId: user?.userId!,
+            sellerUserId: property.userId,
+            dealStatus: DealStatuses.Awaiting,
+            propertyId: property.propertyId,
+            signDate: null,
+            totalPrice: property.priceAmount,
+            createdAt: time,
+            updatedAt: time
+        });
     }
 
     async getDealById(dealId: string): Promise<IDeal | null> {
@@ -26,9 +42,10 @@ export class DealService extends BaseContext {
     }
 
     async updateDealById(data: UpdateDeal, deal: IDeal): Promise<IDeal> {
+        const updatedAt = BigInt(new Date().getTime());
         if (data.dealStatus) deal.dealStatus = data.dealStatus;
         if (data.signDate) deal.signDate = data.signDate;
-        deal.updatedAt = data.updatedAt;
+        deal.updatedAt = updatedAt;
         deal.save();
         return deal;
     }
@@ -37,6 +54,24 @@ export class DealService extends BaseContext {
         data: UpdateDeal, propertyId: string, dealStatus: DealStatuses
     ) {
         return this.di.Deal.update(data, { where: { propertyId, dealStatus } });
+    }
+
+    async signDeal(deal: IDeal) {
+        const time = BigInt(new Date().getTime());
+        const updatedDeal = await this.updateDealById({
+            updatedAt: time,
+            signDate: time,
+            dealStatus: DealStatuses.Done
+        }, deal);
+        await this.di.propertyService.changePropertyOwnerById({ 
+            userId: deal.buyerUserId,
+            updatedAt: time
+        }, deal.propertyId);
+        await this.di.dealService.updateDealsByPropertyIdAndStatusId({ 
+            dealStatus: DealStatuses.Canceled,
+            updatedAt: time
+        }, deal.propertyId, DealStatuses.Awaiting);
+        return updatedDeal;
     }
 
     async getAllDeals(

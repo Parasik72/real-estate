@@ -1,11 +1,8 @@
 import { HttpException } from "../exceptions/http.exception";
 import * as Params from "../params/property.params";
 import { CreatePropertyDto } from "../dto/property/create-property.dto";
-import { v4 } from "uuid";
-import { UUID } from "crypto";
 import { UpdatePropertyDto } from "../dto/property/update-property.dto";
 import type { ControllerConfig } from "../types/controller.types";
-import { DealStatuses } from "../types/deal.type";
 import GET from "../decorators/get.decorator";
 import { BaseController } from "./base-controller";
 import PATCH from "../decorators/patch.decorator";
@@ -46,30 +43,9 @@ export class PropertyController extends BaseController {
   @POST('/api/properties')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
     const { propertyService } = this.di;
-    const propertyAddressId = v4() as UUID;
-    await propertyService.createPropertyAddress({
-      propertyAddressId,
-      countryName: body.countryName,
-      cityName: body.cityName,
-      addressLine1: body.addressLine1,
-      addressLine2: body.addressLine2,
-    });
-    const propertyId = v4() as UUID;
-    const userId = user?.userId as UUID;
-    const time = BigInt(new Date().getTime());
-    const property = await propertyService.createProperty({
-      ...body,
-      propertyId,
-      userId,
-      propertyAddressId,
-      createdAt: time,
-      updatedAt: time,
-    });
-    await propertyService.createPropertyImages(propertyId, files!);
-    return { 
-      message: 'The property has been created successfully.',
-      property: objectToJSON(property) 
-    };
+    const property = await propertyService.createProperty(body, user!, files!);
+    this.sendMessage('The property has been created successfully.');
+    return objectToJSON(property);
   }
 
   @USE([
@@ -83,7 +59,7 @@ export class PropertyController extends BaseController {
   @PATCH('/api/properties/patch/:propertyId')
   async updatePropertyById({ query, body, files, user }
   : ControllerConfig<UpdatePropertyDto, Params.UpdatePropertyParams>) {
-    const { propertyService, dealService } = this.di;
+    const { propertyService } = this.di;
     const property = await propertyService.getPropertyById(query.propertyId);
     if (!property) throw new HttpException("The property was not found", 404);
     if (property.userId !== user?.userId) {
@@ -93,33 +69,9 @@ export class PropertyController extends BaseController {
       if (property.propertyStatus === body.propertyStatus) {
         throw new HttpException('The property already uses this property status', 400);
       }
-      await dealService.updateDealsByPropertyIdAndStatusId({ 
-        dealStatus: DealStatuses.Canceled,
-        updatedAt: BigInt(new Date().getTime())
-      }, property.propertyId, DealStatuses.Awaiting);
     }
-    await propertyService.updatePropertyAddressById({
-      countryName: body.countryName,
-      cityName: body.cityName,
-      addressLine1: body.addressLine1,
-      addressLine2: body.addressLine2,
-    }, property.propertyAddressId);
-    await propertyService.updatePropertyById({
-      area: body.area,
-      bathRooms: body.bathRooms,
-      bedRooms: body.bedRooms,
-      title: body.title,
-      description: body.description,
-      priceAmount: body.priceAmount,
-      propertyStatus: body.propertyStatus,
-      propertyType: body.propertyType,
-      updatedAt: BigInt(new Date().getTime())
-    }, property.propertyId);
-    if (body.imgsToDeleteIds) {
-      await propertyService.deletePropertyImages(body.imgsToDeleteIds, property.propertyId);
-    } 
-    if (files) await propertyService.createPropertyImages(property.propertyId, files!);
-    return { message: 'The property has been updated successfully.' };
+    await propertyService.updatePropertyById(body, property, files);
+    this.sendMessage('The property has been updated successfully.');
   }
 
   @USE([sessions, deserializeUser])

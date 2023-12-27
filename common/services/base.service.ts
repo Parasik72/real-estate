@@ -39,6 +39,7 @@ interface IAction {
 
 const MESSAGE = 'message';
 const PAGER = 'pager';
+const ENTITIES = 'entities';
 
 export class BaseService extends BaseContext {
     private _schema: schema.Entity[] = [];
@@ -88,7 +89,7 @@ export class BaseService extends BaseContext {
             return result;
         }, entityReducers);
         return pagerReducers;
-    }
+    } 
 
     private async sendRequest<ReqBody extends Object, ResBody extends Object>
     (url: string, method: string = 'GET', body: ReqBody | null = null): Promise<ResBody | Error> {
@@ -167,9 +168,6 @@ export class BaseService extends BaseContext {
                 )
             });
             if (isError) return currentData;
-            if (currentData.hasOwnProperty('entities')) {
-                currentData = currentData.entities;
-            }
         }
         const action = this.normalizeReqBody(currentData, actionMethod);
         yield put(action);
@@ -190,6 +188,9 @@ export class BaseService extends BaseContext {
     ): IAction {
         if (data.hasOwnProperty(PAGER)) {
             return this.getPager(data);
+        }
+        if (data.hasOwnProperty(ENTITIES)) {
+            data = data.entities;
         }
         return {
             type: actionMethod,

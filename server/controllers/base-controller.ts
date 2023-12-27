@@ -42,28 +42,31 @@ const concatArrays = (newData: any[] = [], responseArr: any[] = []) => {
 }
 
 const generateResponseData = (data: object) => {
-    let response: IResponseData = data;
-    if (data instanceof Model || Array.isArray(data)) {
-        response.entities =  Array.isArray(data) ? data : [data];
-    } else if(data.hasOwnProperty('pager')) {
+    let response: IResponseData = {};
+    if (data === undefined) return response;
+    if(data.hasOwnProperty('pager')) {
         const pager = data as IPager<any>;
         const { [pager.pager.paginationName]: remove, ...newData } = data as any;
         response = {
             ...newData,
             entities: concatArrays(
                 pager[pager.pager.paginationName] as any, 
-                newData.entities
+                (data as any).entities as any
             ),
             pager: pager.pager
         }
+        return response;
     }
-    return response;
+    return {
+        ...response,
+        entities: Array.isArray(data) ? data : [data]
+    };
 }
 
 const apiAction = (callback: any, statusCode: number, msg?: string) => (
     async (req: INextApiRequestExtended, res: NextApiResponse) => {
         try {
-            const data = await callback({
+            const data: any | undefined = await callback({
                 body: req.body,
                 query: req.query,
                 user: req.user,
@@ -90,6 +93,12 @@ export class BaseController extends BaseContext {
         this._message = msg;
     }
 
+    public get getMessage(): string | undefined {
+        const msg = this._message;
+        this._message = undefined;
+        return msg;
+    }
+
     public handler(
         routePath: string,
         expectedStatusCode: number = 200
@@ -103,7 +112,7 @@ export class BaseController extends BaseContext {
                     getMiddlewares(this.constructor, members[method][i])
                         .forEach((middleware) => router.use(middleware));
                     const callback = (this as any)[members[method][i]].bind(this);
-                    const action = apiAction(callback, expectedStatusCode)
+                    const action = apiAction(callback, expectedStatusCode, this._message)
                     router[methodName as keyof typeof router](routePath as any, action as any);
                 }
             }
@@ -133,7 +142,7 @@ export class BaseController extends BaseContext {
                     res
                 } as ControllerConfig);
                 const result = generateResponseData(data);
-                if (this._message) result.message = this._message;
+                if (this._message) result.message = this.getMessage;
                 return { props: { data: JSON.parse(JSON.stringify(result)) } };
             }).run(context.req, context.res);
         } catch (error) {

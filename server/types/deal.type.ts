@@ -29,7 +29,16 @@ export enum DealRequestedBy {
 export interface UpdateDeal {
     signDate?: BigInt | null;
     dealStatus?: DealStatuses;
-    updatedAt: BigInt;
+    updatedAt?: BigInt;
+}
+
+export interface CreateDeal {
+    signDate: BigInt | null;
+    totalPrice: number;
+    dealStatus: DealStatus;
+    propertyId: UUID;
+    sellerUserId: UUID;
+    buyerUserId: UUID;
 }
 
 export enum DealPaginationNames {

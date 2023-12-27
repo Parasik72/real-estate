@@ -53,6 +53,28 @@ export enum PropertyTypes {
     Villa='Villa'
 }
 
+export interface CreatePropertyAddress {
+    countryName: string;
+    cityName: string;
+    addressLine1: string;
+    addressLine2: string | null;
+}
+
+export interface CreateProperty {
+    bedRooms: number;
+    bathRooms: number;
+    area: number;
+    title: string;
+    description: string;
+    priceAmount: number;
+    propertyStatus: PropertyStatus;
+    userId: UUID;
+    propertyAddressId: UUID;
+    propertyType: PropertyType;
+    createdAt: BigInt;
+    updatedAt: BigInt;
+}
+
 export interface UpdateProperty {
     bedRooms?: number;
     bathRooms?: number;

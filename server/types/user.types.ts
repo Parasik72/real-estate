@@ -18,5 +18,12 @@ export interface UpdateUserProfile {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  updatedAt: BigInt;
+}
+
+export interface CreateUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
 }

@@ -87,7 +87,7 @@ export class PropertyService extends HttpService {
     public *addProperty(payload: {
         values: AddPropertyDto
     }) {
-        const res: { property: PropertyModel } = yield call(
+        const res: { entities: PropertyModel[] } = yield call(
             this.post<FormData, {property: PropertyModel}>, 
             { 
                 url: BACK_PATHS.addProperty,
@@ -96,7 +96,7 @@ export class PropertyService extends HttpService {
             ReducerMethods.UPDATE
         );
         if (res instanceof Error) return;
-        Router.push(FRONT_PATHS.offerById.replace(':propertyId', res.property.propertyId));
+        Router.push(FRONT_PATHS.offerById.replace(':propertyId', res.entities[0].propertyId));
     }
 
     @action()

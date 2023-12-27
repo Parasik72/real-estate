@@ -1,6 +1,9 @@
-import { IUser, UpdateUserProfile } from "../types/user.types";
+import { CreateUser, IUser, UpdateUserProfile } from "../types/user.types";
 import BaseContext from "../context/base-context";
 import { InferCreationAttributes } from "sequelize";
+import { v4 } from "uuid";
+import { UUID } from "crypto";
+import bcryptjs from 'bcryptjs';
 
 export class UserService extends BaseContext {
     async getUserByEmail(email: string): Promise<IUser | null>  {
@@ -18,12 +21,22 @@ export class UserService extends BaseContext {
         });
     }
 
-    async createUser(data: InferCreationAttributes<IUser>): Promise<IUser> {
-        return this.di.User.create(data);
+    async createUser(body: CreateUser): Promise<IUser> {
+        const userId = v4() as UUID;
+        const hashPassword = bcryptjs.hashSync(body.password, 5);
+        const time = BigInt(new Date().getTime());
+        return this.di.User.create({
+            ...body,
+            userId,
+            password: hashPassword,
+            createdAt: time,
+            updatedAt: time
+        });
     }
 
     async editProfile(userId: string, data: UpdateUserProfile) {
-        return this.di.User.update(data, {
+        const updatedAt = BigInt(new Date().getTime());
+        return this.di.User.update({...data, updatedAt}, {
             where: { userId }
         });
     }
