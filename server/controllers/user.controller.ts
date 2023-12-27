@@ -17,6 +17,7 @@ import { EditProfileDto } from "../dto/user/edit-profile.dto";
 import PATCH from "../decorators/patch.decorator";
 import { editProfileValidation } from "../validators/user-schemas/edit-profile.schema";
 import { validateRequest } from "../middlewares/validate-request.middleware";
+import MESSAGE from "../decorators/message.decorator";
 
 export class UserController extends BaseController {
     @USE([sessions, deserializeUser])
@@ -37,6 +38,7 @@ export class UserController extends BaseController {
     @USE([sessions, passportInitialize, passportAuthenticate, validateRequest])
     @USE(validate(signInValidation))
     @POST('/api/user/sign-in')
+    @MESSAGE('Successfull sign in!')
     async signIn({ user }: ControllerConfig) {
         return {
             isAuth: true,
@@ -46,12 +48,12 @@ export class UserController extends BaseController {
 
     @POST('/api/user/sign-up')
     @USE(validate(signUpValidation))
+    @MESSAGE('Successfull sign up!')
     async signUp({ body }: ControllerConfig<SignUpDto>) {
         const { userService } = this.di;
         const emailInUse = await userService.getUserByEmail(body.email);
         if (emailInUse) throw new HttpException('This email is already in use', 400);
         await userService.createUser(body);
-        this.sendMessage('Successful sign up!');
     }
 
     @USE([sessions, passportInitialize, passportSession])
@@ -65,17 +67,17 @@ export class UserController extends BaseController {
 
     @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @GET('/api/user/log-out')
+    @MESSAGE('Successfull log out!')
     async logout({ req }: ControllerConfig) {
         if (!req.logout) throw new HttpException('Unauthorized', 401);
         req.logout();
-        this.sendMessage('Successful log out!');
     }
 
     @USE([sessions, passportInitialize, passportSession, isLogedIn])
     @USE(validate(editProfileValidation))
     @PATCH('/api/user/edit-profile')
+    @MESSAGE('The user has been updated successfully!')
     async editProfile({ body, user }: ControllerConfig<EditProfileDto>) {
         await this.di.userService.editProfile(user?.userId!, body);
-        this.sendMessage('The user has been updated successfully!');
     }
 }

@@ -13,10 +13,12 @@ import { deserializeUser } from "../passport";
 import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 import { objectToJSON } from "../functions/json.functions";
 import SSR from "../decorators/ssr.decorator";
+import MESSAGE from "../decorators/message.decorator";
 
 @USE([sessions, deserializeUser, isLogedIn])
 export class DealController extends BaseController {
     @POST('/api/deals/send/:propertyId')
+    @MESSAGE('The deal request has been sent successfully!')
     async sendDeal({ query, user }: ControllerConfig<{}, Params.SendDealParams>) {
         const { propertyService, dealService } = this.di;
         const { propertyId } = query;
@@ -31,10 +33,10 @@ export class DealController extends BaseController {
         const dealExists = await dealService.getAwaitingDealByPropertyIdAndBuyerId(property.propertyId, user?.userId!);
         if (dealExists) throw new HttpException("You already have the awaiting deal with this property", 400);
         await dealService.createDeal(user!, property);
-        this.sendMessage('The deal request has been sent successfully.');
     }
 
     @POST('/api/deals/sign/:dealId')
+    @MESSAGE('The deal has been signed successfully!')
     async signDeal({ query, user }: ControllerConfig<{}, Params.SignDealParams>) {
         const { dealService } = this.di;
         const { dealId } = query;
@@ -47,11 +49,11 @@ export class DealController extends BaseController {
             throw new HttpException('You can not sign this deal', 403);
         }
         const updatedDeal = await dealService.signDeal(deal);
-        this.sendMessage('The deal has been signed successfully.');
         return objectToJSON(updatedDeal);
     }
 
     @POST('/api/deals/cancel/:dealId')
+    @MESSAGE('The deal has been canceled successfully!')
     async cancelDeal({ query, user }: ControllerConfig<{}, Params.CancelDealParams>) {
         const { dealService } = this.di;
         const { dealId } = query;
@@ -66,7 +68,6 @@ export class DealController extends BaseController {
         await dealService.updateDealById({ 
             dealStatus: DealStatuses.Canceled
         }, deal);
-        this.sendMessage('The deal has been canceled successfully.');
         return objectToJSON(deal);
     }
 

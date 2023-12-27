@@ -28,6 +28,15 @@ const getMiddlewares = (
     return middlewares;
 }
 
+const getMessage = (
+    constructor: Function, 
+    classMethodName: string
+) => {
+    const methodMembers = Reflect
+        .getMetadata(constructor.name + '_' + classMethodName, constructor);
+    return methodMembers?.msg ? methodMembers.msg : undefined;
+}
+
 interface IResponseData {
     entities?: Model[];
     pager?: IPage;
@@ -87,18 +96,6 @@ const apiAction = (callback: any, statusCode: number, msg?: string) => (
 );
 
 export class BaseController extends BaseContext {
-    private _message?: string;
-
-    protected sendMessage(msg: string) {
-        this._message = msg;
-    }
-
-    public get getMessage(): string | undefined {
-        const msg = this._message;
-        this._message = undefined;
-        return msg;
-    }
-
     public handler(
         routePath: string,
         expectedStatusCode: number = 200
@@ -112,7 +109,7 @@ export class BaseController extends BaseContext {
                     getMiddlewares(this.constructor, members[method][i])
                         .forEach((middleware) => router.use(middleware));
                     const callback = (this as any)[members[method][i]].bind(this);
-                    const action = apiAction(callback, expectedStatusCode, this._message)
+                    const action = apiAction(callback, expectedStatusCode, getMessage(this.constructor, members[method][i]))
                     router[methodName as keyof typeof router](routePath as any, action as any);
                 }
             }
@@ -142,7 +139,6 @@ export class BaseController extends BaseContext {
                     res
                 } as ControllerConfig);
                 const result = generateResponseData(data);
-                if (this._message) result.message = this.getMessage;
                 return { props: { data: JSON.parse(JSON.stringify(result)) } };
             }).run(context.req, context.res);
         } catch (error) {

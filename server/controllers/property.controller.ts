@@ -18,6 +18,7 @@ import { updatePropertyValidation } from "../validators/property-schemas/update-
 import validate, { ValidationType } from "../validators/validate";
 import { objectToJSON } from "../functions/json.functions";
 import { allOffersValidation } from "../validators/property-schemas/get-all-offers.schema";
+import MESSAGE from "../decorators/message.decorator";
 
 export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
@@ -41,10 +42,10 @@ export class PropertyController extends BaseController {
 
   @USE([sessions, passportInitialize, passportSession, multer().any(), validate(createPropertyValidation)])
   @POST('/api/properties')
+  @MESSAGE('The property has been created successfully!')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
     const { propertyService } = this.di;
     const property = await propertyService.createProperty(body, user!, files!);
-    this.sendMessage('The property has been created successfully.');
     return objectToJSON(property);
   }
 
@@ -57,6 +58,7 @@ export class PropertyController extends BaseController {
     validate(updatePropertyValidation)
   ])
   @PATCH('/api/properties/patch/:propertyId')
+  @MESSAGE('The property has been updated successfully!')
   async updatePropertyById({ query, body, files, user }
   : ControllerConfig<UpdatePropertyDto, Params.UpdatePropertyParams>) {
     const { propertyService } = this.di;
@@ -71,7 +73,6 @@ export class PropertyController extends BaseController {
       }
     }
     await propertyService.updatePropertyById(body, property, files);
-    this.sendMessage('The property has been updated successfully.');
   }
 
   @USE([sessions, deserializeUser])
