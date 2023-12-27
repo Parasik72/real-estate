@@ -21,7 +21,7 @@ export type MiddlewareType = (req: NextApiRequest, res: NextApiResponse, next: N
 export type MiddlewareTypeSSR = 
   (req: IncomingMessage, res: ServerResponse<IncomingMessage>, next: NextHandler) => Promise<any>;
 
-interface IPage {
+export interface IPage {
   page: number;
   limit: number;
   offset: number;

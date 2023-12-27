@@ -23,7 +23,7 @@ export interface IRootReducer {
     [Paginations.RequestedForMeDealsPage]: IPagination;
     [Paginations.UserPropertiesPage]: IPagination;
     authUser: AuthUserState;
-    toastify: ToastifyState;
+    toastifies: ToastifyState;
 }
 
 export const rootReducer = (reducers: any) => {

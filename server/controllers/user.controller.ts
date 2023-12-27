@@ -63,7 +63,8 @@ export class UserController extends BaseController {
             createdAt: time,
             updatedAt: time
         });
-        return { message: 'Successful sign up!' };
+        this.sendMessage('Successful sign up!');
+        return {};
     }
 
     @USE([sessions, passportInitialize, passportSession])
@@ -80,7 +81,8 @@ export class UserController extends BaseController {
     async logout({ req }: ControllerConfig) {
         if (!req.logout) throw new HttpException('Unauthorized', 401);
         req.logout();
-        return { message: 'Successful log out!' };
+        this.sendMessage('Successful log out!');
+        return {};
     }
 
     @USE([sessions, passportInitialize, passportSession, isLogedIn])
@@ -92,6 +94,7 @@ export class UserController extends BaseController {
             ...body,
             updatedAt: time
         });
-        return { message: 'The user has been updated successfully!' };
+        this.sendMessage('The user has been updated successfully!');
+        return {};
     }
 }

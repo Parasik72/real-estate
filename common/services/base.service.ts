@@ -23,7 +23,7 @@ export interface ISagaMethod {
 }
 
 export enum ToastifyEffectActions {
-    ADD_TOASTIFY = 'toastify_addToastify',
+    ADD_TOASTIFY = 'toastifies_addToastify',
 }
 
 export interface InitSchemaOpts {
@@ -98,7 +98,7 @@ export class BaseService extends BaseContext {
             };
             const response = await fetch(url, { method, body: this.getBody(method, body), headers });
             const data = await response.json();
-            if (!response.ok) throw new Error(data?.error || 'Request error');
+            if (!response.ok) throw new Error(data?.message || 'Request error');
             return data;
         } catch (error) {
             return error as Error;
@@ -117,7 +117,7 @@ export class BaseService extends BaseContext {
 
     private getPager(data: any) {
         const pageName = data.pager.paginationName;
-        const entitiesData = data[pageName];
+        const entitiesData = data.entities;
         const normalizedEntities: any = this.normalizeData(entitiesData);
         const page = {
             ...data.pager,
@@ -157,23 +157,18 @@ export class BaseService extends BaseContext {
     protected *requestResult<ReqBody extends Object, ResBody extends Object>
     (config: HttpRequestConfig<ReqBody>, httpMethod: string, actionMethod: string) {
         let data: object | Error = yield call(this.sendRequest<ReqBody, ResBody>, config.url, httpMethod, config.body);
-        let currentData = data;
-        if (data instanceof Error) {
+        let currentData: any = data;
+        if (currentData.hasOwnProperty(MESSAGE)) {
+            const isError = data instanceof Error;
             yield put({
                 type: ToastifyEffectActions.ADD_TOASTIFY,
-                payload: this.generateToastify(data.message, ToastifyStatus.Error)
+                payload: this.generateToastify(
+                    currentData.message, isError ? ToastifyStatus.Error : ToastifyStatus.Success
+                )
             });
-            return currentData;
-        }
-        if (data.hasOwnProperty(MESSAGE)) {
-            const { [MESSAGE]: message, ...otherData } = data as any;
-            yield put({
-                type: ToastifyEffectActions.ADD_TOASTIFY,
-                payload: this.generateToastify(message, ToastifyStatus.Success)
-            });
-            const keys = Object.keys(otherData);
-            if (keys.length > 0) {
-                currentData = otherData[keys[0]];
+            if (isError) return currentData;
+            if (currentData.hasOwnProperty('entities')) {
+                currentData = currentData.entities;
             }
         }
         const action = this.normalizeReqBody(currentData, actionMethod);

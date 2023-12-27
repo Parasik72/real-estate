@@ -11,8 +11,8 @@ export const isLogedIn =
     } catch (error) {
       if (!res.status) return;
       if (error instanceof HttpException) {
-        return res.status(error.statusCode).json({ error: error.message });
+        return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(500).json({ error: `Server error:\n${error}` });
+      return res.status(500).json({ message: `Server error:\n${error}` });
     }
 }

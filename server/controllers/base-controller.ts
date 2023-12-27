@@ -4,8 +4,10 @@ import { INextApiRequestExtended, INextPageContextExtended } from "../types/http
 import { HttpException } from "../exceptions/http.exception";
 import { apiErrorHandler } from "../handlers/api-error.handler";
 import { notFoundHandler } from "../handlers/not-found.handler";
-import { ControllerConfig, MiddlewareType, MiddlewareTypeSSR } from "../types/controller.types";
+import { ControllerConfig, IPage, MiddlewareType, MiddlewareTypeSSR } from "../types/controller.types";
 import BaseContext from "../context/base-context";
+import { Model } from "sequelize";
+import { IPager } from "../types/controller.types";
 import 'reflect-metadata';
 
 const getMiddlewares = (
@@ -26,7 +28,39 @@ const getMiddlewares = (
     return middlewares;
 }
 
-const apiAction = (callback: any, statusCode: number) => (
+interface IResponseData {
+    entities?: Model[];
+    pager?: IPage;
+    message?: string;
+}
+
+const concatArrays = (newData: any[] = [], responseArr: any[] = []) => {
+    return [
+        ...responseArr,
+        ...newData
+    ];
+}
+
+const generateResponseData = (data: object) => {
+    let response: IResponseData = data;
+    if (data instanceof Model || Array.isArray(data)) {
+        response.entities =  Array.isArray(data) ? data : [data];
+    } else if(data.hasOwnProperty('pager')) {
+        const pager = data as IPager<any>;
+        const { [pager.pager.paginationName]: remove, ...newData } = data as any;
+        response = {
+            ...newData,
+            entities: concatArrays(
+                pager[pager.pager.paginationName] as any, 
+                newData.entities
+            ),
+            pager: pager.pager
+        }
+    }
+    return response;
+}
+
+const apiAction = (callback: any, statusCode: number, msg?: string) => (
     async (req: INextApiRequestExtended, res: NextApiResponse) => {
         try {
             const data = await callback({
@@ -37,10 +71,12 @@ const apiAction = (callback: any, statusCode: number) => (
                 req, 
                 res
             } as ControllerConfig);
-            return res.status(statusCode).json(data);
+            const result = generateResponseData(data);
+            if (msg) result.message = msg;
+            return res.status(statusCode).json(result);
         } catch(error) {
             if (error instanceof HttpException) {
-              return res.status(error.statusCode).json({ error: error.message });
+              return res.status(error.statusCode).json({ message: error.message });
             }
             return res.status(500).json({ error: `Server error: ${error}` });
         }
@@ -48,6 +84,12 @@ const apiAction = (callback: any, statusCode: number) => (
 );
 
 export class BaseController extends BaseContext {
+    private _message?: string;
+
+    protected sendMessage(msg: string) {
+        this._message = msg;
+    }
+
     public handler(
         routePath: string,
         expectedStatusCode: number = 200
@@ -90,7 +132,9 @@ export class BaseController extends BaseContext {
                     req,
                     res
                 } as ControllerConfig);
-                return { props: { data: JSON.parse(JSON.stringify(data)) } };
+                const result = generateResponseData(data);
+                if (this._message) result.message = this._message;
+                return { props: { data: JSON.parse(JSON.stringify(result)) } };
             }).run(context.req, context.res);
         } catch (error) {
             return { 

@@ -9,7 +9,7 @@ interface IState {
 
 const mapToPropsState = (state: RootState): IState => {
     return {
-        toastifies: state.toastify
+        toastifies: state.toastifies
     }
 }
 

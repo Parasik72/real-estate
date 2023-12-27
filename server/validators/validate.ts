@@ -30,9 +30,9 @@ export default function validate(schema: AnySchema, validationType = ValidationT
             return next();
         } catch (error) {
             if (error instanceof ValidationException) {
-                return res.status(error.statusCode).json({ error: error.message });
+                return res.status(error.statusCode).json({ message: error.message });
             }
-            return res.status(500).json({ error: `Validation error: ${error}` })
+            return res.status(500).json({ message: `Validation error: ${error}` })
         }
     }
 }
