@@ -6,7 +6,11 @@ import IContextContainer from "../context/icontext-container";
 import { sagaAction } from "../functions/saga.functions";
 import { SagaEffectAction } from "../store/types/saga.types";
 import { ToastifyAction, ToastifyStatus } from "../store/toastify/toastify.types";
+import { entitiesReducer } from "../store/entities/entities.reducer";
+import { IReducer } from "../decorators/reducer.decorator";
 import 'reflect-metadata';
+import { PagerReducer } from "../decorators/pager.decorator";
+import { paginationsReducer } from "../store/paginations/paginations.reducer";
 
 export interface HttpRequestConfig<ReqBody extends Object> {
     url: string;
@@ -20,6 +24,12 @@ export interface ISagaMethod {
 
 export enum ToastifyEffectActions {
     ADD_TOASTIFY = 'toastify_addToastify',
+}
+
+export interface InitSchemaOpts {
+    name: string,
+    definitions: Schema,
+    options: schema.EntityOptions,
 }
 
 interface IAction {
@@ -55,6 +65,29 @@ export class BaseService extends BaseContext {
             };
             return fork(saga);
         });
+    }
+
+    public static reducers(di: IContextContainer) {
+        const entities: IReducer[] = Reflect.getMetadata('entities', BaseService) || [];
+        const entityReducers = entities.reduce((result, reducerOpts) => {
+            if (reducerOpts.initSchema) {
+                const classInstance = di[reducerOpts.className as keyof typeof di] as BaseService;
+                classInstance.initSchema({ ...reducerOpts.initSchema, name: reducerOpts.entityName });
+            }
+            const getReducer = () => {
+                if (reducerOpts.reducerFunc) return reducerOpts.reducerFunc;
+                return (state: any, action: any) => entitiesReducer(state, action, reducerOpts.entityName);
+            } 
+            result[reducerOpts.entityName] = getReducer();
+            return result;
+        }, {} as any);
+        const pagers: PagerReducer[] = Reflect.getMetadata('pagers', BaseService) || [];
+        const pagerReducers = pagers.reduce((result, pagerOpts) => {
+            result[pagerOpts.pagerName] = 
+                (state: any, action: any) => paginationsReducer(state, action, pagerOpts.pagerName);
+            return result;
+        }, entityReducers);
+        return pagerReducers;
     }
 
     private async sendRequest<ReqBody extends Object, ResBody extends Object>
@@ -112,15 +145,11 @@ export class BaseService extends BaseContext {
         };
     }
 
-    protected initSchema(
-        name: string,
-        definitions: Schema = {},
-        options: schema.EntityOptions = {},
-    ) {
-        this._entityName = name;
+    protected initSchema(opts: InitSchemaOpts) {
+        this._entityName = opts.name;
         this._schema =
-            name && name !== 'entity'
-                ? [new schema.Entity(name, definitions, options)]
+            opts.name && opts.name !== 'entity'
+                ? [new schema.Entity(opts.name, opts.definitions, opts.options)]
                 : [];
         this.sendRequest = this.sendRequest.bind(this);
     }

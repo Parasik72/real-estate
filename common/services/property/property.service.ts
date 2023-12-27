@@ -12,8 +12,11 @@ import { call } from "redux-saga/effects";
 import { generateQueryString } from "@/common/functions/http.functions";
 import { ReducerMethods } from "@/common/store/reducer.methods";
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
-import IContextContainer from '@/common/context/icontext-container';
 import action from '@/common/decorators/action.decorator';
+import { Entities } from '@/common/store/entities/entities.enum';
+import reducer, { InitSchemaReducer } from '@/common/decorators/reducer.decorator';
+import pager from '@/common/decorators/pager.decorator';
+import { Paginations } from '@/common/store/paginations/paginations.enum';
 
 export enum PropertyEffectActions {
     GET_LAST_OFFERS = 'properties_getLastOffers',
@@ -24,19 +27,17 @@ export enum PropertyEffectActions {
     GET_USER_PROPERTIES = 'properties_getUserProperties'
 }
 
-export class PropertyService extends HttpService {
-    constructor(ctx: IContextContainer) {
-        super(ctx);
-        const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
-        const userSchema = new schema.Entity('users', {}, { idAttribute: 'userId' });
-        const dealSchema = new schema.Entity('deals', {}, { idAttribute: 'dealId' });
-        this.initSchema(
-            'properties',
-            { PropertyImages: [propertyImageSchema], Deals: [dealSchema], User: userSchema }, 
-            { idAttribute: 'propertyId' }
-        );
-    }
+const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
+const userSchema = new schema.Entity('users', {}, { idAttribute: 'userId' });
+const dealSchema = new schema.Entity('deals', {}, { idAttribute: 'dealId' });
+const initSchema: InitSchemaReducer = {
+    definitions: { PropertyImages: [propertyImageSchema], Deals: [dealSchema], User: userSchema },
+    options: { idAttribute: 'propertyId' }
+}
 
+@reducer({ entityName: Entities.Property, initSchema })
+@reducer({ entityName: Entities.PropertyImage })
+export class PropertyService extends HttpService {
     @action()
     public *getLastOffers() {
         yield call(
@@ -47,6 +48,7 @@ export class PropertyService extends HttpService {
     }
 
     @action()
+    @pager(Paginations.AllOffersPage)
     public *getAllOffers(payload: GetAllOffersParams) {
         const queryStr = generateQueryString(payload);
         yield call(
@@ -57,6 +59,7 @@ export class PropertyService extends HttpService {
     }
 
     @action()
+    @pager(Paginations.UserPropertiesPage)
     public *getUserProperties(payload: {
         userId: string, page?: number, limit?: number
     }) {

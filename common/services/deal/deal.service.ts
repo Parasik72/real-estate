@@ -7,8 +7,11 @@ import { schema } from "normalizr";
 import { call } from "redux-saga/effects";
 import { ReducerMethods } from "@/common/store/reducer.methods";
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
-import IContextContainer from '@/common/context/icontext-container';
 import action from '@/common/decorators/action.decorator';
+import reducer, { InitSchemaReducer } from '@/common/decorators/reducer.decorator';
+import { Entities } from '@/common/store/entities/entities.enum';
+import pager from '@/common/decorators/pager.decorator';
+import { Paginations } from '@/common/store/paginations/paginations.enum';
 
 export enum DealEffectActions {
     GET_REQUESTED_BY_ME_DEALS = 'deals_getRequestedByMeDeals',
@@ -19,24 +22,22 @@ export enum DealEffectActions {
     SEND_DEAL = 'deals_sendDeal',
 }
 
+const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
+const propertySchema = new schema.Entity(
+    'properties', 
+    { PropertyImages: [propertyImageSchema] }, 
+    { idAttribute: 'propertyId' }
+);
+const userSchema = new schema.Entity('users', {}, { idAttribute: 'userId' });
+const initSchema: InitSchemaReducer = {
+    definitions: { Property: propertySchema, buyer: userSchema, seller: userSchema },
+    options: { idAttribute: 'dealId' }
+}
+
+@reducer({ entityName: Entities.Deal, initSchema })
 export class DealService extends HttpService {
-    constructor(ctx: IContextContainer) {
-        super(ctx);
-        const propertyImageSchema = new schema.Entity('propertyImages', {}, { idAttribute: 'propertyImageId' });
-        const propertySchema = new schema.Entity(
-            'properties', 
-            { PropertyImages: [propertyImageSchema] }, 
-            { idAttribute: 'propertyId' }
-        );
-        const userSchema = new schema.Entity('users', {}, { idAttribute: 'userId' });
-        this.initSchema(
-            'deals',
-            { Property: propertySchema, buyer: userSchema, seller: userSchema },
-            { idAttribute: 'dealId' }
-        );
-    }
-    
     @action()
+    @pager(Paginations.RequestedByMeDealsPage)
     public *getRequestedByMeDeals(payload: number) {
         yield call(
             this.get<DealsPageResponse>, 
@@ -46,6 +47,7 @@ export class DealService extends HttpService {
     }
 
     @action()
+    @pager(Paginations.RequestedForMeDealsPage)
     public *getRequestedForMeDeals(payload: number) {
         yield call(
             this.get<DealsPageResponse>, 
@@ -55,6 +57,7 @@ export class DealService extends HttpService {
     }
 
     @action()
+    @pager(Paginations.MySuccessfulDealsPage)
     public *getMySuccessfulDeals(payload: number) {
         yield call(
             this.get<DealsPageResponse>, 

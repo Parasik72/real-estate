@@ -7,8 +7,10 @@ import { call, put } from "redux-saga/effects";
 import { ReducerMethods } from "@/common/store/reducer.methods";
 import { AuthUser, SignInVariablesForm, SignUpVariablesForm } from "@/common/types/auth.types";
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
-import IContextContainer from '@/common/context/icontext-container';
 import action from '@/common/decorators/action.decorator';
+import reducer, { InitSchemaReducer } from '@/common/decorators/reducer.decorator';
+import { Entities } from '@/common/store/entities/entities.enum';
+import { authUserReducer } from '@/common/store/auth-user/auth-user.reducer';
 
 export enum AuthUserEffectActions {
     GET_AUTH_USER = 'authUser_auth',
@@ -17,12 +19,17 @@ export enum AuthUserEffectActions {
     SIGN_UP = 'authUser_signUp',
 }
 
-export class AuthService extends HttpService {
-    constructor(ctx: IContextContainer) {
-        super(ctx);
-        this.initSchema('authUser', {}, { idAttribute: 'isAuth' });
-    }
+const initSchema: InitSchemaReducer = {
+    definitions: {},
+    options: { idAttribute: 'isAuth' }
+}
 
+@reducer({
+    entityName: Entities.AuthUser,
+    reducerFunc: authUserReducer,
+    initSchema
+})
+export class AuthService extends HttpService {
     @action()
     public *signIn(payload: {
         values: SignInVariablesForm,

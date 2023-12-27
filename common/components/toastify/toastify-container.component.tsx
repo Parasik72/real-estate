@@ -14,6 +14,7 @@ const mapToPropsState = (state: RootState): IState => {
 }
 
 function ToastifyContainer({ toastifies }: IState) {
+    if (!toastifies) return <></>;
     return (
         <div className="absolute top-0 left-0 w-full flex justify-center">
             <div className="p-4 flex flex-col gap-5 w-full max-w-full md:max-w-xs flex-shrink-0">

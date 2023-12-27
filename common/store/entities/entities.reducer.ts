@@ -1,4 +1,3 @@
-import { Entities } from "./entities.enum";
 import { Entity } from "../types/store.types";
 import { ReducerMethods } from "../reducer.methods";
 import { HYDRATE } from "next-redux-wrapper";
@@ -16,7 +15,7 @@ let initialState: EntitiesState = {};
 
 export const entitiesReducer = 
 <TAction extends IReducerAction>(
-    state = initialState, action: TAction, entityName: Entities
+    state = initialState, action: TAction, entityName: string
 ) => {
     switch(action.type) {
         case ReducerMethods.UPDATE: {

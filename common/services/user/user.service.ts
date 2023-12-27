@@ -9,20 +9,22 @@ import { call } from "redux-saga/effects";
 import { ReducerMethods } from "@/common/store/reducer.methods";
 import { EditProfileVariablesForm } from "@/common/types/profile.type";
 import { FRONT_PATHS } from '@/common/constants/front-paths.constants';
-import IContextContainer from '@/common/context/icontext-container';
 import action from '@/common/decorators/action.decorator';
+import reducer, { InitSchemaReducer } from '@/common/decorators/reducer.decorator';
+import { Entities } from '@/common/store/entities/entities.enum';
 
 export enum UserEffectActions {
     GET_USER_PROFILE = 'users_getProfileByUserId',
     EDIT_PROFILE = 'users_editProfile',
 }
 
-export class UserService extends HttpService {
-    constructor(ctx: IContextContainer) {
-        super(ctx);
-        this.initSchema('users', {}, {idAttribute: 'userId'});
-    }
+const initSchema: InitSchemaReducer = {
+    definitions: {},
+    options: {idAttribute: 'userId'}
+}
 
+@reducer({ entityName: Entities.User, initSchema })
+export class UserService extends HttpService {
     @action()
     public *getProfileByUserId(payload: string) {
         yield call(

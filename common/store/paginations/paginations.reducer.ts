@@ -1,6 +1,5 @@
 import { Entity } from "../types/store.types";
 import { ReducerMethods } from "../reducer.methods";
-import { Paginations } from "./paginations.enum";
 import { HYDRATE } from "next-redux-wrapper";
 import { IPagination } from "@/common/types/common.types";
 
@@ -30,7 +29,7 @@ let initialState: PaginationsState = {};
 
 export const paginationsReducer = 
 <TAction extends IReducerAction>(
-    state = initialState, action: TAction, entityName: Paginations
+    state = initialState, action: TAction, entityName: string
 ) => {
     switch(action.type) {
         case ReducerMethods.UPDATE: {

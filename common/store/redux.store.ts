@@ -21,21 +21,17 @@ interface SSRConfig {
 }
 
 export class ReduxStore extends BaseContext {
-    private _store: EnhancedStore<IRootReducer>;
+    private _store: any;
     private _sagas: ReturnType<typeof BaseService.sagas>;
     private _wrapper: ReturnType<typeof createWrapper>;
+    public _reducers: { [reducerName: string]: any };
 
     constructor(ctx: IContextContainer) {
         super(ctx);
         this.rootSaga = this.rootSaga.bind(this);
+        this._reducers = BaseService.reducers(ctx);
         this._sagas = BaseService.sagas(ctx);
         this._wrapper = {} as any;
-        const isDebug =
-            process.env.NODE_ENV as string === 'local' ||
-            process.env.DEBUG_PROD === 'true';
-        // this._store = isDebug 
-        //     ? this.configureDevStore() 
-        //     : this.configureProdStore();
         this._wrapper = this.configureDevStore();
     }
 
@@ -46,7 +42,7 @@ export class ReduxStore extends BaseContext {
     private configureProdStore() {
         const sagaMiddleware = createSagaMiddleware();
         const store = configureStore({
-            reducer: rootReducer,
+            reducer: rootReducer(this._reducers),
             middleware: (getDefaultMiddleware): any =>
                 getDefaultMiddleware({ serializableCheck: false }).concat([sagaMiddleware]),
         });
@@ -69,7 +65,7 @@ export class ReduxStore extends BaseContext {
             enhancers.push(applyMiddleware(...middleware));
             const enhancer = composeEnhancers(...enhancers);
             const store = configureStore({
-                reducer: rootReducer,
+                reducer: rootReducer(this._reducers),
                 middleware: (getDefaultMiddleware): any =>
                     getDefaultMiddleware({ serializableCheck: false }).concat(middleware),
                 // enhancers: enhancer
@@ -112,7 +108,7 @@ export class ReduxStore extends BaseContext {
         if (!pager || !pager.currentPage || !pager.pages) return [];
         const entities: Object[] = [];
         for (let i = 1; i <= pager?.currentPage ?? 0; ++i) {
-            pager.pages[i].ids.forEach((entityId) => {
+            pager.pages[i].ids.forEach((entityId: string) => {
                 const entity = state[entityName][entityId] as Object;
                 entities.push(entity)
             });
