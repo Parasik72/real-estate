@@ -1,22 +1,32 @@
 import { LocationMarkIcon } from "@/common/icons/location-mark.icon"
 import { SearchIcon } from "@/common/icons/search.icon"
-import { FC } from "react";
 import clsx from "clsx";
 import { Input } from "../form/input.component";
 import { PropertyTypes } from "@/common/types/property.type";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import { generateQueryString } from "@/common/functions/http.functions";
 import { FRONT_PATHS } from "@/common/constants/front-paths.constants";
 import { Paginations } from "@/common/store/paginations/paginations.enum";
+import { IPagination } from "@/common/types/common.types";
+import { RootState } from "@/common/store/root.reducer";
+import { connect } from "react-redux";
 
 interface IProps {
   className?: string;
 }
 
-export const FormSearch: FC<IProps> = ({ className }) => {
-  const router = useRouter();
-  const queryString = generateQueryString(router.query);
+interface IState {
+  allOffersPage: IPagination;
+}
+
+function mapStateToProps(state: RootState): IState {
+  return { 
+      allOffersPage: state.allOffersPage,
+  };
+}
+
+const FormSearchComponent = ({ className, allOffersPage }: IProps & IState) => {
+  const queryString = generateQueryString(allOffersPage.query || {});
   return (
     <div>
       <div className={clsx("flex flex-col lg:flex-row lg:inline-flex gap-4 rounded-md bg-indigo-50 relative z-10", className)}>
@@ -47,3 +57,5 @@ export const FormSearch: FC<IProps> = ({ className }) => {
     </div>
   )
 }
+
+export const FormSearch = connect(mapStateToProps, null)(FormSearchComponent);

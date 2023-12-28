@@ -3,6 +3,7 @@ import { FC, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Paginations } from "@/common/store/paginations/paginations.enum";
 import { ReducerMethods } from "@/common/store/reducer.methods";
+import { useRouter } from "next/router";
 
 interface IProps {
     type: 'text' | 'number' | 'select';
@@ -19,7 +20,8 @@ export const Input: FC<IProps> = ({
     placeholder, className, type, name, id, title, paginationName, children
 }) => {
     const [timeHandler, setTimeHandler] = useState<NodeJS.Timeout | null>(null);
-    const [value, setValue] = useState('');
+    const router = useRouter();
+    const [value, setValue] = useState(router.query[name] ?? '');
     const dispatch = useDispatch();
     const handleSearch = (term: string) => {
         setValue(term);
@@ -59,4 +61,8 @@ export const Input: FC<IProps> = ({
             value={value}
         />
     );
+}
+
+function useRoute() {
+    throw new Error("Function not implemented.");
 }
