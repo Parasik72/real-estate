@@ -27,6 +27,7 @@ export interface IPage {
   offset: number;
   totalPages: number;
   paginationName: string;
+  query: Record<string, string | number | undefined>;
 }
 
 export interface IPager<T extends Model> {

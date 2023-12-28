@@ -14,6 +14,7 @@ import { isLogedIn } from "../middlewares/is-loged-in.middleware";
 import { objectToJSON } from "../functions/json.functions";
 import SSR from "../decorators/ssr.decorator";
 import MESSAGE from "../decorators/message.decorator";
+import PAGER from "../decorators/pager.decorator";
 
 @USE([sessions, deserializeUser, isLogedIn])
 export class DealController extends BaseController {
@@ -73,6 +74,7 @@ export class DealController extends BaseController {
 
     @SSR('/deals')
     @GET('/api/deals')
+    @PAGER()
     async getAllDeals({ query, user }: ControllerConfig<{}, Params.GetAllDealsParams>) {
         const { dealService } = this.di;
         const page = query.page || Constants.DEALS_PAGE_DEFAULT;

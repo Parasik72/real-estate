@@ -62,7 +62,7 @@ export class PropertyService extends BaseContext {
             ] 
         };
         const pageName = Types.PropertyPaginationNames.AllOffersPage;
-        return getModelPage(this.di.Property, page, limit, pageName, countOptions, findAllOptions);
+        return getModelPage(this.di.Property, page, limit, pageName, countOptions, findAllOptions, params);
     }
 
     async getUserProperties(userId: string, page?: string, limit?: string)
@@ -80,7 +80,7 @@ export class PropertyService extends BaseContext {
             ]
         };
         const pageName = Types.PropertyPaginationNames.UserPropertiesPage;
-        return getModelPage(this.di.Property, currentPage, currentLimit, pageName, countOptions, findAllOptions);
+        return getModelPage(this.di.Property, currentPage, currentLimit, pageName, countOptions, findAllOptions, {});
     }
 
     async getPropertyWithOwnerByPropertyId(propertyId: string, user?: IUser)

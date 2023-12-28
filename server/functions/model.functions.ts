@@ -17,9 +17,11 @@ export const getModelPage = async <T extends Model> (
   page: number,
   limit: number,
   paginationName: string,
-  countOptions: IOptions<T> = {},
-  findAllOptions: IOptions<T> = {},
+  countOptions: IOptions<T>,
+  findAllOptions: IOptions<T>,
+  query: Record<string, string | number | undefined>
 ): Promise<IPager<T>> => {
+  const { ['page']: removePage, ['limit']: removeLimit, ...newQuery } = query;
   const totalCount = await model.count(countOptions);
   const offset = (page - 1) * limit;
   const data = await model.findAll({ ...findAllOptions, offset });
@@ -30,6 +32,7 @@ export const getModelPage = async <T extends Model> (
       offset,
       totalPages: Math.ceil(totalCount / limit),
       paginationName,
+      query: newQuery
     },
     [paginationName]: data
   };

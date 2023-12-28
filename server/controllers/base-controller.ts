@@ -10,15 +10,21 @@ import { Model } from "sequelize";
 import { IPager } from "../types/controller.types";
 import 'reflect-metadata';
 
+const getClassMembers = (constructor: Function) => {
+    return Reflect.getMetadata(constructor.name, constructor);
+}
+
+const getMethodMembers = (constructor: Function, classMethodName: string) => {
+    return Reflect.getMetadata(constructor.name + '_' + classMethodName, constructor);
+}
+
 const getMiddlewares = (
     constructor: Function, 
     classMethodName: string
 ) => {
     let middlewares: MiddlewareType[] = [];
-    const classMembers = Reflect
-        .getMetadata(constructor.name, constructor);
-    const methodMembers = Reflect
-        .getMetadata(constructor.name + '_' + classMethodName, constructor);
+    const classMembers = getClassMembers(constructor);
+    const methodMembers = getMethodMembers(constructor, classMethodName);
     middlewares = !classMembers || !classMembers.USE 
         ? [] 
         : classMembers.USE;
@@ -32,9 +38,16 @@ const getMessage = (
     constructor: Function, 
     classMethodName: string
 ) => {
-    const methodMembers = Reflect
-        .getMetadata(constructor.name + '_' + classMethodName, constructor);
+    const methodMembers = getMethodMembers(constructor, classMethodName);
     return methodMembers?.msg ? methodMembers.msg : undefined;
+}
+
+const getIsPager = (
+    constructor: Function, 
+    classMethodName: string
+) => {
+    const methodMembers = getMethodMembers(constructor, classMethodName);
+    return methodMembers?.isPager;
 }
 
 interface IResponseData {
@@ -44,35 +57,30 @@ interface IResponseData {
 }
 
 const concatArrays = (newData: any[] = [], responseArr: any[] = []) => {
-    return [
-        ...responseArr,
-        ...newData
-    ];
+    return [ ...responseArr, ...newData ];
 }
 
-const generateResponseData = (data: object) => {
+const generateResponseData = (data: object, isPager?: boolean, msg?: string) => {
     let response: IResponseData = {};
-    if (data === undefined) return response;
-    if(data.hasOwnProperty('pager')) {
+    if(data && isPager) {
         const pager = data as IPager<any>;
-        const { [pager.pager.paginationName]: remove, ...newData } = data as any;
         response = {
-            ...newData,
             entities: concatArrays(
                 pager[pager.pager.paginationName] as any, 
                 (data as any).entities as any
             ),
             pager: pager.pager
         }
-        return response;
+    } else if (data) {
+        response = {
+            entities: Array.isArray(data) ? data : [data]
+        }
     }
-    return {
-        ...response,
-        entities: Array.isArray(data) ? data : [data]
-    };
+    if (msg) response.message = msg;
+    return response;
 }
 
-const apiAction = (callback: any, statusCode: number, msg?: string) => (
+const apiAction = (callback: any, statusCode: number, isPager?: boolean, msg?: string) => (
     async (req: INextApiRequestExtended, res: NextApiResponse) => {
         try {
             const data: any | undefined = await callback({
@@ -83,8 +91,7 @@ const apiAction = (callback: any, statusCode: number, msg?: string) => (
                 req, 
                 res
             } as ControllerConfig);
-            const result = generateResponseData(data);
-            if (msg) result.message = msg;
+            const result = generateResponseData(data, isPager, msg);
             return res.status(statusCode).json(result);
         } catch(error) {
             if (error instanceof HttpException) {
@@ -109,7 +116,12 @@ export class BaseController extends BaseContext {
                     getMiddlewares(this.constructor, members[method][i])
                         .forEach((middleware) => router.use(middleware));
                     const callback = (this as any)[members[method][i]].bind(this);
-                    const action = apiAction(callback, expectedStatusCode, getMessage(this.constructor, members[method][i]))
+                    const action = apiAction(
+                        callback, 
+                        expectedStatusCode, 
+                        getIsPager(this.constructor, members[method][i]), 
+                        getMessage(this.constructor, members[method][i])
+                    );
                     router[methodName as keyof typeof router](routePath as any, action as any);
                 }
             }
@@ -138,7 +150,7 @@ export class BaseController extends BaseContext {
                     req,
                     res
                 } as ControllerConfig);
-                const result = generateResponseData(data);
+                const result = generateResponseData(data, getIsPager(this.constructor, firstMethod));
                 return { props: { data: JSON.parse(JSON.stringify(result)) } };
             }).run(context.req, context.res);
         } catch (error) {

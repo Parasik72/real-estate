@@ -19,6 +19,7 @@ import validate, { ValidationType } from "../validators/validate";
 import { objectToJSON } from "../functions/json.functions";
 import { allOffersValidation } from "../validators/property-schemas/get-all-offers.schema";
 import MESSAGE from "../decorators/message.decorator";
+import PAGER from "../decorators/pager.decorator";
 
 export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
@@ -30,12 +31,14 @@ export class PropertyController extends BaseController {
   @SSR('/properties/offers')
   @GET('/api/properties/offers')
   @USE(validate(allOffersValidation, ValidationType.Query))
+  @PAGER()
   async getAllOffers({ query }: ControllerConfig<{}, Params.GetAllPropertiesParams>) {
     return this.di.propertyService.getAllOffers(query);
   }
 
   @SSR('/user/profile')
   @GET('/api/properties/user/:userId')
+  @PAGER()
   async getUserProperties({ query }: ControllerConfig<{}, Params.GetUserProperties>) {
     return this.di.propertyService.getUserProperties(query.userId, query.page, query.limit);
   }

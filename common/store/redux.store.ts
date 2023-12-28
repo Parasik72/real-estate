@@ -24,7 +24,7 @@ export class ReduxStore extends BaseContext {
     private _store: any;
     private _sagas: ReturnType<typeof BaseService.sagas>;
     private _wrapper: ReturnType<typeof createWrapper>;
-    public _reducers: { [reducerName: string]: any };
+    private _reducers: { [reducerName: string]: any };
 
     constructor(ctx: IContextContainer) {
         super(ctx);

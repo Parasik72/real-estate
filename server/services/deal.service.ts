@@ -105,6 +105,7 @@ export class DealService extends BaseContext {
             : requestedBy === DealRequestedBy.Seller
             ? DealPaginationNames.RequestedForMeDealsPage
             : DealPaginationNames.MySuccessfulDealsPage;
-        return getModelPage(this.di.Deal, page, limit, pageName, countOptions, findAllOptions);
+        const query = { requestedBy, dealStatus };
+        return getModelPage(this.di.Deal, page, limit, pageName, countOptions, findAllOptions, query);
     }
 }

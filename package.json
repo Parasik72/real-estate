@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrations:up": "NODE_ENV=local npx sequelize-cli db:migrate",
-    "migrations:down": "NODE_ENV=local npx sequelize-cli db:migrate:undo:all",
-    "seeds:up": "NODE_ENV=local npx sequelize-cli db:seed:all",
-    "seeds:down": "NODE_ENV=local npx sequelize-cli db:seed:undo:all"
+    "migrations:up": "set NODE_ENV=local&& npx sequelize-cli db:migrate",
+    "migrations:down": "set NODE_ENV=local&& npx sequelize-cli db:migrate:undo:all",
+    "seeds:up": "set NODE_ENV=local&& npx sequelize-cli db:seed:all",
+    "seeds:down": "set NODE_ENV=local&& npx sequelize-cli db:seed:undo:all"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.0.1",
