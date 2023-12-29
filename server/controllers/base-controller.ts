@@ -97,7 +97,7 @@ const apiAction = (callback: any, statusCode: number, isPager?: boolean, msg?: s
             if (error instanceof HttpException) {
               return res.status(error.statusCode).json({ message: error.message });
             }
-            return res.status(500).json({ error: `Server error: ${error}` });
+            return res.status(500).json({ message: `Server error: ${error}` });
         }
     }
 );

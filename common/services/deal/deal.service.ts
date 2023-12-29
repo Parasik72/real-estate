@@ -38,10 +38,10 @@ const initSchema: InitSchemaReducer = {
 export class DealService extends HttpService {
     @action()
     @pager(Paginations.RequestedByMeDealsPage)
-    public *getRequestedByMeDeals(payload: number) {
+    public *getRequestedByMeDeals(page: number) {
         yield call(
             this.get<DealsPageResponse>, 
-            { url: `${BACK_PATHS.getDeals}?page=${payload}&requestedBy=Buyer` },
+            { url: `${BACK_PATHS.getDeals}?page=${page}&requestedBy=Buyer` },
             ReducerMethods.UPDATE
         );
     }
