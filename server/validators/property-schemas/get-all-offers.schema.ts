@@ -1,6 +1,6 @@
 import { minimumZeroExp, moreThanZeroExp } from "@/server/constants/reg-expretions.constants";
 import { PropertyTypes } from "@/server/types/properties.types";
-import { JSONSchemaType } from "ajv";
+import type { JSONSchemaType } from "ajv";
 
 const propertyTypeEnum = [PropertyTypes.Apartment, PropertyTypes.House, PropertyTypes.Villa, 'Any'];
 

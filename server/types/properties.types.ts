@@ -1,6 +1,5 @@
-import { UUID } from "crypto";
-import { Model } from "sequelize";
-import { IPager } from "./controller.types";
+import type { UUID } from "crypto";
+import type { Model } from "sequelize";
 
 export type PropertyStatus = PropertyStatuses.Awaiting | PropertyStatuses.ForSale;
 export type PropertyType = PropertyTypes.House | PropertyTypes.Apartment | PropertyTypes.Villa;

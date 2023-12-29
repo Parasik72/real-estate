@@ -7,12 +7,12 @@ export enum ApiContainerKeys {
   PropertyImage = 'PropertyImage',
   Deal = 'Deal',
 
-  UserService = 'userService',
-  PropertyService = 'propertyService',
-  FileUploaderService = 'fileUploaderService',
-  DealService = 'dealService',
+  UserService = 'UserService',
+  PropertyService = 'PropertyService',
+  FileUploaderService = 'FileUploaderService',
+  DealService = 'DealService',
 
-  PropertyController = 'propertyController',
-  UserController = 'userController',
-  DealController = 'dealController',
+  PropertyController = 'PropertyController',
+  UserController = 'UserController',
+  DealController = 'DealController',
 }

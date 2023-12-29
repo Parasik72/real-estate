@@ -1,7 +1,7 @@
-import { NextApiResponse } from "next";
-import { INextApiRequestExtended } from "../types/http.types";
+import type { NextApiResponse } from "next";
+import type { INextApiRequestExtended } from "../types/http.types";
 import { HttpException } from "../exceptions/http.exception";
-import { NextHandler } from "next-connect";
+import type { NextHandler } from "next-connect";
 
 export const isLogedIn = 
   (req: INextApiRequestExtended, res: NextApiResponse, next: NextHandler) => {

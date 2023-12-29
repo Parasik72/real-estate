@@ -1,13 +1,12 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { createRouter } from "next-connect";
-import { INextApiRequestExtended, INextPageContextExtended } from "../types/http.types";
+import type { INextApiRequestExtended, INextPageContextExtended } from "../types/http.types";
 import { HttpException } from "../exceptions/http.exception";
 import { apiErrorHandler } from "../handlers/api-error.handler";
 import { notFoundHandler } from "../handlers/not-found.handler";
-import { ControllerConfig, IPage, MiddlewareType, MiddlewareTypeSSR } from "../types/controller.types";
+import type { ControllerConfig, IPage, MiddlewareType, MiddlewareTypeSSR, IPager } from "../types/controller.types";
 import BaseContext from "../context/base-context";
-import { Model } from "sequelize";
-import { IPager } from "../types/controller.types";
+import type { Model } from "sequelize";
 import 'reflect-metadata';
 
 const getClassMembers = (constructor: Function) => {

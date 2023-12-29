@@ -1,9 +1,9 @@
-import { INextApiRequestExtended, INextApiResponseExtended, QueryType } from "./http.types";
-import { NextApiRequest, NextApiResponse } from "next";
-import { NextHandler } from "next-connect";
-import { IncomingMessage, ServerResponse } from "http";
-import { IUser } from "./user.types";
-import { Model } from "sequelize";
+import type { INextApiRequestExtended, INextApiResponseExtended, QueryType } from "./http.types";
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextHandler } from "next-connect";
+import type { IncomingMessage, ServerResponse } from "http";
+import type { IUser } from "./user.types";
+import type { Model } from "sequelize";
 
 export interface ControllerConfig<
   TBody extends Object = {},

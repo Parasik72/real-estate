@@ -1,10 +1,10 @@
 import Ajv, { AnySchema } from "ajv";
 import ajvErrors from "ajv-errors";
 import addFormats from "ajv-formats";
-import { NextApiResponse } from "next";
-import { NextHandler } from "next-connect";
+import type { NextApiResponse } from "next";
+import type { NextHandler } from "next-connect";
 import { ValidationException } from "../exceptions/validation.exception";
-import { INextApiRequestExtended } from "../types/http.types";
+import type { INextApiRequestExtended } from "../types/http.types";
 
 export enum ValidationType {
     Body,

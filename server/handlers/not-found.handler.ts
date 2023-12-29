@@ -1,4 +1,4 @@
-import { INextApiRequestExtended, INextApiResponseExtended } from "../types/http.types";
+import type { INextApiRequestExtended, INextApiResponseExtended } from "../types/http.types";
 
 export const notFoundHandler = (
   req: INextApiRequestExtended,

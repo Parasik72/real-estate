@@ -1,6 +1,5 @@
 import { CreateUser, IUser, UpdateUserProfile } from "../types/user.types";
 import BaseContext from "../context/base-context";
-import { InferCreationAttributes } from "sequelize";
 import { v4 } from "uuid";
 import { UUID } from "crypto";
 import bcryptjs from 'bcryptjs';

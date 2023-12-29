@@ -1,4 +1,3 @@
-import { userService } from "../services/user/user.service";
 import { AuthActionsForm, AuthTypeForm, SignInVariablesForm, SignUpVariablesForm } from "../types/auth.types";
 import { signInSchemaForm, signUpSchemaForm } from "../validators/auth.validators";
 

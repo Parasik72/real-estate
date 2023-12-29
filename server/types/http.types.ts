@@ -1,6 +1,6 @@
-import { IncomingMessage, ServerResponse } from "http";
-import { NextApiRequest, NextApiResponse, NextPageContext } from "next";
-import { IUser } from "./user.types";
+import type { IncomingMessage, ServerResponse } from "http";
+import type { NextApiRequest, NextApiResponse, NextPageContext } from "next";
+import type { IUser } from "./user.types";
 
 export type QueryType = { [key: string]: string | string[]; };
 

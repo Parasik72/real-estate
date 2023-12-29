@@ -1,6 +1,6 @@
-import { UUID } from "crypto";
-import { PropertyWithAddress } from "./properties.types";
-import { Model } from "sequelize";
+import type { UUID } from "crypto";
+import type { PropertyWithAddress } from "./properties.types";
+import type { Model } from "sequelize";
 export interface IUser extends Model {
   userId: UUID;
   firstName: string;

@@ -63,11 +63,11 @@ export class DealService extends BaseContext {
             signDate: time,
             dealStatus: DealStatuses.Done
         }, deal);
-        await this.di.propertyService.changePropertyOwnerById({ 
+        await this.di.PropertyService.changePropertyOwnerById({ 
             userId: deal.buyerUserId,
             updatedAt: time
         }, deal.propertyId);
-        await this.di.dealService.updateDealsByPropertyIdAndStatusId({ 
+        await this.di.DealService.updateDealsByPropertyIdAndStatusId({ 
             dealStatus: DealStatuses.Canceled,
             updatedAt: time
         }, deal.propertyId, DealStatuses.Awaiting);

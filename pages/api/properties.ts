@@ -8,5 +8,5 @@ export const config = {
 };
 
 export default container
-  .resolve<PropertyController>('propertyController')
+  .resolve<PropertyController>('PropertyController')
   .handler('/api/properties', 201);

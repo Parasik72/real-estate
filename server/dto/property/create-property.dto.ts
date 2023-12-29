@@ -1,4 +1,4 @@
-import { PropertyStatuses, PropertyTypes } from "@/server/types/properties.types";
+import type { PropertyStatuses, PropertyTypes } from "@/server/types/properties.types";
 
 export interface CreatePropertyDto {
     bedRooms: number;

@@ -164,7 +164,7 @@ export class PropertyService extends BaseContext {
         files: Express.Multer.File[] | undefined
     ) {
         if (data.propertyStatus) {
-          await this.di.dealService.updateDealsByPropertyIdAndStatusId({ 
+          await this.di.DealService.updateDealsByPropertyIdAndStatusId({ 
             dealStatus: DealStatuses.Canceled,
             updatedAt: BigInt(new Date().getTime())
           }, property.propertyId, DealStatuses.Awaiting);
@@ -200,11 +200,11 @@ export class PropertyService extends BaseContext {
     }
 
     async createPropertyImages(propertyId: UUID, images: Express.Multer.File[]) {
-        const { fileUploaderService } = this.di;
+        const { FileUploaderService } = this.di;
         const propertyImages: InferAttributes<Types.IPropertyImage>[] = [];
         images.forEach((image) => {
             const propertyImageId = v4();
-            const imgName = fileUploaderService.uploadFile(image, PROPERTY_IMGS_PATH);
+            const imgName = FileUploaderService.uploadFile(image, PROPERTY_IMGS_PATH);
             propertyImages.push({
                 propertyId,
                 imgName,
@@ -215,13 +215,13 @@ export class PropertyService extends BaseContext {
     }
 
     async deletePropertyImages(propertyImageIds: string[], propertyId: string) {
-        const { fileUploaderService } = this.di;
+        const { FileUploaderService } = this.di;
         const propertyImages = await this.di.PropertyImage.findAll({
             where: { propertyImageId: propertyImageIds, propertyId }
         });
         const propertyImagesIds: string[] = [];
         propertyImages.forEach((propertyImage) => {
-            fileUploaderService.deleteFile(propertyImage.imgName, PROPERTY_IMGS_PATH);
+            FileUploaderService.deleteFile(propertyImage.imgName, PROPERTY_IMGS_PATH);
             propertyImagesIds.push(propertyImage.propertyImageId);
         });
         await this.di.PropertyImage.destroy({

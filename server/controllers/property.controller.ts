@@ -1,7 +1,7 @@
 import { HttpException } from "../exceptions/http.exception";
-import * as Params from "../params/property.params";
-import { CreatePropertyDto } from "../dto/property/create-property.dto";
-import { UpdatePropertyDto } from "../dto/property/update-property.dto";
+import type * as Params from "../params/property.params";
+import type { CreatePropertyDto } from "../dto/property/create-property.dto";
+import type { UpdatePropertyDto } from "../dto/property/update-property.dto";
 import type { ControllerConfig } from "../types/controller.types";
 import GET from "../decorators/get.decorator";
 import { BaseController } from "./base-controller";
@@ -20,12 +20,14 @@ import { objectToJSON } from "../functions/json.functions";
 import { allOffersValidation } from "../validators/property-schemas/get-all-offers.schema";
 import MESSAGE from "../decorators/message.decorator";
 import PAGER from "../decorators/pager.decorator";
+import CONTROLLER from "../decorators/controller.decorator";
 
+@CONTROLLER()
 export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
   @GET('/api/properties/last-offers')
   async getLastOffers() {
-    return this.di.propertyService.getLastOffers();
+    return this.di.PropertyService.getLastOffers();
   }
 
   @SSR('/properties/offers')
@@ -33,22 +35,22 @@ export class PropertyController extends BaseController {
   @USE(validate(allOffersValidation, ValidationType.Query))
   @PAGER()
   async getAllOffers({ query }: ControllerConfig<{}, Params.GetAllPropertiesParams>) {
-    return this.di.propertyService.getAllOffers(query);
+    return this.di.PropertyService.getAllOffers(query);
   }
 
   @SSR('/user/profile')
   @GET('/api/properties/user/:userId')
   @PAGER()
   async getUserProperties({ query }: ControllerConfig<{}, Params.GetUserProperties>) {
-    return this.di.propertyService.getUserProperties(query.userId, query.page, query.limit);
+    return this.di.PropertyService.getUserProperties(query.userId, query.page, query.limit);
   }
 
   @USE([sessions, passportInitialize, passportSession, multer().any(), validate(createPropertyValidation)])
   @POST('/api/properties')
   @MESSAGE('The property has been created successfully!')
   async createProperty({ body, user, files }: ControllerConfig<CreatePropertyDto>) {
-    const { propertyService } = this.di;
-    const property = await propertyService.createProperty(body, user!, files!);
+    const { PropertyService } = this.di;
+    const property = await PropertyService.createProperty(body, user!, files!);
     return objectToJSON(property);
   }
 
@@ -64,8 +66,8 @@ export class PropertyController extends BaseController {
   @MESSAGE('The property has been updated successfully!')
   async updatePropertyById({ query, body, files, user }
   : ControllerConfig<UpdatePropertyDto, Params.UpdatePropertyParams>) {
-    const { propertyService } = this.di;
-    const property = await propertyService.getPropertyById(query.propertyId);
+    const { PropertyService } = this.di;
+    const property = await PropertyService.getPropertyById(query.propertyId);
     if (!property) throw new HttpException("The property was not found", 404);
     if (property.userId !== user?.userId) {
       throw new HttpException("You don't have a permission to update this property", 403);
@@ -75,16 +77,16 @@ export class PropertyController extends BaseController {
         throw new HttpException('The property already uses this property status', 400);
       }
     }
-    await propertyService.updatePropertyById(body, property, files);
+    await PropertyService.updatePropertyById(body, property, files);
   }
 
   @USE([sessions, deserializeUser])
   @SSR('/properties/:propertyId')
   @GET('/api/properties/get/:propertyId')
   async getPropertyById({ query, user }: ControllerConfig<{}, Params.GetPropertyByIdParams>) {
-    const { propertyService } = this.di;
+    const { PropertyService } = this.di;
     const { propertyId } = query;
-    const property = await propertyService.getPropertyWithOwnerByPropertyId(propertyId, user);
+    const property = await PropertyService.getPropertyWithOwnerByPropertyId(propertyId, user);
     if (!property) throw new HttpException("The property was not found", 404);
     return property;
   }

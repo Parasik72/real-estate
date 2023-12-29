@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { HttpException } from "../exceptions/http.exception";
 import { ValidationException } from "../exceptions/validation.exception";
 
