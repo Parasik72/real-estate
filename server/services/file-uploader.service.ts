@@ -2,7 +2,9 @@ import { v4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import BaseContext from '../context/base-context';
+import INJECTABLE from '../decorators/injectable.decorator';
 
+@INJECTABLE()
 export class FileUploaderService extends BaseContext {
   uploadFile(file: Express.Multer.File, dirPath: string): string {
     const fileName = this.generateFileName(file,);

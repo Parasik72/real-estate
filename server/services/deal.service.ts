@@ -1,14 +1,16 @@
-import { CreateDeal, DealPaginationNames, DealRequestedBy, DealStatuses, IDeal, UpdateDeal } from "../types/deal.type";
+import { DealPaginationNames, DealRequestedBy, DealStatuses, IDeal, UpdateDeal } from "../types/deal.type";
 import { dealRequestedByFindMap } from "../functions/deal.functions";
 import BaseContext from "../context/base-context";
-import { InferCreationAttributes, Order } from "sequelize";
+import type { Order } from "sequelize";
 import { getModelPage } from "../functions/model.functions";
-import { IPager } from "../types/controller.types";
+import type { IPager } from "../types/controller.types";
 import { v4 } from "uuid";
-import { UUID } from "crypto";
-import { IUser } from "../types/user.types";
-import { IProperty } from "../types/properties.types";
+import type { UUID } from "crypto";
+import type { IUser } from "../types/user.types";
+import type { IProperty } from "../types/properties.types";
+import INJECTABLE from "../decorators/injectable.decorator";
 
+@INJECTABLE()
 export class DealService extends BaseContext {
     async getAwaitingDealByPropertyIdAndBuyerId(propertyId: string, buyerUserId: string)
     : Promise<IDeal | null> {

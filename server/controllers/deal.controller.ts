@@ -15,9 +15,9 @@ import { objectToJSON } from "../functions/json.functions";
 import SSR from "../decorators/ssr.decorator";
 import MESSAGE from "../decorators/message.decorator";
 import PAGER from "../decorators/pager.decorator";
-import CONTROLLER from "../decorators/controller.decorator";
+import INJECTABLE from "../decorators/injectable.decorator";
 
-@CONTROLLER()
+@INJECTABLE()
 @USE([sessions, deserializeUser, isLogedIn])
 export class DealController extends BaseController {
     @POST('/api/deals/send/:propertyId')

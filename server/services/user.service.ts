@@ -1,9 +1,11 @@
-import { CreateUser, IUser, UpdateUserProfile } from "../types/user.types";
+import type { CreateUser, IUser, UpdateUserProfile } from "../types/user.types";
 import BaseContext from "../context/base-context";
 import { v4 } from "uuid";
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 import bcryptjs from 'bcryptjs';
+import INJECTABLE from "../decorators/injectable.decorator";
 
+@INJECTABLE()
 export class UserService extends BaseContext {
     async getUserByEmail(email: string): Promise<IUser | null>  {
         return this.di.User.findOne({ where: { email } });

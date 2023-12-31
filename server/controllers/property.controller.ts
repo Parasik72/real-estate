@@ -20,9 +20,9 @@ import { objectToJSON } from "../functions/json.functions";
 import { allOffersValidation } from "../validators/property-schemas/get-all-offers.schema";
 import MESSAGE from "../decorators/message.decorator";
 import PAGER from "../decorators/pager.decorator";
-import CONTROLLER from "../decorators/controller.decorator";
+import INJECTABLE from "../decorators/injectable.decorator";
 
-@CONTROLLER()
+@INJECTABLE()
 export class PropertyController extends BaseController {
   @SSR('/properties/last-offers')
   @GET('/api/properties/last-offers')

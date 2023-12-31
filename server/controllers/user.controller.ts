@@ -18,9 +18,9 @@ import PATCH from "../decorators/patch.decorator";
 import { editProfileValidation } from "../validators/user-schemas/edit-profile.schema";
 import { validateRequest } from "../middlewares/validate-request.middleware";
 import MESSAGE from "../decorators/message.decorator";
-import CONTROLLER from "../decorators/controller.decorator";
+import INJECTABLE from "../decorators/injectable.decorator";
 
-@CONTROLLER()
+@INJECTABLE()
 export class UserController extends BaseController {
     @USE([sessions, deserializeUser])
     @SSR('/user/profile')

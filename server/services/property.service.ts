@@ -1,5 +1,5 @@
 import * as Types from "../types/properties.types";
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 import { v4 } from "uuid";
 import { PROPERTY_IMGS_PATH } from "../constants/path.constants";
 import { 
@@ -8,17 +8,19 @@ import {
     PROPERTIES_LIMIT_DEFAULT, 
     PROPERTIES_PAGE_DEFAULT 
 } from "../constants/property.constants";
-import { GetAllPropertiesParams } from "../params/property.params";
+import type { GetAllPropertiesParams } from "../params/property.params";
 import { allOffersPAWhereOptions, allOffersWhereOptions } from "../functions/property.functions";
 import BaseContext from "../context/base-context";
-import { IUser } from "../types/user.types";
-import { Includeable, InferAttributes, InferCreationAttributes, Order } from "sequelize";
+import type { IUser } from "../types/user.types";
+import type { Includeable, InferAttributes, InferCreationAttributes, Order } from "sequelize";
 import { getModelPage } from "../functions/model.functions";
-import { IPager } from "../types/controller.types";
+import type { IPager } from "../types/controller.types";
 import { DealStatuses } from "../types/deal.type";
-import { CreatePropertyDto } from "../dto/property/create-property.dto";
-import { UpdatePropertyDto } from "../dto/property/update-property.dto";
+import type { CreatePropertyDto } from "../dto/property/create-property.dto";
+import type { UpdatePropertyDto } from "../dto/property/update-property.dto";
+import INJECTABLE from "../decorators/injectable.decorator";
 
+@INJECTABLE()
 export class PropertyService extends BaseContext {
     async getLastOffers(): Promise<Types.IProperty[]> {
         return this.di.Property.findAll({ 

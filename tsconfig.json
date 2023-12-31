@@ -15,7 +15,6 @@
     "incremental": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "importsNotUsedAsValues": "error",
     "paths": {
       "@/*": ["./*"]
     }

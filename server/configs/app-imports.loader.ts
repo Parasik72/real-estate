@@ -8,21 +8,18 @@ interface ContainerItems {
 }
 
 export class AppImportsLoader {
-    static async load(pattern: string | string[]) {
+    static async load(pattern: string | string[]): Promise<ContainerItems> {
         const filePaths = sync(pattern);
         let result: ContainerItems = {};
-        for await (const filePath of filePaths) {
+        for (const filePath of filePaths) {
             try {
-                const resolvedFilePath = path.relative(getConfig().serverRuntimeConfig.API_ROOT, filePath);
+                const resolvedFilePath = path.relative(getConfig().serverRuntimeConfig.API_ROOT, filePath).replace(/\\/g, '/');
                 const importFile = await import(`../${resolvedFilePath}`);
                 Object.keys(importFile).forEach((importFileKey) => {
                     if (typeof importFile[importFileKey] === 'function') {
                         const metadata = Reflect.getMetadata(importFile[importFileKey].name, importFile[importFileKey]);
-                        if (!metadata?.CONTROLLER) return;
-                        result = {
-                            ...result,
-                            [importFile[importFileKey].name]: asClass(importFile[importFileKey]).singleton() 
-                        }
+                        if (!metadata?.isInjectable) return;
+                        result[importFile[importFileKey].name] = asClass(importFile[importFileKey]).singleton();
                     }
                 });
             } catch (error) {
