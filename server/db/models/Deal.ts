@@ -6,8 +6,8 @@ export type DealType = typeof Model & {
   new (values?: object, options?: BuildOptions): IDeal;
 }
 
-export default (ctx: IContextContainer) => {
-  const Deal = <DealType>ctx.dbInstance.define('Deals', {
+export const defineModel = (ctx: IContextContainer) => {
+  return <DealType>ctx.dbInstance.define('Deals', {
     dealId: {
       allowNull: false,
       primaryKey: true,
@@ -62,15 +62,15 @@ export default (ctx: IContextContainer) => {
       type: DataTypes.BIGINT
     }
   });
+}
 
-  ctx.Property.hasMany(Deal, { foreignKey: 'propertyId' });
-  Deal.belongsTo(ctx.Property, { foreignKey: 'propertyId' });
+export const defineAssociations = (ctx: IContextContainer) => {
+  ctx.Property.hasMany(ctx.Deal, { foreignKey: 'propertyId' });
+  ctx.Deal.belongsTo(ctx.Property, { foreignKey: 'propertyId' });
 
-  ctx.User.hasMany(Deal, { foreignKey: 'sellerUserId' });
-  Deal.belongsTo(ctx.User, { foreignKey: 'sellerUserId', as: 'seller' });
+  ctx.User.hasMany(ctx.Deal, { foreignKey: 'sellerUserId' });
+  ctx.Deal.belongsTo(ctx.User, { foreignKey: 'sellerUserId', as: 'seller' });
 
-  ctx.User.hasMany(Deal, { foreignKey: 'buyerUserId' });
-  Deal.belongsTo(ctx.User, { foreignKey: 'buyerUserId', as: 'buyer' });
-
-  return Deal;
+  ctx.User.hasMany(ctx.Deal, { foreignKey: 'buyerUserId' });
+  ctx.Deal.belongsTo(ctx.User, { foreignKey: 'buyerUserId', as: 'buyer' });
 }

@@ -6,8 +6,8 @@ export type UserType = typeof Model & {
   new (values?: object, options?: BuildOptions): IUser;
 }
 
-export default (ctx: IContextContainer) => {
-  const User = <UserType>ctx.dbInstance.define('Users', {
+export const defineModel = (ctx: IContextContainer) => {
+  return <UserType>ctx.dbInstance.define('Users', {
     userId: {
       allowNull: false,
       primaryKey: true,
@@ -43,5 +43,4 @@ export default (ctx: IContextContainer) => {
       type: DataTypes.BIGINT
     }
   });
-  return User;
 }

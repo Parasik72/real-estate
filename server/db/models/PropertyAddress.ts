@@ -6,8 +6,8 @@ export type PropertyAddressType = typeof Model & {
   new (values?: object, options?: BuildOptions): IPropertyAddress;
 }
 
-export default (ctx: IContextContainer) => {
-  const PropertyAddress = <PropertyAddressType>ctx.dbInstance.define('PropertyAddresses', {
+export const defineModel = (ctx: IContextContainer) => {
+  return <PropertyAddressType>ctx.dbInstance.define('PropertyAddresses', {
     propertyAddressId: {
       allowNull: false,
       primaryKey: true,
@@ -30,9 +30,9 @@ export default (ctx: IContextContainer) => {
       type: DataTypes.STRING
     }
   });
+}
 
-  PropertyAddress.hasOne(ctx.Property, { foreignKey: 'propertyAddressId' });
-  ctx.Property.belongsTo(PropertyAddress, { foreignKey: 'propertyAddressId'});
-
-  return PropertyAddress;
+export const defineAssociations = (ctx: IContextContainer) => {
+  ctx.PropertyAddress.hasOne(ctx.Property, { foreignKey: 'propertyAddressId' });
+  ctx.Property.belongsTo(ctx.PropertyAddress, { foreignKey: 'propertyAddressId'});
 }

@@ -1,4 +1,4 @@
-import type { IModelContainer } from "@/db/models/model-container";
+import type { IModelContainer } from "@/server/db/models/model-container";
 import type { IControllerContainer } from "../controllers";
 import type { IServiceContainer } from "../services";
 import type { Sequelize } from "sequelize";

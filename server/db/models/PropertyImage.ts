@@ -6,8 +6,8 @@ export type PropertyImageType = typeof Model & {
   new (values?: object, options?: BuildOptions): IPropertyImage;
 }
 
-export default (ctx: IContextContainer) => {
-  const PropertyImage = <PropertyImageType>ctx.dbInstance.define('PropertyImages', {
+export const defineModel = (ctx: IContextContainer) => {
+  return <PropertyImageType>ctx.dbInstance.define('PropertyImages', {
     propertyImageId: {
       allowNull: false,
       primaryKey: true,
@@ -26,9 +26,9 @@ export default (ctx: IContextContainer) => {
       }
     }
   });
+}
 
-  PropertyImage.belongsTo(ctx.Property, { foreignKey: 'propertyId' });
-  ctx.Property.hasMany(PropertyImage, { foreignKey: 'propertyId' });
-
-  return PropertyImage;
+export const defineAssociations = (ctx: IContextContainer) => {
+  ctx.PropertyImage.belongsTo(ctx.Property, { foreignKey: 'propertyId' });
+  ctx.Property.hasMany(ctx.PropertyImage, { foreignKey: 'propertyId' });
 }

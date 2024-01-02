@@ -10,8 +10,8 @@ export type PropertyType = typeof Model & {
   new (values?: object, options?: BuildOptions): IProperty;
 }
 
-export default (ctx: IContextContainer) => {
-  const Property = <PropertyType>ctx.dbInstance.define('Properties', {
+export const defineModel = (ctx: IContextContainer) => {
+  return <PropertyType>ctx.dbInstance.define('Properties', {
     propertyId: {
       allowNull: false,
       primaryKey: true,
@@ -81,9 +81,9 @@ export default (ctx: IContextContainer) => {
       type: DataTypes.BIGINT
     }
   });
+}
 
-  Property.belongsTo(ctx.User, { foreignKey: 'userId'});
-  ctx.User.hasMany(Property, { foreignKey: 'userId' });
-
-  return Property;
+export const defineAssociations = (ctx: IContextContainer) => {
+  ctx.Property.belongsTo(ctx.User, { foreignKey: 'userId'});
+  ctx.User.hasMany(ctx.Property, { foreignKey: 'userId' });
 }

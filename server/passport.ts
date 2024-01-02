@@ -1,12 +1,12 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcryptjs from 'bcryptjs';
-import { dbInstance } from '@/db/db-instance';
+import { dbInstance } from '@/server/db/db-instance';
 import type { IUser } from './types/user.types';
 import { QueryTypes } from 'sequelize';
 
 const findUserByEmail = async (email: string) => {
-  const query = 'SELECT * FROM users WHERE email = :email';
+  const query = 'SELECT * FROM Users WHERE email = :email';
   const res = await dbInstance.query(query, {
     replacements: { email },
     type: QueryTypes.SELECT
@@ -16,7 +16,7 @@ const findUserByEmail = async (email: string) => {
 }
 
 const findUserById = async (userId: string) => {
-  const query = 'SELECT * FROM users WHERE userId = :userId';
+  const query = 'SELECT * FROM Users WHERE userId = :userId';
   const res = await dbInstance.query(query, {
     replacements: { userId },
     type: QueryTypes.SELECT
